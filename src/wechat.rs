@@ -23,10 +23,10 @@ pub enum EncodingMode {
 }
 
 impl ServerConfig {
-    pub fn new(token: &str, aes_key: Option<String>, encoding_mode: EncodingMode) -> Self {
+    pub fn new<S: AsRef<str>>(token: S, aes_key: Option<S>, encoding_mode: EncodingMode) -> Self {
         ServerConfig {
-            token: token.to_owned(),
-            encoding_aes_key: aes_key,
+            token: token.as_ref().to_owned(),
+            encoding_aes_key: aes_key.map(|x| x.as_ref().to_owned()),
             encoding_mode
         }
     }
@@ -49,7 +49,9 @@ impl<T: AccessTokenProvider> WxSdk<T> {
 }
 
 impl WxSdk<TokenClient> {
-    pub fn new_with_default_token_client(app_id: String, app_secret: String, server_config: ServerConfig) -> Self {
+    pub fn new_with_default_token_client<S: AsRef<str>>(app_id: S, app_secret: S, server_config: ServerConfig) -> Self {
+        let app_id = app_id.as_ref().to_owned();
+        let app_secret = app_secret.as_ref().to_owned();
         let token_client = TokenClient::new(app_id.clone(), app_secret.clone());
         WxSdk {
             http_client: Client::new(),
