@@ -1,11 +1,25 @@
 # wx_func
 
 ## `wx_func` is a [WeChat SDK](https://mp.weixin.qq.com/) written in [Rust](https://www.rust-lang.org/).
+## QuickStart
 
+First, please refer to this [page](https://developers.weixin.qq.com/doc/offiaccount/Basic_Information/Access_Overview.html) to provide these values: `token`, `EncodingAESKey`,`EncodingMode`.
+```rust
+use wx_func::wechat::{ServerConfig, EncodingMode};
+let config = ServerConfig::new(token, Some("aes_key"), EncodingMode::Plain);
+let sdk = WxSdk::new_with_default_token_client("app_id", "app_secret", config);
+```
+Then, you can use the sdk functions, like get current menu info:
+```rust
+use wx_func::office_account::menu;
+
+let menu = menu::get_current_selfmenu_info(&sdk);
+```
 ## Features
 
 - [x] get access token
-- [-] custom menu
+- [x] clear quota
+- [ ] custom menu
   - [x] [create custom defined menu](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Creating_Custom-Defined_Menu.html)
   - [x] [get current menu info](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Querying_Custom_Menus.html)
   - [x] [delete custom defined menu](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Deleting_Custom-Defined_Menu.html)
@@ -40,21 +54,6 @@
   - [x] [get blocklist](https://developers.weixin.qq.com/doc/offiaccount/User_Management/Manage_blacklist.html)
   - [x] [batch add blocklist](https://developers.weixin.qq.com/doc/offiaccount/User_Management/Manage_blacklist.html)
   - [x] [batch undo blocklist](https://developers.weixin.qq.com/doc/offiaccount/User_Management/Manage_blacklist.html)
-
-## QuickStart
-
-First, please refer to this [page](https://developers.weixin.qq.com/doc/offiaccount/Basic_Information/Access_Overview.html) to provide these values: `token`, `EncodingAESKey`,`EncodingMode`.
-```rust
-use wx_func::wechat::{ServerConfig, EncodingMode};
-let config = ServerConfig::new(token, Some("aes_key"), EncodingMode::Plain);
-let sdk = WxSdk::new_with_default_token_client("app_id", "app_secret", config);
-```
-Then, you can do the sdk operations, like get current menu info:
-```rust
-use wx_func::office_account::menu;
-
-let menu = menu::get_current_selfmenu_info(&sdk);
-```
 
 ## Contributing
 

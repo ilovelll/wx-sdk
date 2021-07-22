@@ -1,9 +1,26 @@
+//! This module provides the most important struct [WxSdk], almost every funcition in `wx_func` take it as a parameter.
+//!
+//! You can construct it with a [ServerConfig].
+//!
+//! Example
+//! ```rust
+//! use wx_func::wechat::{ServerConfig, EncodingMode};
+//! let config = ServerConfig::new("token", Some("aes_key"), EncodingMode::Plain);
+//! let sdk = WxSdk::new_with_default_token_client("app_id", "app_secret", config);
+//! ```
+//! above example use the default token client, you could implement one that impl trait [AccessTokenProvider] by yourself.
+//! ```rust
+//! let token_clinet = MyTokenClient{};
+//! let sdk = WxSdk::new("app_id", "app_sercret", config, token_client);
+//! ```
+
+
 use async_trait::async_trait;
 use reqwest::Client;
 
 use crate::{access_token::AccessTokenProvider, AccessToken, SdkResult, TokenClient};
 pub struct WxSdk<T: AccessTokenProvider> {
-    app_id: String,
+    pub app_id: String,
     app_secret: String,
     server_config: ServerConfig,
     http_client: Client,
@@ -33,11 +50,11 @@ impl ServerConfig {
 }
 
 impl<T: AccessTokenProvider> WxSdk<T> {
-    pub fn new(app_id: String, app_secret: String, server_config: ServerConfig, token_client: T) -> Self {
+    pub fn new<S: AsRef<str>>(app_id: S, app_secret: S, server_config: ServerConfig, token_client: T) -> Self {
         WxSdk {
             http_client: Client::new(),
-            app_id,
-            app_secret,
+            app_id: app_id.as_ref().to_owned(),
+            app_secret: app_secret.as_ref().to_owned(),
             server_config,
             token_client,
         }

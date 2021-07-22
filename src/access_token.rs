@@ -1,3 +1,9 @@
+//! The [access_token](https://developers.weixin.qq.com/doc/offiaccount/Basic_Information/Get_access_token.html) releated module.
+//!
+//! The purpose for this module is providing a [AccessTokenProvider] trait with a method [get_access_token][AccessTokenProvider], return a struct [AccessToken]. 
+//!
+//! We also provide a default [TokenClient](by [reqwest](https://crates.io/crates/reqwest) crate) for the users didn't want to implement one themselves.
+
 use crate::error::{CommonResponse, SdkError, SdkResult};
 use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
