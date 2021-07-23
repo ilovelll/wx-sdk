@@ -1,14 +1,22 @@
+//! This module define the types for error handling.
+//!
+//! Most the function call on `wx_func` return a [SdkResult], it's a type of `std::result::Result<T, SdkError>` wrapper.
+
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use thiserror::Error;
 // use tonic::codegen::http::request;
 
+/// Almost every WeChat's api calling will return a JSON value contains `errcode` and `errmsg`, that is a struct for it.
+/// When the `errcode == 0`,  it can transmute to `SdkResult<()>`.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Error)]
 #[error("Wechat API response error: errcode {errcode}, errmsg {errmsg}")]
 pub struct CommonError {
     pub errcode: i32,
     pub errmsg: String,
 }
+
+/// Enum for the return result of http calling WeChat's api.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[serde(untagged)]
 pub enum CommonResponse<T> {
@@ -16,6 +24,7 @@ pub enum CommonResponse<T> {
     Err(CommonError),
 }
 
+/// The SDK self-defined enum.
 #[derive(Error, Debug)]
 pub enum SdkError {
     #[error("reqwest Error")]
@@ -32,8 +41,10 @@ pub enum SdkError {
     ParmasInvalid(String),
 }
 
+/// A wrap of `std::result::Result<T, SdkError>`.
 pub type SdkResult<T> = std::result::Result<T, SdkError>;
 
+/// When the `errcode == 0`,  it can transmute to `SdkResult<()>`.
 impl From<CommonError> for SdkResult<()> {
     fn from(e: CommonError) -> Self {
         if e.errcode == 0 {
@@ -44,6 +55,7 @@ impl From<CommonError> for SdkResult<()> {
     }
 }
 
+/// Trans CommonResponse<T> to SdkResult<T> when the error case is `SdkError::WxApiError(_)`.
 impl<T> From<CommonResponse<T>> for SdkResult<T> {
     fn from(r: CommonResponse<T>) -> Self {
         match r {
@@ -52,6 +64,8 @@ impl<T> From<CommonResponse<T>> for SdkResult<T> {
         }
     }
 }
+
+/// Unwrap the `CommonResponse<CommonError>` to SdkResult<()> or `SdkError::WxApiError(_)`.
 impl From<CommonResponse<CommonError>> for SdkResult<()> {
     fn from(r: CommonResponse<CommonError>) -> Self {
         match r {
