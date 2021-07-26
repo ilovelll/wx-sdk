@@ -6,6 +6,7 @@
 First, please refer to this [page](https://developers.weixin.qq.com/doc/offiaccount/Basic_Information/Access_Overview.html) to provide these values: `token`, `EncodingAESKey`,`EncodingMode`.
 ```rust
 use wx_func::wechat::{ServerConfig, EncodingMode};
+
 let config = ServerConfig::new(token, Some("aes_key"), EncodingMode::Plain);
 let sdk = WxSdk::new_with_default_token_client("app_id", "app_secret", config);
 ```
