@@ -1,3 +1,4 @@
+use futures::stream::Scan;
 // use quick_xml::{events::Event, Reader};
 use roxmltree::{Document, Node};
 use serde::{Deserialize, Serialize};
@@ -9,13 +10,13 @@ const MSG_IMAGE: &'static str = "image";
 const MSG_VOICE: &'static str = "voice";
 const MSG_VIDEO: &'static str = "video";
 const MSG_SHORTVIDEO: &'static str = "shortvideo";
-const MSG_LOCATION: &'static str = "location";
+const MSG_LOCATION: &'static str = "location"; // 地理位置消息
 const MSG_LINK: &'static str = "link";
 const MSG_EVENT: &'static str = "event";
 
 const EVENT_SUBSCRIBE: &'static str = "subscribe";
 const EVENT_SCAN: &'static str = "SCAN";
-const EVENT_LOCATION: &'static str = "LOCATION";
+const EVENT_LOCATION: &'static str = "LOCATION"; // 地理位置事件
 const EVENT_CLICK: &'static str = "CLICK";
 const EVENT_VIEW: &'static str = "VIEW";
 const EVENT_SCANCODE_PUSH: &'static str = "scancode_push";
@@ -45,8 +46,8 @@ pub mod signature {
     }
 
     impl Signature {
-        pub fn check_signature(&self, token: String) -> bool {
-            let mut arr: [String; 3] = [token, self.timestamp.clone(), self.nonce.clone()];
+        pub fn check_signature(&self, token: impl AsRef<str>) -> bool {
+            let mut arr: [String; 3] = [token.as_ref().to_owned(), self.timestamp.clone(), self.nonce.clone()];
             arr.sort();
             let str = arr.join("");
 
@@ -91,16 +92,16 @@ impl ReceivedEvent {
     pub fn parse(input: &str) -> SdkResult<Self> {
         let xml = Document::parse(input)?;
         let root = xml.root();
-        let mt = get_tag_name_node(&root, "MsgType")?;
-        let from = get_tag_name_node(&root, "FromUserName")?;
-        let to = get_tag_name_node(&root, "ToUserName")?;
+        let mt = get_node_by_tag(&root, "MsgType")?;
+        let from = get_node_by_tag(&root, "FromUserName")?;
+        let to = get_node_by_tag(&root, "ToUserName")?;
 
-        let from = get_node_text(&from)?;
-        let to = get_node_text(&to)?;
+        let from = get_text_from_node(&from)?;
+        let to = get_text_from_node(&to)?;
 
-        let create_time = get_tag_name_node(&root, "CreateTime")?;
-        let create_time = get_node_text(&create_time)?;
-        let create_time = create_time.parse::<i64>().map_err(|x| {
+        let create_time = get_node_by_tag(&root, "CreateTime")?;
+        let create_time = get_text_from_node(&create_time)?;
+        let create_time = create_time.parse::<i64>().map_err(|_x| {
             SdkError::ParmasInvalid(
                 "Parse XML msg from wechat error: tag `CreateTime` should be number".to_string(),
             )
@@ -109,12 +110,12 @@ impl ReceivedEvent {
             if let Some(t) = mt.text() {
                 match t {
                     MSG_TEXT => {
-                        let content = get_tag_name_node(&root, "Content")?;
-                        let content = get_node_text(&content)?;
+                        let content = get_node_by_tag(&root, "Content")?;
+                        let content = get_text_from_node(&content)?;
 
-                        let msgid = get_tag_name_node(&root, "MsgId")?;
-                        let msgid = get_node_text(&msgid)?;
-                        let msgid = msgid.parse::<u64>().map_err(|x| {
+                        let msgid = get_node_by_tag(&root, "MsgId")?;
+                        let msgid = get_text_from_node(&msgid)?;
+                        let msgid = msgid.parse::<u64>().map_err(|_x| {
                             SdkError::ParmasInvalid(
                                 "Parse XML msg from wechat error: tag `MsgId` should be number"
                                     .to_string(),
@@ -133,20 +134,20 @@ impl ReceivedEvent {
                         return Ok(r);
                     }
                     MSG_IMAGE => {
-                        let msgid = get_tag_name_node(&root, "MsgId")?;
-                        let msgid = get_node_text(&msgid)?;
-                        let msgid = msgid.parse::<u64>().map_err(|x| {
+                        let msgid = get_node_by_tag(&root, "MsgId")?;
+                        let msgid = get_text_from_node(&msgid)?;
+                        let msgid = msgid.parse::<u64>().map_err(|_x| {
                             SdkError::ParmasInvalid(
                                 "Parse XML msg from wechat error: tag `MsgId` should be number"
                                     .to_string(),
                             )
                         })?;
 
-                        let pic_url = get_tag_name_node(&root, "PicUrl")?;
-                        let pic_url = get_node_text(&pic_url)?;
+                        let pic_url = get_node_by_tag(&root, "PicUrl")?;
+                        let pic_url = get_text_from_node(&pic_url)?;
 
-                        let media_id = get_tag_name_node(&root, "MediaId")?;
-                        let media_id = get_node_text(&media_id)?;
+                        let media_id = get_node_by_tag(&root, "MediaId")?;
+                        let media_id = get_text_from_node(&media_id)?;
 
                         return Ok(ReceivedEvent::new(
                             from,
@@ -161,20 +162,20 @@ impl ReceivedEvent {
                         ));
                     }
                     MSG_VOICE => {
-                        let msgid = get_tag_name_node(&root, "MsgId")?;
-                        let msgid = get_node_text(&msgid)?;
-                        let msgid = msgid.parse::<u64>().map_err(|x| {
+                        let msgid = get_node_by_tag(&root, "MsgId")?;
+                        let msgid = get_text_from_node(&msgid)?;
+                        let msgid = msgid.parse::<u64>().map_err(|_x| {
                             SdkError::ParmasInvalid(
                                 "Parse XML msg from wechat error: tag `MsgId` should be number"
                                     .to_string(),
                             )
                         })?;
 
-                        let media_id = get_tag_name_node(&root, "MediaId")?;
-                        let media_id = get_node_text(&media_id)?;
+                        let media_id = get_node_by_tag(&root, "MediaId")?;
+                        let media_id = get_text_from_node(&media_id)?;
 
-                        let format = get_tag_name_node(&root, "Format")?;
-                        let format = get_node_text(&format)?;
+                        let format = get_node_by_tag(&root, "Format")?;
+                        let format = get_text_from_node(&format)?;
 
                         let recognition =
                             root.descendants().find(|n| n.has_tag_name("Recognition"));
@@ -196,19 +197,19 @@ impl ReceivedEvent {
                         ));
                     }
                     MSG_VIDEO | MSG_SHORTVIDEO => {
-                        let msgid = get_tag_name_node(&root, "MsgId")?;
-                        let msgid = get_node_text(&msgid)?;
-                        let msgid = msgid.parse::<u64>().map_err(|x| {
+                        let msgid = get_node_by_tag(&root, "MsgId")?;
+                        let msgid = get_text_from_node(&msgid)?;
+                        let msgid = msgid.parse::<u64>().map_err(|_x| {
                             SdkError::ParmasInvalid(
                                 "Parse XML msg from wechat error: tag `MsgId` should be number"
                                     .to_string(),
                             )
                         })?;
 
-                        let media_id = get_tag_name_node(&root, "MediaId")?;
-                        let media_id = get_node_text(&media_id)?;
-                        let thumb = get_tag_name_node(&root, "ThumbMediaId")?;
-                        let thumb = get_node_text(&thumb)?;
+                        let media_id = get_node_by_tag(&root, "MediaId")?;
+                        let media_id = get_text_from_node(&media_id)?;
+                        let thumb = get_node_by_tag(&root, "ThumbMediaId")?;
+                        let thumb = get_text_from_node(&thumb)?;
                         let vm = ViedoMessage {
                             id: msgid,
                             thumb_media_id: thumb.to_string(),
@@ -222,42 +223,42 @@ impl ReceivedEvent {
                         return Ok(ReceivedEvent::new(from, to, create_time, t, body));
                     }
                     MSG_LOCATION => {
-                        let msgid = get_tag_name_node(&root, "MsgId")?;
-                        let msgid = get_node_text(&msgid)?;
-                        let msgid = msgid.parse::<u64>().map_err(|x| {
+                        let msgid = get_node_by_tag(&root, "MsgId")?;
+                        let msgid = get_text_from_node(&msgid)?;
+                        let msgid = msgid.parse::<u64>().map_err(|_x| {
                             SdkError::ParmasInvalid(
                                 "Parse XML msg from wechat error: tag `MsgId` should be number"
                                     .to_string(),
                             )
                         })?;
 
-                        let location_x = get_tag_name_node(&root, "Location_X")?;
-                        let location_x = get_node_text(&location_x)?;
-                        let location_x = location_x.parse::<f32>().map_err(|x| {
+                        let location_x = get_node_by_tag(&root, "Location_X")?;
+                        let location_x = get_text_from_node(&location_x)?;
+                        let location_x = location_x.parse::<f32>().map_err(|_x| {
                             SdkError::ParmasInvalid(
                                 "Parse XML msg from wechat error: tag `location_x` should be number"
                                     .to_string(),
                             )
                         })?;
-                        let location_y = get_tag_name_node(&root, "Location_Y")?;
-                        let location_y = get_node_text(&location_y)?;
-                        let location_y = location_y.parse::<f32>().map_err(|x| {
+                        let location_y = get_node_by_tag(&root, "Location_Y")?;
+                        let location_y = get_text_from_node(&location_y)?;
+                        let location_y = location_y.parse::<f32>().map_err(|_x| {
                             SdkError::ParmasInvalid(
                                 "Parse XML msg from wechat error: tag `location_y` should be number"
                                     .to_string(),
                             )
                         })?; 
 
-                        let scale = get_tag_name_node(&root, "Scale")?;
-                        let scale = get_node_text(&scale)?;
-                        let scale = scale.parse::<i32>().map_err(|x| {
+                        let scale = get_node_by_tag(&root, "Scale")?;
+                        let scale = get_text_from_node(&scale)?;
+                        let scale = scale.parse::<i32>().map_err(|_x| {
                             SdkError::ParmasInvalid(
                                 "Parse XML msg from wechat error: tag `scale` should be number"
                                     .to_string(),
                             )
                         })?;
-                        let label = get_tag_name_node(&root, "Label")?;
-                        let label = get_node_text(&label)?; 
+                        let label = get_node_by_tag(&root, "Label")?;
+                        let label = get_text_from_node(&label)?; 
                         return Ok(ReceivedEvent::new(from, to, create_time, t, ReceivedMessage::Location(LocationMessage {
                             id: msgid,
                             location_x,
@@ -267,21 +268,21 @@ impl ReceivedEvent {
                         })));
                     }
                     MSG_LINK => {
-                        let msgid = get_tag_name_node(&root, "MsgId")?;
-                        let msgid = get_node_text(&msgid)?;
-                        let msgid = msgid.parse::<u64>().map_err(|x| {
+                        let msgid = get_node_by_tag(&root, "MsgId")?;
+                        let msgid = get_text_from_node(&msgid)?;
+                        let msgid = msgid.parse::<u64>().map_err(|_x| {
                             SdkError::ParmasInvalid(
                                 "Parse XML msg from wechat error: tag `MsgId` should be number"
                                     .to_string(),
                             )
                         })?;
 
-                        let title = get_tag_name_node(&root, "Title")?;
-                        let title = get_node_text(&title)?; 
-                        let description = get_tag_name_node(&root, "Description")?;
-                        let description = get_node_text(&description)?; 
-                        let url = get_tag_name_node(&root, "Url")?;
-                        let url = get_node_text(&url)?; 
+                        let title = get_node_by_tag(&root, "Title")?;
+                        let title = get_text_from_node(&title)?; 
+                        let description = get_node_by_tag(&root, "Description")?;
+                        let description = get_text_from_node(&description)?; 
+                        let url = get_node_by_tag(&root, "Url")?;
+                        let url = get_text_from_node(&url)?; 
                         return Ok(ReceivedEvent::new(from, to, create_time, t, ReceivedMessage::Link(LinkMessage {
                             id: msgid,
                             title: title.to_string(),
@@ -290,7 +291,7 @@ impl ReceivedEvent {
                         })));
                     }
                     MSG_EVENT => {
-                        let et = get_tag_name_node(&root, "EventType")?;
+                        let et = get_node_by_tag(&root, "Event")?;
                         if let Some(t) = et.text() {
                             match t {
                                 EVENT_SUBSCRIBE => {
@@ -298,10 +299,10 @@ impl ReceivedEvent {
                                         root.descendants().find(|n| n.has_tag_name("EventKey"));
                                     match ekn {
                                         Some(n) => {
-                                            let ek = get_node_text(&n)?;
+                                            let ek = get_text_from_node(&n)?;
                                             // let ek = ek.trim_start_matches("qrscene_");
-                                            let ticket = get_tag_name_node(&root, "Ticket")?;
-                                            let ticket = get_node_text(&ticket)?;
+                                            let ticket = get_node_by_tag(&root, "Ticket")?;
+                                            let ticket = get_text_from_node(&ticket)?;
                                             let r = ReceivedEvent::new(
                                                 from,
                                                 to,
@@ -330,11 +331,11 @@ impl ReceivedEvent {
                                     }
                                 }
                                 EVENT_SCAN => {
-                                    let ek = get_tag_name_node(&root, "EventKey")?;
-                                    let ek = get_node_text(&ek)?;
+                                    let ek = get_node_by_tag(&root, "EventKey")?;
+                                    let ek = get_text_from_node(&ek)?;
                                     // let ek = ek.trim_start_matches("qrscene_");
-                                    let ticket = get_tag_name_node(&root, "Ticket")?;
-                                    let ticket = get_node_text(&ticket)?;
+                                    let ticket = get_node_by_tag(&root, "Ticket")?;
+                                    let ticket = get_text_from_node(&ticket)?;
                                     let r = ReceivedEvent::new(
                                         from,
                                         to,
@@ -348,13 +349,148 @@ impl ReceivedEvent {
                                     return Ok(r);
                                 }
                                 EVENT_LOCATION => {
-
+                                    let latitude = get_node_by_tag(&root, "Latitude")?;
+                                    let latitude = get_text_from_node(&latitude)?;
+                                    let latitude = latitude.parse::<f32>().map_err(|_x| {
+                                        SdkError::ParmasInvalid(
+                                            "Parse XML msg from wechat error: tag `latitude` should be number"
+                                                .to_string(),
+                                        )
+                                    })?;
+                                    let longitude = get_node_by_tag(&root, "Longitude")?;
+                                    let longitude = get_text_from_node(&longitude)?;
+                                    let longitude = longitude.parse::<f32>().map_err(|_x| {
+                                        SdkError::ParmasInvalid(
+                                            "Parse XML msg from wechat error: tag `longitude` should be number"
+                                                .to_string(),
+                                        )
+                                    })?;
+                                    let precision = get_node_by_tag(&root, "Precision")?;
+                                    let precision = get_text_from_node(&precision)?;
+                                    let precision = precision.parse::<f32>().map_err(|_x| {
+                                        SdkError::ParmasInvalid(
+                                            "Parse XML msg from wechat error: tag `longitude` should be number"
+                                                .to_string(),
+                                        )
+                                    })?;
+                                    let r = ReceivedEvent::new(
+                                        from,
+                                        to,
+                                        create_time,
+                                        t,
+                                        ReceivedMessage::EventPush(EventPush::Location(LocationEvent {
+                                            latitude, longitude, precision
+                                        })),
+                                    );
+                                    return Ok(r);
                                 },
                                 EVENT_CLICK => {
-
+                                    let ek = get_node_by_tag(&root, "EventKey")?;
+                                    let ek = get_text_from_node(&ek)?;
+                                    let r = ReceivedEvent::new(
+                                        from,
+                                        to,
+                                        create_time,
+                                        t,
+                                        ReceivedMessage::EventPush(EventPush::Click(ClickEvent {
+                                            event_key: ek.to_string(),
+                                        })),
+                                    );
+                                    return Ok(r);
                                 },
                                 EVENT_VIEW => {
+                                    let ek = get_node_by_tag(&root, "EventKey")?;
+                                    let ek = get_text_from_node(&ek)?;
+                                    let menuid = get_node_by_tag(&root, "MenuID");
                                     
+                                    let mut event = ViewEvent {
+                                            event_key: ek.to_string(),
+                                            menu_id: None
+                                    };
+                                    if let Ok(id) = menuid {
+                                        let sid = get_text_from_node(&id)?;
+                                        event.menu_id = Some(sid.to_owned());
+                                    }
+                                    
+                                    let r = ReceivedEvent::new(
+                                        from,
+                                        to,
+                                        create_time,
+                                        t,
+                                        ReceivedMessage::EventPush(EventPush::View(event)),
+                                    );
+                                    return Ok(r);                                    
+                                }
+                                EVENT_SCANCODE_PUSH | EVENT_SCANCODE_WAITMSG => {
+                                    let ek = get_node_by_tag(&root, "EventKey")?;
+                                    let ek = get_text_from_node(&ek)?;
+                                    let scan_code_info = get_node_by_tag(&root, "ScanCodeInfo")?;
+                                    let scan_type = get_node_by_tag(&scan_code_info, "ScanType")?;
+                                    let scan_type = get_text_from_node(&scan_type)?;
+                                    let scan_result = get_node_by_tag(&scan_code_info, "ScanResult")?;
+                                    let scan_result = get_text_from_node(&scan_result)?;
+                                    let event = ScanCodeEvent{
+                                            event_key: ek.to_owned(),
+                                            scan_type: scan_type.to_owned(),
+                                            scan_result: scan_result.to_owned(),
+                                    };
+                                    let event = if t == EVENT_SCANCODE_PUSH {
+                                        EventPush::ScanCodePush(event)
+                                    } else {
+                                        EventPush::ScanCodeWaitMsg(event)
+                                    };
+                                    let r = ReceivedEvent::new(
+                                        from,
+                                        to,
+                                        create_time,
+                                        t,
+                                        ReceivedMessage::EventPush(event),
+                                    );
+                                    return Ok(r);
+                                }
+                                EVENT_PIC_SYSPHOTO |EVENT_PIC_PHOTO_OR_ALBUM |EVENT_PIC_WEIXIN => {
+                                    let ek = get_node_by_tag(&root, "EventKey")?;
+                                    let ek = get_text_from_node(&ek)?;
+                                    let send_pics_info = get_node_by_tag(&root, "SendPicsInfo")?;
+                                    let count = get_node_by_tag(&send_pics_info, "Count")?;
+                                    let count = get_text_from_node(&count)?;
+                                    let count = count.parse::<u16>().map_err(|_x| {
+                                        SdkError::ParmasInvalid(
+                                            "Parse XML msg from wechat error: tag `count` should be number"
+                                                .to_string(),
+                                        )
+                                    })?;
+                                    let pic_list = get_node_by_tag(&send_pics_info, "PicList")?;
+                                    let md5_vec: Vec<PicMd5Sum> = pic_list.descendants()
+                                        .filter(|n| n.has_tag_name("PicMd5Sum"))
+                                        .filter_map(|n| get_text_from_node(&n).ok())
+                                        .map(|s| PicMd5Sum(s.to_owned()))
+                                        .collect();
+                                    let event = SendPicsInfo {
+                                        event_key: ek.to_owned(),
+                                        count,
+                                        pic_list: md5_vec,
+                                    };
+                                    let event = match t {
+                                        EVENT_PIC_SYSPHOTO => EventPush::PicSysPhoto(event),
+                                        EVENT_PIC_PHOTO_OR_ALBUM => EventPush::PicPhotoOrAlbum(event),
+                                        EVENT_PIC_WEIXIN => EventPush::PicWeixin(event),
+                                        _ => unreachable!()
+                                    };
+                                    let r = ReceivedEvent::new(
+                                        from,
+                                        to,
+                                        create_time,
+                                        t,
+                                        ReceivedMessage::EventPush(event),
+                                    );
+                                    return Ok(r);
+                                }
+                                EVENT_LOCATION_SELECT => {
+                                    todo!()
+                                }
+                                EVENT_VIEW_MINIPROGRAM => {
+                                    todo!()
                                 }
                                 _ => {
                                     let r = ReceivedEvent::new(
@@ -379,7 +515,7 @@ impl ReceivedEvent {
     }
 }
 
-fn get_tag_name_node<'a, 'b>(node: &'a Node, tag_name: &'b str) -> SdkResult<Node<'a, 'a>> {
+fn get_node_by_tag<'a, 'b>(node: &'a Node, tag_name: &'b str) -> SdkResult<Node<'a, 'a>> {
     node.descendants()
         .find(|n| n.has_tag_name(tag_name))
         .ok_or_else(|| {
@@ -390,7 +526,7 @@ fn get_tag_name_node<'a, 'b>(node: &'a Node, tag_name: &'b str) -> SdkResult<Nod
         })
 }
 
-fn get_node_text<'a>(node: &Node<'a, 'a>) -> SdkResult<&'a str> {
+fn get_text_from_node<'a>(node: &Node<'a, 'a>) -> SdkResult<&'a str> {
     node.text().ok_or_else(|| {
         SdkError::ParmasInvalid(format!(
             "Parse XML msg from wechat error: tag `{}` text content is none",
@@ -419,7 +555,12 @@ pub enum EventPush {
     Scan(ScanEvent),
     Location(LocationEvent),
     Click(ClickEvent),
-    View(ClickEvent),
+    View(ViewEvent),
+    ScanCodePush(ScanCodeEvent),
+    ScanCodeWaitMsg(ScanCodeEvent),
+    PicSysPhoto(SendPicsInfo),
+    PicPhotoOrAlbum(SendPicsInfo),
+    PicWeixin(SendPicsInfo),
     TemplateSendJobFinish(TemplateSendJobFinishEvent),
     MassSendJobFinish(MassSendJobFinishEvent),
     GuideInviteResult(GuideInviteResultEvent),
@@ -569,6 +710,35 @@ pub struct ClickEvent {
     // timestamp: i64,
     #[serde(alias = "EventKey")]
     event_key: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ViewEvent {
+    // #[serde(alias = "FromUserName")]
+    // from: String,
+    // #[serde(alias = "ToUserName")]
+    // to: String,
+    // #[serde(alias = "CreateTime")]
+    // timestamp: i64,
+    #[serde(alias = "EventKey")]
+    event_key: String,
+    #[serde(alias = "MenuId")]
+    menu_id: Option<String>,
+}
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ScanCodeEvent {
+    event_key: String,
+    scan_type: String,
+    scan_result: String
+}
+#[derive(Serialize, Deserialize, Debug)]
+pub struct PicMd5Sum(String);
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct SendPicsInfo {
+    event_key: String,
+    count: u16,
+    pic_list: Vec<PicMd5Sum>
 }
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MassSendJobFinishEvent {
