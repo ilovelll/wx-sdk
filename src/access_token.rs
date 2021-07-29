@@ -9,10 +9,11 @@ use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use tokio::sync::RwLock;
 
-/// [WxSdk][crate::wechat::WxSdk] take a strust which impl [AccessTokenProvider].
+/// [WxSdk][crate::wechat::WxSdk] take a struct which impl [AccessTokenProvider].
+/// You need to use [async_trait](https://crates.io/crates/async-trait) to implement [AccessTokenProvider].
 #[async_trait]
 pub trait AccessTokenProvider: Sync + Send + Sized {
-    /// This trait derive [async_trait], it return a [std::future] of [AccessToken].
+    /// This trait derive [async_trait](https://crates.io/crates/async-trait), it return a [std::future] of [AccessToken].
     async fn get_access_token(&self) -> SdkResult<AccessToken>;
 }
 
@@ -81,7 +82,7 @@ impl AccessTokenProvider for TokenClient {
             self.app_id.clone(),
             self.app_secret.clone()
         );
-        let locked = self.cache_token.read().await;
+        let locked = futures::executor::block_on(self.cache_token.read());
         
         if let Some(cache) = &*locked {
             if !cache.is_expires() {

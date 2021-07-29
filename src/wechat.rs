@@ -14,11 +14,12 @@
 //! let sdk = WxSdk::new("app_id", "app_sercret", config, token_client);
 //! ```
 
-
 use async_trait::async_trait;
 use reqwest::Client;
 
-use crate::{access_token::AccessTokenProvider, AccessToken, SdkResult, TokenClient};
+use crate::{access_token::AccessTokenProvider, SdkResult, TokenClient};
+
+/// This is the sdk object. We provide a `new` method to construct it.
 pub struct WxSdk<T: AccessTokenProvider> {
     pub app_id: String,
     app_secret: String,
@@ -27,23 +28,26 @@ pub struct WxSdk<T: AccessTokenProvider> {
     token_client: T,
 }
 
+/// The configuration of your app server.
 pub struct ServerConfig {
     pub token: String,
-    pub encoding_aes_key: Option<String>,
     pub encoding_mode: EncodingMode
 }
 
+type AesKey = String;
+
+/// Encoding mode of message getting or sending with wechat.
+/// [EncodingMode::Compat] or [EncodingMode::Security] mode has a aes-key.
 pub enum EncodingMode {
     Plain,
-    Compat,
-    Security,
+    Compat(AesKey),
+    Security(AesKey),
 }
 
 impl ServerConfig {
-    pub fn new<S: AsRef<str>>(token: S, aes_key: Option<S>, encoding_mode: EncodingMode) -> Self {
+    pub fn new<S: AsRef<str>>(token: S, encoding_mode: EncodingMode) -> Self {
         ServerConfig {
             token: token.as_ref().to_owned(),
-            encoding_aes_key: aes_key.map(|x| x.as_ref().to_owned()),
             encoding_mode
         }
     }
@@ -80,6 +84,7 @@ impl WxSdk<TokenClient> {
     }
 }
 
+/// This trait warps two common http request method that [wx_get][WxApiRequestBuilder::wx_get] and [wx_post][WxApiRequestBuilder::wx_post] with wechat api server.
 #[async_trait]
 pub trait WxApiRequestBuilder {
     async fn wx_get(&self, url: &'static str) -> SdkResult<reqwest::RequestBuilder>;
