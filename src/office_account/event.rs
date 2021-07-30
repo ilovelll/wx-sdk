@@ -3,7 +3,7 @@ use futures::stream::Scan;
 use roxmltree::{Document, Node};
 use serde::{Deserialize, Serialize};
 
-use crate::{error::SdkError, SdkResult};
+use crate::{SdkResult, error::SdkError};
 
 const MSG_TEXT: &'static str = "text";
 const MSG_IMAGE: &'static str = "image";
@@ -487,10 +487,213 @@ impl ReceivedEvent {
                                     return Ok(r);
                                 }
                                 EVENT_LOCATION_SELECT => {
-                                    todo!()
+                                    let ek = get_node_by_tag(&root, "EventKey")?;
+                                    let ek = get_text_from_node(&ek)?;
+                                    let send_location_info = get_node_by_tag(&root, "SendLocationInfo")?;
+                                    
+                                    let location_x = get_node_by_tag(&send_location_info, "Location_X")?;
+                                    let location_x = get_text_from_node(&location_x)?;
+                                    let location_x = location_x.parse::<f32>().map_err(|_x| {
+                                        SdkError::ParmasInvalid(
+                                            "Parse XML msg from wechat error: tag `location_x` should be number"
+                                                .to_string(),
+                                        )
+                                    })?;
+
+                                    let location_y = get_node_by_tag(&send_location_info, "Location_Y")?;
+                                    let location_y = get_text_from_node(&location_y)?;
+                                    let location_y = location_y.parse::<f32>().map_err(|_x| {
+                                        SdkError::ParmasInvalid(
+                                            "Parse XML msg from wechat error: tag `location_y` should be number"
+                                                .to_string(),
+                                        )
+                                    })?;
+
+                                    let scale = get_node_by_tag(&send_location_info, "Scale")?;
+                                    let scale = get_text_from_node(&scale)?;
+                                    let scale = scale.parse::<f32>().map_err(|_x| {
+                                        SdkError::ParmasInvalid(
+                                            "Parse XML msg from wechat error: tag `scale` should be number"
+                                                .to_string(),
+                                        )
+                                    })?;
+                                    
+                                    let label = get_node_by_tag(&send_location_info, "Label")?;
+                                    let label = get_text_from_node(&label)?;
+
+                                    let poiname = get_node_by_tag(&send_location_info, "Poiname")
+                                        .ok()
+                                        .map(|n| get_text_from_node(&n).ok())
+                                        .flatten()
+                                        .map(|s| s.to_owned());
+                                        let r = ReceivedEvent::new(
+                                        from,
+                                        to,
+                                        create_time,
+                                        t,
+                                        ReceivedMessage::EventPush(EventPush::LocationSelect(SendLocationInfo{
+                                            event_key: ek.to_owned(),
+                                            location_x,
+                                            location_y,
+                                            scale,
+                                            label: label.to_owned(),
+                                            poiname
+                                        })),
+                                    );
+                                    return Ok(r);
+
                                 }
                                 EVENT_VIEW_MINIPROGRAM => {
-                                    todo!()
+                                    let ek = get_node_by_tag(&root, "EventKey")?;
+                                    let ek = get_text_from_node(&ek)?;
+                                    let menuid = get_node_by_tag(&root, "MenuID")
+                                        .ok()
+                                        .map(|n| get_text_from_node(&n).ok())
+                                        .flatten()
+                                        .map(|s| s.to_owned());
+                                    
+                                    let r = ReceivedEvent::new(
+                                        from,
+                                        to,
+                                        create_time,
+                                        t,
+                                        ReceivedMessage::EventPush(EventPush::ViewMiniProgram(ViewEvent {
+                                            event_key: ek.to_string(),
+                                            menu_id: menuid
+                                    })),
+                                    );
+                                    return Ok(r);  
+                                }
+                                EVENT_TEMPLATESENDJOBFINISH => {
+                                    let msgid = get_node_by_tag(&root, "MsgId")?;
+                                    let msgid = get_text_from_node(&msgid)?;
+                                    let msgid = msgid.parse::<u64>().map_err(|_x| {
+                                        SdkError::ParmasInvalid(
+                                            "Parse XML msg from wechat error: tag `MsgId` should be number"
+                                                .to_string(),
+                                        )
+                                    })?;
+
+                                    let status = get_node_by_tag(&root, "Status")?;
+                                    let status = get_text_from_node(&status)?;
+                                    let r = ReceivedEvent::new(
+                                        from,
+                                        to,
+                                        create_time,
+                                        t,
+                                        ReceivedMessage::EventPush(EventPush::TemplateSendJobFinish(TemplateSendJobFinishEvent {
+                                            id: msgid,
+                                            status: status.to_owned()
+                                    })),
+                                    );
+                                    return Ok(r); 
+                                }
+                                EVENT_MASSSENDJOBFINISH => {
+                                    let msgid = get_number_from_node::<u64>(&root, "MsgId")?;
+                                    let status = get_node_by_tag(&root, "Status")?;
+                                    let status = get_text_from_node(&status)?;
+                                    let total_count = get_number_from_node::<u64>(&root, "TotalCount")?;
+                                    let filter_count = get_number_from_node::<u64>(&root, "FilterCount")?;
+                                    let sent_count = get_number_from_node::<u64>(&root, "SentCount")?;
+                                    let error_count = get_number_from_node::<u64>(&root, "ErrorCount")?;
+                                    let copyright_check = get_node_by_tag(&root, "CopyrightCheckResult")?;
+                                    let copyright_count = get_number_from_node::<u16>(&copyright_check, "Count")?;
+                                    let copyright_check_state = get_number_from_node::<u8>(&copyright_check, "CheckState")?;
+                                    let copyright_result_list = get_node_by_tag(&copyright_check, "ResultList")?;
+                                    let copyright_result_list: Vec<Node> = copyright_result_list.descendants()
+                                        .filter(|n| n.has_tag_name("item"))
+                                        .collect();
+                                    let copyright_result_list: SdkResult<Vec<CopyrightCheckResultItem>> = copyright_result_list.iter().map(|n| {
+                                            let article_idx = get_number_from_node::<i8>(&n, "ArticleIdx")?;
+                                            let user_declare_state = get_number_from_node::<i8>(&n, "UserDeclareState")?;
+                                            let audit_state = get_number_from_node::<i8>(&n, "AuditState")?;
+                                            let original_article_url = get_node_by_tag(&n, "OriginalArticleUrl")?;
+                                            let original_article_url = get_text_from_node(&original_article_url)?;
+                                            let original_article_type = get_number_from_node::<i8>(&n, "OriginalArticleType")?;
+                                            let can_reprint = get_number_from_node(&n, "CanReprint")?;
+                                            let need_replace_content = get_number_from_node(&n, "NeedReplaceContent")?;
+                                            let need_show_reprint_source = get_number_from_node(&n, "NeedShowReprintSource")?;
+                                            Ok(CopyrightCheckResultItem {
+                                                article_idx,
+                                                user_declare_state,
+                                                audit_state,
+                                                original_article_url: original_article_url.to_owned(),
+                                                original_article_type,
+                                                can_reprint,
+                                                need_replace_content,
+                                                need_show_reprint_source,
+                                            })
+                                        }).collect();
+                                    let copyright_result_list = copyright_result_list?;
+                                    let copyright_check_result = CopyrightCheckResult {
+                                        count: copyright_count,
+                                        check_state: copyright_check_state,
+                                        result_list: copyright_result_list
+                                    };
+                                    let event = ReceivedEvent::new(
+                                        from,
+                                        to,
+                                        create_time,
+                                        t,
+                                        ReceivedMessage::EventPush(EventPush::MassSendJobFinish(MassSendJobFinishEvent{
+                                            id: msgid,
+                                            status: status.to_owned(),
+                                            total_count,
+                                            filter_count,
+                                            sent_count,
+                                            error_count,
+                                            copyright_check_result
+                                        }
+                                        )),
+                                    );
+                                    return Ok(event);
+                                }
+                                EVENT_GUIDE_INVITE_RESULT => {
+                                    let guide_invite = get_node_by_tag(&root, "GuideInviteEvent")?;
+                                    let guide_account = get_node_by_tag(&guide_invite, "guide_account")?;
+                                    let guide_account = get_text_from_node(&guide_account)?;
+                                    let guide_openid = get_node_by_tag(&guide_invite, "guide_openid")?;
+                                    let guide_openid = get_text_from_node(&guide_openid)?;
+                                    let invite_result = get_number_from_node::<i32>(&guide_invite, "invite_result")?;
+                                    let r = ReceivedEvent::new(
+                                        from, to,
+                                        create_time,
+                                        t,
+                                        ReceivedMessage::EventPush(EventPush::GuideInviteResult(GuideInviteResultEvent {
+                                        guide_account: guide_account.to_owned(),
+                                        guide_openid: guide_openid.to_owned(),
+                                        invite_result
+                                    })));
+                                    return Ok(r);
+                                }
+                                EVENT_GUIDE_QRCODE_SCAN => {
+                                    let guide_scan = get_node_by_tag(&root, "GuideScanEvent")?;
+                                    
+                                    let qrcode_guide_account = get_node_by_tag(&guide_scan, "qrcode_guide_account")?;
+                                    let qrcode_guide_account = get_text_from_node(&qrcode_guide_account)?;
+                                    
+                                    let qrcode_guide_openid = get_node_by_tag(&guide_scan, "qrcode_guide_openid")?;
+                                    let qrcode_guide_openid = get_text_from_node(&qrcode_guide_openid)?;
+
+                                    let openid = get_node_by_tag(&guide_scan, "openid")?;
+                                    let openid = get_text_from_node(&openid)?;
+
+                                    let action = get_number_from_node::<u8>(&guide_scan, "action")?;
+
+                                    let qrcode_info = get_node_by_tag(&guide_scan, "qrcode_info")?;
+                                    let qrcode_info = get_text_from_node(&qrcode_info)?;
+                                    let r = ReceivedEvent::new(
+                                        from, to, create_time,
+                                        t,
+                                        ReceivedMessage::EventPush(EventPush::GuideQrcodeScan(GuideQrcodeScanEvent{
+                                            qrcode_guide_account: qrcode_guide_account.to_owned(),
+                                            qrcode_guide_openid: qrcode_guide_openid.to_owned(),
+                                            openid: openid.to_owned(),
+                                            action,
+                                            qrcode_info: qrcode_info.to_owned(),
+                                        }))
+                                    );
+                                    return Ok(r);
                                 }
                                 _ => {
                                     let r = ReceivedEvent::new(
@@ -535,6 +738,16 @@ fn get_text_from_node<'a>(node: &Node<'a, 'a>) -> SdkResult<&'a str> {
     })
 }
 
+fn get_number_from_node<'a, T: std::str::FromStr>(node: &Node<'a, 'a>, tag_name: &str) -> SdkResult<T> {
+    let num = get_node_by_tag(node, tag_name)?;
+    let num = get_text_from_node(&num)?;
+    num.parse::<T>().map_err(|_x| {
+        SdkError::ParmasInvalid(
+            format!("Parse XML msg from wechat error: tag `{}` should be number", tag_name)
+        )
+    })
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub enum ReceivedMessage {
     Text(TextMessage),
@@ -556,11 +769,13 @@ pub enum EventPush {
     Location(LocationEvent),
     Click(ClickEvent),
     View(ViewEvent),
+    ViewMiniProgram(ViewEvent),
     ScanCodePush(ScanCodeEvent),
     ScanCodeWaitMsg(ScanCodeEvent),
     PicSysPhoto(SendPicsInfo),
     PicPhotoOrAlbum(SendPicsInfo),
     PicWeixin(SendPicsInfo),
+    LocationSelect(SendLocationInfo),
     TemplateSendJobFinish(TemplateSendJobFinishEvent),
     MassSendJobFinish(MassSendJobFinishEvent),
     GuideInviteResult(GuideInviteResultEvent),
@@ -740,6 +955,17 @@ pub struct SendPicsInfo {
     count: u16,
     pic_list: Vec<PicMd5Sum>
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct SendLocationInfo {
+    event_key: String,
+    location_x: f32,
+    location_y: f32,
+    scale: f32,
+    label: String,
+    poiname: Option<String>
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MassSendJobFinishEvent {
     // #[serde(alias = "FromUserName")]
