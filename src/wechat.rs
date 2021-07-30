@@ -5,7 +5,7 @@
 //! Example
 //! ```rust
 //! use wx_func::wechat::{WxSdk, ServerConfig, EncodingMode};
-//! let config = ServerConfig::new("token", Some("aes_key"), EncodingMode::Plain);
+//! let config = ServerConfig::new("token", EncodingMode::Plain);
 //! let sdk = WxSdk::new_with_default_token_client("app_id", "app_secret", config);
 //! ```
 //! above example use the default token client, you could implement one that impl trait [AccessTokenProvider] by yourself.
