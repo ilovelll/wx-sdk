@@ -1,3 +1,6 @@
+//! This module define the api set of wechat office account.
+//!
+//! It seperates those apis to different mods by url path.
 use crate::{
     access_token::AccessTokenProvider,
     error::{CommonError, CommonResponse},
@@ -20,7 +23,7 @@ pub mod user;
 
 /// 接口限额清零
 ///
-/// 公众号调用接口并不是无限制的。 
+/// 公众号调用接口并不是无限制的。
 /// 每个帐号每月共10次清零操作机会，清零生效一次即用掉一次机会（10次包括了平台上的清零和调用接口API的清零）。
 pub async fn clear_quota<T: AccessTokenProvider>(sdk: &WxSdk<T>) -> SdkResult<()> {
     let base_url = "https://api.weixin.qq.com/cgi-bin/clear_quota";

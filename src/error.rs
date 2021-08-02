@@ -24,7 +24,7 @@ pub enum CommonResponse<T> {
     Err(CommonError),
 }
 
-/// The SDK self-defined enum.
+/// The SDK self-defined error enum.
 #[derive(Error, Debug)]
 pub enum SdkError {
     #[error("reqwest Error")]
@@ -39,6 +39,8 @@ pub enum SdkError {
     UrlParseError(#[from] url::ParseError),
     #[error("api request params error: {0}")]
     ParmasInvalid(String),
+    #[error("parse received encrypt msg error: wrong signature")]
+    WrongSignature
 }
 
 /// A wrap of `std::result::Result<T, SdkError>`.
