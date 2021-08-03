@@ -313,7 +313,7 @@ pub async fn addconditional<T: AccessTokenProvider>(
     let base_url = "https://api.weixin.qq.com/cgi-bin/menu/addconditional";
 
     if !rules.is_valid() {
-        return Err(SdkError::ParmasInvalid(
+        return Err(SdkError::InvalidParams(
             "add conditional menu match rules invalid.".to_string(),
         ));
     }

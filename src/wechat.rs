@@ -14,10 +14,14 @@
 //! let sdk = WxSdk::new("app_id", "app_sercret", config, token_client);
 //! ```
 
+use std::collections::HashMap;
+
 use async_trait::async_trait;
 use reqwest::Client;
+use roxmltree::Document;
 
-use crate::{access_token::AccessTokenProvider, SdkResult, TokenClient};
+use crate::office_account;
+use crate::{SdkResult, TokenClient, access_token::AccessTokenProvider, error::SdkError, office_account::event::{self, ReceivedEvent}};
 
 /// This is the sdk object. We provide a `new` method to construct it.
 pub struct WxSdk<T: AccessTokenProvider> {
@@ -81,6 +85,42 @@ impl WxSdk<TokenClient> {
             server_config,
             token_client,
         }
+    }
+    pub fn parse_received_msg<S: AsRef<str>>(&self, msg: S) -> SdkResult<ReceivedEvent> {
+        event::ReceivedEvent::parse(msg.as_ref())
+    }
+    
+    pub fn parse_received_decrypt_msg<S:AsRef<str>>(&self, msg: S, url_params: HashMap<String, String>) -> SdkResult<ReceivedEvent> {
+        let mut msg = msg.as_ref().to_owned();
+        if let EncodingMode::Security(ref aes_key) = self.get_server_config().encoding_mode {
+            let signature = url_params.get("msg_signature").ok_or_else(|| SdkError::InvalidParams("msg_signature".to_owned()))?;
+            let timestamp= url_params.get("timestamp").ok_or_else(|| SdkError::InvalidParams("timestamp".to_owned()))?;
+            let nonce= url_params.get("nonce").ok_or_else(|| SdkError::InvalidParams("nonce".to_owned()))?;
+            let token = self.get_server_config().token.clone();
+            let root = Document::parse(msg.as_ref())?;
+            let encrypt_msg = root.descendants().find(|n| n.has_tag_name("Encrypt")).map(|n| n.text()).flatten().unwrap();
+
+            let check_sign = vec![token, timestamp.clone(), nonce.clone(), encrypt_msg.to_owned()];
+            let sign = office_account::events::signature::Signature::new(signature, check_sign);
+            if !sign.is_ok() {
+                return Err(SdkError::InvalidSignature)
+            }
+            // decrpyted_text = [random(16) + content_len(4) + content + appid]
+            let mut decrypted_ciphertext = office_account::events::crypto::decrypt_message(encrypt_msg, aes_key)?;
+            let(_, text) = decrypted_ciphertext.split_at_mut(16);
+            let (xlen, text) = text.split_at_mut(4);
+            let mut len = [0;4];
+            len.copy_from_slice(&xlen[..]);
+            let len = u32::from_be_bytes(len);
+            let (text, appid) = text.split_at(len as usize);
+            let decrypted_msg = String::from_utf8_lossy(text).to_string();
+            let app_id = String::from_utf8_lossy(appid).to_string();
+            if app_id != self.app_id {
+                return Err(SdkError::InvalidAppid);
+            }
+            msg = decrypted_msg;
+        }
+        event::ReceivedEvent::parse(msg.as_ref())
     }
 }
 

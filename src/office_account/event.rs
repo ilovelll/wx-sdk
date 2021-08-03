@@ -38,7 +38,7 @@ pub struct ReceivedEvent {
 
     create_time: i64,
 
-    msg_type: String,
+    pub msg_type: String,
 
     pub body: ReceivedMessage,
 }
