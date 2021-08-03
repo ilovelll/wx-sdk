@@ -38,9 +38,15 @@ pub enum SdkError {
     #[error(transparent)]
     UrlParseError(#[from] url::ParseError),
     #[error("api request params error: {0}")]
-    ParmasInvalid(String),
+    InvalidParams(String),
     #[error("parse received encrypt msg error: wrong signature")]
-    WrongSignature
+    InvalidSignature,
+    #[error("parse received encrypt msg error: invalid appid")]
+    InvalidAppid,
+    #[error("decrypt msg error: {0}")]
+    MsgDecryptError(String),
+    #[error("encrypt msg error: {0}")]
+    MsgEncryptError(String),
 }
 
 /// A wrap of `std::result::Result<T, SdkError>`.

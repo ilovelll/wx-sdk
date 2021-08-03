@@ -30,35 +30,6 @@ const EVENT_TEMPLATESENDJOBFINISH: &'static str = "TEMPLATESENDJOBFINISH";
 const EVENT_MASSSENDJOBFINISH: &'static str = "MASSSENDJOBFINISH";
 const EVENT_GUIDE_INVITE_RESULT: &'static str = "guide_invite_result_event";
 const EVENT_GUIDE_QRCODE_SCAN: &'static str = "guide_qrcode_scan_event";
-
-pub mod signature {
-    use serde_derive::Deserialize;
-    use sha1::{Digest, Sha1};
-
-    use crate::{access_token::AccessTokenProvider, wechat::WxSdk, AccessToken};
-
-    #[derive(Debug, Deserialize)]
-    pub struct Signature {
-        pub signature: String,
-        pub timestamp: String,
-        pub nonce: String,
-        pub echostr: Option<String>,
-    }
-
-    impl Signature {
-        pub fn check_signature(&self, token: impl AsRef<str>) -> bool {
-            let mut arr: [String; 3] = [token.as_ref().to_owned(), self.timestamp.clone(), self.nonce.clone()];
-            arr.sort();
-            let str = arr.join("");
-
-            let mut hasher = Sha1::new();
-            hasher.update(str);
-            let result = hasher.finalize();
-            format!("{:x}", result) == self.signature
-        }
-    }
-}
-
 #[derive(Debug)]
 pub struct ReceivedEvent {
     from: String,
@@ -102,7 +73,7 @@ impl ReceivedEvent {
         let create_time = get_node_by_tag(&root, "CreateTime")?;
         let create_time = get_text_from_node(&create_time)?;
         let create_time = create_time.parse::<i64>().map_err(|_x| {
-            SdkError::ParmasInvalid(
+            SdkError::InvalidParams(
                 "Parse XML msg from wechat error: tag `CreateTime` should be number".to_string(),
             )
         })?;
@@ -116,7 +87,7 @@ impl ReceivedEvent {
                         let msgid = get_node_by_tag(&root, "MsgId")?;
                         let msgid = get_text_from_node(&msgid)?;
                         let msgid = msgid.parse::<u64>().map_err(|_x| {
-                            SdkError::ParmasInvalid(
+                            SdkError::InvalidParams(
                                 "Parse XML msg from wechat error: tag `MsgId` should be number"
                                     .to_string(),
                             )
@@ -137,7 +108,7 @@ impl ReceivedEvent {
                         let msgid = get_node_by_tag(&root, "MsgId")?;
                         let msgid = get_text_from_node(&msgid)?;
                         let msgid = msgid.parse::<u64>().map_err(|_x| {
-                            SdkError::ParmasInvalid(
+                            SdkError::InvalidParams(
                                 "Parse XML msg from wechat error: tag `MsgId` should be number"
                                     .to_string(),
                             )
@@ -165,7 +136,7 @@ impl ReceivedEvent {
                         let msgid = get_node_by_tag(&root, "MsgId")?;
                         let msgid = get_text_from_node(&msgid)?;
                         let msgid = msgid.parse::<u64>().map_err(|_x| {
-                            SdkError::ParmasInvalid(
+                            SdkError::InvalidParams(
                                 "Parse XML msg from wechat error: tag `MsgId` should be number"
                                     .to_string(),
                             )
@@ -200,7 +171,7 @@ impl ReceivedEvent {
                         let msgid = get_node_by_tag(&root, "MsgId")?;
                         let msgid = get_text_from_node(&msgid)?;
                         let msgid = msgid.parse::<u64>().map_err(|_x| {
-                            SdkError::ParmasInvalid(
+                            SdkError::InvalidParams(
                                 "Parse XML msg from wechat error: tag `MsgId` should be number"
                                     .to_string(),
                             )
@@ -226,7 +197,7 @@ impl ReceivedEvent {
                         let msgid = get_node_by_tag(&root, "MsgId")?;
                         let msgid = get_text_from_node(&msgid)?;
                         let msgid = msgid.parse::<u64>().map_err(|_x| {
-                            SdkError::ParmasInvalid(
+                            SdkError::InvalidParams(
                                 "Parse XML msg from wechat error: tag `MsgId` should be number"
                                     .to_string(),
                             )
@@ -235,7 +206,7 @@ impl ReceivedEvent {
                         let location_x = get_node_by_tag(&root, "Location_X")?;
                         let location_x = get_text_from_node(&location_x)?;
                         let location_x = location_x.parse::<f32>().map_err(|_x| {
-                            SdkError::ParmasInvalid(
+                            SdkError::InvalidParams(
                                 "Parse XML msg from wechat error: tag `location_x` should be number"
                                     .to_string(),
                             )
@@ -243,7 +214,7 @@ impl ReceivedEvent {
                         let location_y = get_node_by_tag(&root, "Location_Y")?;
                         let location_y = get_text_from_node(&location_y)?;
                         let location_y = location_y.parse::<f32>().map_err(|_x| {
-                            SdkError::ParmasInvalid(
+                            SdkError::InvalidParams(
                                 "Parse XML msg from wechat error: tag `location_y` should be number"
                                     .to_string(),
                             )
@@ -252,7 +223,7 @@ impl ReceivedEvent {
                         let scale = get_node_by_tag(&root, "Scale")?;
                         let scale = get_text_from_node(&scale)?;
                         let scale = scale.parse::<i32>().map_err(|_x| {
-                            SdkError::ParmasInvalid(
+                            SdkError::InvalidParams(
                                 "Parse XML msg from wechat error: tag `scale` should be number"
                                     .to_string(),
                             )
@@ -271,7 +242,7 @@ impl ReceivedEvent {
                         let msgid = get_node_by_tag(&root, "MsgId")?;
                         let msgid = get_text_from_node(&msgid)?;
                         let msgid = msgid.parse::<u64>().map_err(|_x| {
-                            SdkError::ParmasInvalid(
+                            SdkError::InvalidParams(
                                 "Parse XML msg from wechat error: tag `MsgId` should be number"
                                     .to_string(),
                             )
@@ -352,7 +323,7 @@ impl ReceivedEvent {
                                     let latitude = get_node_by_tag(&root, "Latitude")?;
                                     let latitude = get_text_from_node(&latitude)?;
                                     let latitude = latitude.parse::<f32>().map_err(|_x| {
-                                        SdkError::ParmasInvalid(
+                                        SdkError::InvalidParams(
                                             "Parse XML msg from wechat error: tag `latitude` should be number"
                                                 .to_string(),
                                         )
@@ -360,7 +331,7 @@ impl ReceivedEvent {
                                     let longitude = get_node_by_tag(&root, "Longitude")?;
                                     let longitude = get_text_from_node(&longitude)?;
                                     let longitude = longitude.parse::<f32>().map_err(|_x| {
-                                        SdkError::ParmasInvalid(
+                                        SdkError::InvalidParams(
                                             "Parse XML msg from wechat error: tag `longitude` should be number"
                                                 .to_string(),
                                         )
@@ -368,7 +339,7 @@ impl ReceivedEvent {
                                     let precision = get_node_by_tag(&root, "Precision")?;
                                     let precision = get_text_from_node(&precision)?;
                                     let precision = precision.parse::<f32>().map_err(|_x| {
-                                        SdkError::ParmasInvalid(
+                                        SdkError::InvalidParams(
                                             "Parse XML msg from wechat error: tag `longitude` should be number"
                                                 .to_string(),
                                         )
@@ -455,7 +426,7 @@ impl ReceivedEvent {
                                     let count = get_node_by_tag(&send_pics_info, "Count")?;
                                     let count = get_text_from_node(&count)?;
                                     let count = count.parse::<u16>().map_err(|_x| {
-                                        SdkError::ParmasInvalid(
+                                        SdkError::InvalidParams(
                                             "Parse XML msg from wechat error: tag `count` should be number"
                                                 .to_string(),
                                         )
@@ -494,7 +465,7 @@ impl ReceivedEvent {
                                     let location_x = get_node_by_tag(&send_location_info, "Location_X")?;
                                     let location_x = get_text_from_node(&location_x)?;
                                     let location_x = location_x.parse::<f32>().map_err(|_x| {
-                                        SdkError::ParmasInvalid(
+                                        SdkError::InvalidParams(
                                             "Parse XML msg from wechat error: tag `location_x` should be number"
                                                 .to_string(),
                                         )
@@ -503,7 +474,7 @@ impl ReceivedEvent {
                                     let location_y = get_node_by_tag(&send_location_info, "Location_Y")?;
                                     let location_y = get_text_from_node(&location_y)?;
                                     let location_y = location_y.parse::<f32>().map_err(|_x| {
-                                        SdkError::ParmasInvalid(
+                                        SdkError::InvalidParams(
                                             "Parse XML msg from wechat error: tag `location_y` should be number"
                                                 .to_string(),
                                         )
@@ -512,7 +483,7 @@ impl ReceivedEvent {
                                     let scale = get_node_by_tag(&send_location_info, "Scale")?;
                                     let scale = get_text_from_node(&scale)?;
                                     let scale = scale.parse::<f32>().map_err(|_x| {
-                                        SdkError::ParmasInvalid(
+                                        SdkError::InvalidParams(
                                             "Parse XML msg from wechat error: tag `scale` should be number"
                                                 .to_string(),
                                         )
@@ -568,7 +539,7 @@ impl ReceivedEvent {
                                     let msgid = get_node_by_tag(&root, "MsgId")?;
                                     let msgid = get_text_from_node(&msgid)?;
                                     let msgid = msgid.parse::<u64>().map_err(|_x| {
-                                        SdkError::ParmasInvalid(
+                                        SdkError::InvalidParams(
                                             "Parse XML msg from wechat error: tag `MsgId` should be number"
                                                 .to_string(),
                                         )
@@ -722,7 +693,7 @@ fn get_node_by_tag<'a, 'b>(node: &'a Node, tag_name: &'b str) -> SdkResult<Node<
     node.descendants()
         .find(|n| n.has_tag_name(tag_name))
         .ok_or_else(|| {
-            SdkError::ParmasInvalid(format!(
+            SdkError::InvalidParams(format!(
                 "Parse XML msg from wechat error: tag `{}` invalid",
                 tag_name
             ))
@@ -731,7 +702,7 @@ fn get_node_by_tag<'a, 'b>(node: &'a Node, tag_name: &'b str) -> SdkResult<Node<
 
 fn get_text_from_node<'a>(node: &Node<'a, 'a>) -> SdkResult<&'a str> {
     node.text().ok_or_else(|| {
-        SdkError::ParmasInvalid(format!(
+        SdkError::InvalidParams(format!(
             "Parse XML msg from wechat error: tag `{}` text content is none",
             node.tag_name().name()
         ))
@@ -742,7 +713,7 @@ fn get_number_from_node<'a, T: std::str::FromStr>(node: &Node<'a, 'a>, tag_name:
     let num = get_node_by_tag(node, tag_name)?;
     let num = get_text_from_node(&num)?;
     num.parse::<T>().map_err(|_x| {
-        SdkError::ParmasInvalid(
+        SdkError::InvalidParams(
             format!("Parse XML msg from wechat error: tag `{}` should be number", tag_name)
         )
     })

@@ -20,6 +20,7 @@ pub mod qrcode;
 pub mod tags;
 pub mod template;
 pub mod user;
+pub mod events;
 
 /// 接口限额清零
 ///
