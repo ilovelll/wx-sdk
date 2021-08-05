@@ -2,13 +2,19 @@ use roxmltree::{Document, Node};
 
 use crate::{SdkResult, error::SdkError};
 
-use text::TextMessage;
-use image::ImageMessage;
+use msg_text::TextMessage;
+use msg_image::ImageMessage;
+
+use self::{msg_location::LocationMessage, msg_video::VideoMessage, msg_voice::VoiceMessage};
+
 pub mod signature;
 pub mod xmlutil;
 pub mod crypto;
-pub mod text;
-pub mod image;
+pub mod msg_text;
+pub mod msg_image;
+pub mod msg_voice;
+pub mod msg_video;
+pub mod msg_location;
 
 const MSG_TEXT: &'static str = "text";
 const MSG_IMAGE: &'static str = "image";
@@ -57,6 +63,10 @@ pub enum ReceivedMessage {
     UnhandledEvent(String),
     Text(TextMessage),
     Image(ImageMessage),
+    Voice(VoiceMessage),
+    Video(VideoMessage),
+    ShortVideo(VideoMessage),
+    Location(LocationMessage)
 }
 
 impl ReceivedEvent {
@@ -77,6 +87,20 @@ impl ReceivedEvent {
             },
             MSG_IMAGE => {
                 ReceivedMessage::Image(ImageMessage::from_xml(&root)?)
+            }
+            MSG_VOICE => {
+                ReceivedMessage::Voice(VoiceMessage::from_xml(&root)?)
+            }
+            MSG_VIDEO | MSG_SHORTVIDEO => {
+                let msg = if msg_type == MSG_VIDEO {
+                    ReceivedMessage::Video(VideoMessage::from_xml(&root)?)
+                } else {
+                    ReceivedMessage::ShortVideo(VideoMessage::from_xml(&root)?)
+                };
+                msg
+            }
+            MSG_LOCATION => {
+                ReceivedMessage::Location(LocationMessage::from_xml(&root)?)
             }
             _ => {
                 ReceivedMessage::UnhandledEvent(

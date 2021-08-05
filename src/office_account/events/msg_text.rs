@@ -24,3 +24,22 @@ impl EventMessage for TextMessage {
         })
     }
 }
+
+#[test]
+pub fn parse() -> SdkResult<()> {
+    use roxmltree::Document;
+
+    let s = "<xml>
+    <ToUserName><![CDATA[toUser]]></ToUserName>
+    <FromUserName><![CDATA[fromUser]]></FromUserName>
+    <CreateTime>1348831860</CreateTime>
+    <MsgType><![CDATA[text]]></MsgType>
+    <Content><![CDATA[this is a test]]></Content>
+    <MsgId>1234567890123456</MsgId>
+  </xml>";
+    let node = Document::parse(&s)?;
+    let msg = TextMessage::from_xml(&node.root())?;
+    assert_eq!(msg.content, "this is a test");
+    assert_eq!(msg.msg_id, 1234567890123456);
+    Ok(())
+}
