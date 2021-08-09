@@ -17,7 +17,7 @@ pub fn decrypt_message<'a, S: AsRef<str>>(raw: &'a str, key: S) -> SdkResult<Vec
         .map_err(|e| SdkError::MsgDecryptError(e.to_string()))?;
     iv_buf.copy_from_slice(&key[0..16]);
     // new the cipher
-    let cipher = Aes256Cbc::new_from_slices(&key, &iv_buf)
+    let cipher = Aes256Cbc::new_from_slices(key, &iv_buf)
         .map_err(|e| SdkError::MsgDecryptError(e.to_string()))?;
 
     let mut dec_buf = [0u8; 4096];

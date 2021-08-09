@@ -11,7 +11,7 @@ impl ReceivedMessageParser for ClickEvent {
     type ReceivedMessage = ClickEvent;
 
     fn from_xml(node: &roxmltree::Node) -> SdkResult<Self::ReceivedMessage> {
-        let event_key = get_text_from_root(&node, "EventKey")?;
+        let event_key = get_text_from_root(node, "EventKey")?;
         Ok(ClickEvent {
             event_key: event_key.to_string(),
         })

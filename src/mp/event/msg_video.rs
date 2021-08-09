@@ -17,9 +17,9 @@ impl ReceivedMessageParser for VideoMessage {
     type ReceivedMessage = VideoMessage;
 
     fn from_xml(node: &Node) -> SdkResult<Self::ReceivedMessage> {
-        let msg_id = get_number_from_root::<u64>(&node, "MsgId")?;
-        let media_id = get_text_from_root(&node, "MediaId")?;
-        let thumb_media_id = get_text_from_root(&node, "ThumbMediaId")?;
+        let msg_id = get_number_from_root::<u64>(node, "MsgId")?;
+        let media_id = get_text_from_root(node, "MediaId")?;
+        let thumb_media_id = get_text_from_root(node, "ThumbMediaId")?;
 
         Ok(VideoMessage {
             msg_id,

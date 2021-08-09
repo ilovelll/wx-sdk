@@ -17,9 +17,9 @@ impl ReceivedMessageParser for ImageMessage {
     type ReceivedMessage = Self;
 
     fn from_xml(node: &Node) -> SdkResult<Self::ReceivedMessage> {
-        let msg_id = get_number_from_root::<u64>(&node, "MsgId")?;
-        let pic_url = get_text_from_root(&node, "PicUrl")?;
-        let media_id = get_text_from_root(&node, "MediaId")?;
+        let msg_id = get_number_from_root::<u64>(node, "MsgId")?;
+        let pic_url = get_text_from_root(node, "PicUrl")?;
+        let media_id = get_text_from_root(node, "MediaId")?;
 
         Ok(ImageMessage {
             msg_id,

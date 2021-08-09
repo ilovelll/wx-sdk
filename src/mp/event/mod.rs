@@ -104,12 +104,11 @@ impl ReceivedEvent {
             MSG_IMAGE => ReceivedMessage::Image(ImageMessage::from_xml(&root)?),
             MSG_VOICE => ReceivedMessage::Voice(VoiceMessage::from_xml(&root)?),
             MSG_VIDEO | MSG_SHORTVIDEO => {
-                let msg = if msg_type == MSG_VIDEO {
+                if msg_type == MSG_VIDEO {
                     ReceivedMessage::Video(VideoMessage::from_xml(&root)?)
                 } else {
                     ReceivedMessage::ShortVideo(VideoMessage::from_xml(&root)?)
-                };
-                msg
+                }
             }
             MSG_LOCATION => ReceivedMessage::Location(LocationMessage::from_xml(&root)?),
             MSG_LINK => ReceivedMessage::Link(LinkMessage::from_xml(&root)?),
@@ -124,7 +123,7 @@ impl ReceivedEvent {
             to: to.to_owned(),
             msg_type: msg_type.to_owned(),
             create_time,
-            body: body,
+            body,
         })
     }
 }

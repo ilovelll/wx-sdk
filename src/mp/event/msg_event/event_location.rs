@@ -13,9 +13,9 @@ impl ReceivedMessageParser for LocationEvent {
     type ReceivedMessage = LocationEvent;
 
     fn from_xml(node: &roxmltree::Node) -> SdkResult<Self::ReceivedMessage> {
-        let latitude = get_number_from_root::<f32>(&node, "Latitude")?;
-        let longitude = get_number_from_root::<f32>(&node, "Longitude")?;
-        let precision = get_number_from_root::<f32>(&node, "Precision")?;
+        let latitude = get_number_from_root::<f32>(node, "Latitude")?;
+        let longitude = get_number_from_root::<f32>(node, "Longitude")?;
+        let precision = get_number_from_root::<f32>(node, "Precision")?;
         Ok(LocationEvent {
             latitude,
             longitude,

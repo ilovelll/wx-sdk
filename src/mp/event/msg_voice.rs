@@ -18,9 +18,9 @@ impl ReceivedMessageParser for VoiceMessage {
     type ReceivedMessage = VoiceMessage;
 
     fn from_xml(node: &Node) -> SdkResult<Self::ReceivedMessage> {
-        let msg_id = get_number_from_root::<u64>(&node, "MsgId")?;
-        let media_id = get_text_from_root(&node, "MediaId")?;
-        let format = get_text_from_root(&node, "Format")?;
+        let msg_id = get_number_from_root::<u64>(node, "MsgId")?;
+        let media_id = get_text_from_root(node, "MediaId")?;
+        let format = get_text_from_root(node, "Format")?;
         let recognition = node.descendants().find(|n| n.has_tag_name("Recognition"));
         let recognition = recognition
             .map(|n| n.text())

@@ -63,14 +63,14 @@ impl ReceivedMessageParser for MassSendJobFinishEvent {
         let copyright_result_list: SdkResult<Vec<CopyrightCheckResultItem>> = copyright_result_list
             .iter()
             .map(|n| {
-                let article_idx = get_number_from_root::<i8>(&n, "ArticleIdx")?;
-                let user_declare_state = get_number_from_root::<i8>(&n, "UserDeclareState")?;
-                let audit_state = get_number_from_root::<i8>(&n, "AuditState")?;
-                let original_article_url = get_text_from_root(&n, "OriginalArticleUrl")?;
-                let original_article_type = get_number_from_root::<i8>(&n, "OriginalArticleType")?;
-                let can_reprint = get_number_from_root(&n, "CanReprint")?;
-                let need_replace_content = get_number_from_root(&n, "NeedReplaceContent")?;
-                let need_show_reprint_source = get_number_from_root(&n, "NeedShowReprintSource")?;
+                let article_idx = get_number_from_root::<i8>(n, "ArticleIdx")?;
+                let user_declare_state = get_number_from_root::<i8>(n, "UserDeclareState")?;
+                let audit_state = get_number_from_root::<i8>(n, "AuditState")?;
+                let original_article_url = get_text_from_root(n, "OriginalArticleUrl")?;
+                let original_article_type = get_number_from_root::<i8>(n, "OriginalArticleType")?;
+                let can_reprint = get_number_from_root(n, "CanReprint")?;
+                let need_replace_content = get_number_from_root(n, "NeedReplaceContent")?;
+                let need_show_reprint_source = get_number_from_root(n, "NeedShowReprintSource")?;
                 Ok(CopyrightCheckResultItem {
                     article_idx,
                     user_declare_state,

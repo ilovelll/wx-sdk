@@ -21,7 +21,7 @@ impl ReceivedMessageParser for SubScribeEvent {
                         n.tag_name().name()
                     ))
                 })?;
-                let ticket = get_text_from_root(&node, "Ticket")?;
+                let ticket = get_text_from_root(node, "Ticket")?;
                 EventMessage::SubscribeScan(ScanEvent {
                     event_key: event_key.to_string(),
                     ticket: ticket.to_string(),

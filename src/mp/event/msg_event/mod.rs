@@ -71,7 +71,7 @@ impl ReceivedMessageParser for EventMessage {
     type ReceivedMessage = Self;
 
     fn from_xml(node: &Node) -> SdkResult<Self::ReceivedMessage> {
-        let event_type = get_text_from_root(&node, "Event")?;
+        let event_type = get_text_from_root(node, "Event")?;
         let event = match event_type {
             EVENT_SUBSCRIBE => SubScribeEvent::from_xml(node)?,
             EVENT_UNSUBSCRIBE => EventMessage::UnSubscribe,

@@ -13,8 +13,8 @@ impl ReceivedMessageParser for ScanEvent {
     type ReceivedMessage = ScanEvent;
 
     fn from_xml(node: &roxmltree::Node) -> SdkResult<Self::ReceivedMessage> {
-        let event_key = get_text_from_root(&node, "EventKey")?;
-        let ticket = get_text_from_root(&node, "Ticket")?;
+        let event_key = get_text_from_root(node, "EventKey")?;
+        let ticket = get_text_from_root(node, "Ticket")?;
         Ok(ScanEvent {
             event_key: event_key.to_string(),
             ticket: ticket.to_string(),
@@ -32,7 +32,7 @@ impl ReceivedMessageParser for MenuScanEvent {
     type ReceivedMessage = MenuScanEvent;
 
     fn from_xml(node: &roxmltree::Node) -> SdkResult<Self::ReceivedMessage> {
-        let event_key = get_text_from_root(&node, "EventKey")?;
+        let event_key = get_text_from_root(node, "EventKey")?;
         let scan_code_info = node
             .descendants()
             .find(|n| n.has_tag_name("ScanCodeInfo"))

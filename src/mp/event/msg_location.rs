@@ -19,11 +19,11 @@ impl ReceivedMessageParser for LocationMessage {
     type ReceivedMessage = LocationMessage;
 
     fn from_xml(node: &Node) -> SdkResult<Self::ReceivedMessage> {
-        let msg_id = get_number_from_root::<u64>(&node, "MsgId")?;
-        let location_x = get_number_from_root::<f32>(&node, "Location_X")?;
-        let location_y = get_number_from_root::<f32>(&node, "Location_Y")?;
-        let scale = get_number_from_root::<f32>(&node, "Scale")?;
-        let label = get_text_from_root(&node, "Label")?;
+        let msg_id = get_number_from_root::<u64>(node, "MsgId")?;
+        let location_x = get_number_from_root::<f32>(node, "Location_X")?;
+        let location_y = get_number_from_root::<f32>(node, "Location_Y")?;
+        let scale = get_number_from_root::<f32>(node, "Scale")?;
+        let label = get_text_from_root(node, "Label")?;
 
         Ok(LocationMessage {
             msg_id,

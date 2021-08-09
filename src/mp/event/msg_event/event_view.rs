@@ -12,7 +12,7 @@ impl ReceivedMessageParser for ViewEvent {
     type ReceivedMessage = ViewEvent;
 
     fn from_xml(node: &roxmltree::Node) -> SdkResult<Self::ReceivedMessage> {
-        let event_key = get_text_from_root(&node, "EventKey")?;
+        let event_key = get_text_from_root(node, "EventKey")?;
         let menu_id = node
             .descendants()
             .find(|n| n.has_tag_name("MenuId"))

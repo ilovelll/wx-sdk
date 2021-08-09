@@ -17,7 +17,7 @@ impl ReceivedMessageParser for SendPicsEvent {
     type ReceivedMessage = SendPicsEvent;
 
     fn from_xml(node: &roxmltree::Node) -> SdkResult<Self::ReceivedMessage> {
-        let event_key = get_text_from_root(&node, "EventKey")?;
+        let event_key = get_text_from_root(node, "EventKey")?;
         let send_pics_info = node
             .descendants()
             .find(|n| n.has_tag_name("SendPicsInfo"))
@@ -66,7 +66,7 @@ impl ReceivedMessageParser for SendLocationEvent {
     type ReceivedMessage = SendLocationEvent;
 
     fn from_xml(node: &roxmltree::Node) -> SdkResult<Self::ReceivedMessage> {
-        let event_key = get_text_from_root(&node, "EventKey")?;
+        let event_key = get_text_from_root(node, "EventKey")?;
         let send_location_info = node
             .descendants()
             .find(|n| n.has_tag_name("SendLocationInfo"))

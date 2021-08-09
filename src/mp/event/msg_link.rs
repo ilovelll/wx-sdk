@@ -18,10 +18,10 @@ impl ReceivedMessageParser for LinkMessage {
     type ReceivedMessage = LinkMessage;
 
     fn from_xml(node: &Node) -> SdkResult<Self::ReceivedMessage> {
-        let msg_id = get_number_from_root::<u64>(&node, "MsgId")?;
-        let title = get_text_from_root(&node, "Title")?;
-        let description = get_text_from_root(&node, "Description")?;
-        let url = get_text_from_root(&node, "Url")?;
+        let msg_id = get_number_from_root::<u64>(node, "MsgId")?;
+        let title = get_text_from_root(node, "Title")?;
+        let description = get_text_from_root(node, "Description")?;
+        let url = get_text_from_root(node, "Url")?;
 
         Ok(LinkMessage {
             msg_id,
