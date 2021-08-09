@@ -1,6 +1,10 @@
-use crate::{SdkResult, error::SdkError, mp::{event::{ReceivedMessageParser, xmlutil::get_text_from_root}}};
+use crate::{
+    error::SdkError,
+    mp::event::{xmlutil::get_text_from_root, ReceivedMessageParser},
+    SdkResult,
+};
 
-use super::{EventMessage, event_scan::ScanEvent};
+use super::{event_scan::ScanEvent, EventMessage};
 
 pub struct SubScribeEvent;
 
@@ -8,8 +12,7 @@ impl ReceivedMessageParser for SubScribeEvent {
     type ReceivedMessage = EventMessage;
 
     fn from_xml(node: &roxmltree::Node) -> SdkResult<Self::ReceivedMessage> {
-	    let ekn =
-            node.descendants().find(|n| n.has_tag_name("EventKey"));
+        let ekn = node.descendants().find(|n| n.has_tag_name("EventKey"));
         let event = match ekn {
             Some(n) => {
                 let event_key = n.text().ok_or_else(|| {
@@ -21,12 +24,10 @@ impl ReceivedMessageParser for SubScribeEvent {
                 let ticket = get_text_from_root(&node, "Ticket")?;
                 EventMessage::SubscribeScan(ScanEvent {
                     event_key: event_key.to_string(),
-                    ticket: ticket.to_string()
+                    ticket: ticket.to_string(),
                 })
             }
-            None => {
-                EventMessage::Subscribe
-            }
+            None => EventMessage::Subscribe,
         };
         Ok(event)
     }

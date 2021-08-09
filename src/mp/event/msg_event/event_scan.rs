@@ -1,4 +1,8 @@
-use crate::{SdkResult, error::SdkError, mp::event::{ReceivedMessageParser, xmlutil::get_text_from_root}};
+use crate::{
+    error::SdkError,
+    mp::event::{xmlutil::get_text_from_root, ReceivedMessageParser},
+    SdkResult,
+};
 
 pub struct ScanEvent {
     pub event_key: String,
@@ -13,7 +17,7 @@ impl ReceivedMessageParser for ScanEvent {
         let ticket = get_text_from_root(&node, "Ticket")?;
         Ok(ScanEvent {
             event_key: event_key.to_string(),
-            ticket: ticket.to_string()
+            ticket: ticket.to_string(),
         })
     }
 }
@@ -21,7 +25,7 @@ impl ReceivedMessageParser for ScanEvent {
 pub struct MenuScanEvent {
     pub event_key: String,
     pub scan_type: String,
-    pub scan_result: String    
+    pub scan_result: String,
 }
 
 impl ReceivedMessageParser for MenuScanEvent {
@@ -29,18 +33,21 @@ impl ReceivedMessageParser for MenuScanEvent {
 
     fn from_xml(node: &roxmltree::Node) -> SdkResult<Self::ReceivedMessage> {
         let event_key = get_text_from_root(&node, "EventKey")?;
-        let scan_code_info = node.descendants().find(|n| n.has_tag_name("ScanCodeInfo")).ok_or_else(|| {
-            SdkError::InvalidParams(format!(
-                "Parse XML msg from wechat error: tag `{}` is none",
-                "ScanCodeInfo"
-            ))
-        })?;
+        let scan_code_info = node
+            .descendants()
+            .find(|n| n.has_tag_name("ScanCodeInfo"))
+            .ok_or_else(|| {
+                SdkError::InvalidParams(format!(
+                    "Parse XML msg from wechat error: tag `{}` is none",
+                    "ScanCodeInfo"
+                ))
+            })?;
         let scan_type = get_text_from_root(&scan_code_info, "ScanType")?;
         let scan_result = get_text_from_root(&scan_code_info, "ScanResult")?;
-        let event = MenuScanEvent{
-                event_key: event_key.to_owned(),
-                scan_type: scan_type.to_owned(),
-                scan_result: scan_result.to_owned(),
+        let event = MenuScanEvent {
+            event_key: event_key.to_owned(),
+            scan_type: scan_type.to_owned(),
+            scan_result: scan_result.to_owned(),
         };
         Ok(event)
     }
@@ -84,5 +91,5 @@ pub fn parse_menuscan() -> SdkResult<()> {
     assert_eq!(msg.event_key, "6");
     assert_eq!(msg.scan_type, "qrcode");
     assert_eq!(msg.scan_result, "1");
-    Ok(())    
+    Ok(())
 }

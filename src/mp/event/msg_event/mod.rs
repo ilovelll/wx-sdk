@@ -1,19 +1,31 @@
 use roxmltree::Node;
 
-use crate::{SdkResult, error::SdkError};
+use crate::{error::SdkError, SdkResult};
 
-use self::{event_click::ClickEvent, event_guide::{GuideInviteResultEvent, GuideQrcodeScanEvent}, event_location::LocationEvent, event_scan::{MenuScanEvent, ScanEvent}, event_send::{SendLocationEvent, SendPicsEvent}, event_sendjob::{MassSendJobFinishEvent, TemplateSendJobFinishEvent}, event_subscribe::{SubScribeEvent}, event_view::ViewEvent};
+use self::{
+    event_click::ClickEvent,
+    event_guide::{GuideInviteResultEvent, GuideQrcodeScanEvent},
+    event_location::LocationEvent,
+    event_scan::{MenuScanEvent, ScanEvent},
+    event_send::{SendLocationEvent, SendPicsEvent},
+    event_sendjob::{MassSendJobFinishEvent, TemplateSendJobFinishEvent},
+    event_subscribe::SubScribeEvent,
+    event_view::ViewEvent,
+};
 
-use super::{ReceivedMessageParser, xmlutil::{get_number_from_root, get_text_from_root}};
+use super::{
+    xmlutil::{get_number_from_root, get_text_from_root},
+    ReceivedMessageParser,
+};
 
-pub mod event_subscribe;
-pub mod event_scan;
-pub mod event_location;
 pub mod event_click;
-pub mod event_view;
-pub mod event_send;
 pub mod event_guide;
+pub mod event_location;
+pub mod event_scan;
+pub mod event_send;
 pub mod event_sendjob;
+pub mod event_subscribe;
+pub mod event_view;
 
 const EVENT_SUBSCRIBE: &'static str = "subscribe";
 const EVENT_UNSUBSCRIBE: &'static str = "unsubscribe";
@@ -55,49 +67,26 @@ pub enum EventMessage {
     UnhandledEvent(String),
 }
 
-
 impl ReceivedMessageParser for EventMessage {
     type ReceivedMessage = Self;
 
     fn from_xml(node: &Node) -> SdkResult<Self::ReceivedMessage> {
         let event_type = get_text_from_root(&node, "Event")?;
         let event = match event_type {
-            EVENT_SUBSCRIBE => {
-                SubScribeEvent::from_xml(node)?
-            }
-            EVENT_UNSUBSCRIBE => {
-                EventMessage::UnSubscribe
-            }
-            EVENT_SCAN => {
-                EventMessage::Scan(ScanEvent::from_xml(node)?)
-            }
-            EVENT_LOCATION => {
-                EventMessage::Location(LocationEvent::from_xml(node)?)
-            }
-            EVENT_CLICK => {
-                EventMessage::Click(ClickEvent::from_xml(node)?)
-            }
-            EVENT_VIEW => {
-                EventMessage::View(ViewEvent::from_xml(node)?)
-            }
-            EVENT_VIEW_MINIPROGRAM => {
-                EventMessage::ViewMiniProgram(ViewEvent::from_xml(node)?)
-            }
-            EVENT_SCANCODE_PUSH => {
-                EventMessage::ScanCodePush(MenuScanEvent::from_xml(node)?)
-            }
-            EVENT_SCANCODE_WAITMSG => {
-                EventMessage::ScanCodeWaitMsg(MenuScanEvent::from_xml(node)?)
-            }
-            EVENT_PIC_SYSPHOTO => {
-                EventMessage::PicSysPhoto(SendPicsEvent::from_xml(node)?)
-            }
+            EVENT_SUBSCRIBE => SubScribeEvent::from_xml(node)?,
+            EVENT_UNSUBSCRIBE => EventMessage::UnSubscribe,
+            EVENT_SCAN => EventMessage::Scan(ScanEvent::from_xml(node)?),
+            EVENT_LOCATION => EventMessage::Location(LocationEvent::from_xml(node)?),
+            EVENT_CLICK => EventMessage::Click(ClickEvent::from_xml(node)?),
+            EVENT_VIEW => EventMessage::View(ViewEvent::from_xml(node)?),
+            EVENT_VIEW_MINIPROGRAM => EventMessage::ViewMiniProgram(ViewEvent::from_xml(node)?),
+            EVENT_SCANCODE_PUSH => EventMessage::ScanCodePush(MenuScanEvent::from_xml(node)?),
+            EVENT_SCANCODE_WAITMSG => EventMessage::ScanCodeWaitMsg(MenuScanEvent::from_xml(node)?),
+            EVENT_PIC_SYSPHOTO => EventMessage::PicSysPhoto(SendPicsEvent::from_xml(node)?),
             EVENT_PIC_PHOTO_OR_ALBUM => {
                 EventMessage::PicPhotoOrAlbum(SendPicsEvent::from_xml(node)?)
             }
-            EVENT_PIC_WEIXIN => {
-                EventMessage::PicWeixin(SendPicsEvent::from_xml(node)?)
-            }
+            EVENT_PIC_WEIXIN => EventMessage::PicWeixin(SendPicsEvent::from_xml(node)?),
             EVENT_LOCATION_SELECT => {
                 EventMessage::LocationSelect(SendLocationEvent::from_xml(node)?)
             }
@@ -113,16 +102,14 @@ impl ReceivedMessageParser for EventMessage {
             EVENT_GUIDE_QRCODE_SCAN => {
                 EventMessage::GuideQrcodeScan(GuideQrcodeScanEvent::from_xml(node)?)
             }
-            _ => {
-                EventMessage::UnhandledEvent(format!("unhandle this event type: {}", event_type))
-            }
-	    };
+            _ => EventMessage::UnhandledEvent(format!("unhandle this event type: {}", event_type)),
+        };
         Ok(event)
     }
 }
 
 impl EventMessage {
-    pub fn get_event_type(&self) -> &'static str{
+    pub fn get_event_type(&self) -> &'static str {
         match self {
             EventMessage::Subscribe => EVENT_SUBSCRIBE,
             EventMessage::UnSubscribe => EVENT_UNSUBSCRIBE,

@@ -11,17 +11,17 @@ impl Signature {
     pub fn new<S: AsRef<str>>(signature: S, input: Vec<String>) -> Self {
         Signature {
             signature: signature.as_ref().to_owned(),
-            data: input
+            data: input,
         }
     }
-	pub fn is_ok(&self) -> bool {
-		let mut arr = self.data.clone();
-		arr.sort();
-		let str = arr.join("");
+    pub fn is_ok(&self) -> bool {
+        let mut arr = self.data.clone();
+        arr.sort();
+        let str = arr.join("");
 
-		let mut hasher = Sha1::new();
-		hasher.update(str);
-		let result = hasher.finalize();
-		format!("{:x}", result) == self.signature
-	}
+        let mut hasher = Sha1::new();
+        hasher.update(str);
+        let result = hasher.finalize();
+        format!("{:x}", result) == self.signature
+    }
 }

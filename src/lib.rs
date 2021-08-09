@@ -11,9 +11,9 @@
 //!
 //! let config = ServerConfig::new("token", EncodingMode::Plain);
 //! let sdk = WxSdk::new_with_default_token_client("app_id", "app_secret", config);
-//! 
+//!
 //! // Then, you can use the sdk functions, like get current menu info:
-//! 
+//!
 //! use wx_func::mp::menu;
 //!
 //! let menu = menu::get_current_selfmenu_info(&sdk);
@@ -26,7 +26,6 @@
 //! ## License
 
 //! wx_func is available under the [_MIT License_](https://github.com/ilovelll/wx_func/blob/main/LICENSE)
-
 
 pub mod access_token;
 

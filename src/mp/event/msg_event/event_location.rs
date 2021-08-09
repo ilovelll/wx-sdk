@@ -1,11 +1,13 @@
-use crate::{SdkResult, mp::event::{ReceivedMessageParser, xmlutil::{get_number_from_root}}};
+use crate::{
+    mp::event::{xmlutil::get_number_from_root, ReceivedMessageParser},
+    SdkResult,
+};
 
 pub struct LocationEvent {
     pub latitude: f32,
     pub longitude: f32,
     pub precision: f32,
 }
-
 
 impl ReceivedMessageParser for LocationEvent {
     type ReceivedMessage = LocationEvent;
@@ -17,11 +19,10 @@ impl ReceivedMessageParser for LocationEvent {
         Ok(LocationEvent {
             latitude,
             longitude,
-            precision
+            precision,
         })
     }
 }
-
 
 #[test]
 pub fn parse() -> SdkResult<()> {

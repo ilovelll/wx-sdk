@@ -2,7 +2,10 @@ use roxmltree::Node;
 
 use crate::SdkResult;
 
-use super::{ReceivedMessageParser, xmlutil::{get_number_from_root, get_text_from_root}};
+use super::{
+    xmlutil::{get_number_from_root, get_text_from_root},
+    ReceivedMessageParser,
+};
 
 pub struct LocationMessage {
     pub msg_id: u64,
@@ -16,7 +19,7 @@ impl ReceivedMessageParser for LocationMessage {
     type ReceivedMessage = LocationMessage;
 
     fn from_xml(node: &Node) -> SdkResult<Self::ReceivedMessage> {
-	    let msg_id = get_number_from_root::<u64>(&node, "MsgId")?;
+        let msg_id = get_number_from_root::<u64>(&node, "MsgId")?;
         let location_x = get_number_from_root::<f32>(&node, "Location_X")?;
         let location_y = get_number_from_root::<f32>(&node, "Location_Y")?;
         let scale = get_number_from_root::<f32>(&node, "Scale")?;
@@ -24,10 +27,10 @@ impl ReceivedMessageParser for LocationMessage {
 
         Ok(LocationMessage {
             msg_id,
-	        location_x,
-	        location_y,
-	        scale,
-	        label: label.to_owned(),
+            location_x,
+            location_y,
+            scale,
+            label: label.to_owned(),
         })
     }
 }

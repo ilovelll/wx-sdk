@@ -1,4 +1,7 @@
-use crate::{SdkResult, mp::event::{ReceivedMessageParser, xmlutil::{get_text_from_root}}};
+use crate::{
+    mp::event::{xmlutil::get_text_from_root, ReceivedMessageParser},
+    SdkResult,
+};
 
 pub struct ClickEvent {
     pub event_key: String,
@@ -10,11 +13,10 @@ impl ReceivedMessageParser for ClickEvent {
     fn from_xml(node: &roxmltree::Node) -> SdkResult<Self::ReceivedMessage> {
         let event_key = get_text_from_root(&node, "EventKey")?;
         Ok(ClickEvent {
-            event_key: event_key.to_string()
+            event_key: event_key.to_string(),
         })
     }
 }
-
 
 #[test]
 pub fn parse() -> SdkResult<()> {

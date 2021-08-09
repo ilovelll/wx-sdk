@@ -1,9 +1,16 @@
-use crate::{SdkResult, error::SdkError, mp::event::{ReceivedMessageParser, xmlutil::{get_number_from_root, get_text_from_root}}};
+use crate::{
+    error::SdkError,
+    mp::event::{
+        xmlutil::{get_number_from_root, get_text_from_root},
+        ReceivedMessageParser,
+    },
+    SdkResult,
+};
 
 pub struct SendPicsEvent {
     pub event_key: String,
     pub count: u16,
-    pub pic_md5_sum_list: Vec<String>
+    pub pic_md5_sum_list: Vec<String>,
 }
 
 impl ReceivedMessageParser for SendPicsEvent {
@@ -11,21 +18,28 @@ impl ReceivedMessageParser for SendPicsEvent {
 
     fn from_xml(node: &roxmltree::Node) -> SdkResult<Self::ReceivedMessage> {
         let event_key = get_text_from_root(&node, "EventKey")?;
-        let send_pics_info = node.descendants().find(|n| n.has_tag_name("SendPicsInfo")).ok_or_else(|| {
-            SdkError::InvalidParams(format!(
-                "Parse XML msg from wechat error: tag `{}` is none",
-                "SendPicsInfo"
-            ))
-        })?;
+        let send_pics_info = node
+            .descendants()
+            .find(|n| n.has_tag_name("SendPicsInfo"))
+            .ok_or_else(|| {
+                SdkError::InvalidParams(format!(
+                    "Parse XML msg from wechat error: tag `{}` is none",
+                    "SendPicsInfo"
+                ))
+            })?;
         let count = get_number_from_root::<u16>(&send_pics_info, "Count")?;
-        
-        let pic_list = send_pics_info.children().find(|n| n.has_tag_name("PicList")).ok_or_else(|| {
-            SdkError::InvalidParams(format!(
-                "Parse XML msg from wechat error: tag `{}` is none",
-                "PicList"
-            ))
-        })?;
-        let md5_vec: Vec<String> = pic_list.descendants()
+
+        let pic_list = send_pics_info
+            .children()
+            .find(|n| n.has_tag_name("PicList"))
+            .ok_or_else(|| {
+                SdkError::InvalidParams(format!(
+                    "Parse XML msg from wechat error: tag `{}` is none",
+                    "PicList"
+                ))
+            })?;
+        let md5_vec: Vec<String> = pic_list
+            .descendants()
             .filter(|n| n.has_tag_name("PicMd5Sum"))
             .filter_map(|n| n.text())
             .map(|s| s.to_owned())
@@ -39,14 +53,13 @@ impl ReceivedMessageParser for SendPicsEvent {
     }
 }
 
-
 pub struct SendLocationEvent {
     pub event_key: String,
     pub location_x: f32,
     pub location_y: f32,
     pub scale: f32,
     pub label: String,
-    pub poiname: Option<String>
+    pub poiname: Option<String>,
 }
 
 impl ReceivedMessageParser for SendLocationEvent {
@@ -54,12 +67,15 @@ impl ReceivedMessageParser for SendLocationEvent {
 
     fn from_xml(node: &roxmltree::Node) -> SdkResult<Self::ReceivedMessage> {
         let event_key = get_text_from_root(&node, "EventKey")?;
-        let send_location_info = node.descendants().find(|n| n.has_tag_name("SendLocationInfo")).ok_or_else(|| {
-            SdkError::InvalidParams(format!(
-                "Parse XML msg from wechat error: tag `{}` is none",
-                "SendLocationInfo"
-            ))
-        })?;
+        let send_location_info = node
+            .descendants()
+            .find(|n| n.has_tag_name("SendLocationInfo"))
+            .ok_or_else(|| {
+                SdkError::InvalidParams(format!(
+                    "Parse XML msg from wechat error: tag `{}` is none",
+                    "SendLocationInfo"
+                ))
+            })?;
 
         let location_x = get_number_from_root::<f32>(&send_location_info, "Location_X")?;
         let location_y = get_number_from_root::<f32>(&send_location_info, "Location_Y")?;
@@ -79,7 +95,6 @@ impl ReceivedMessageParser for SendLocationEvent {
         })
     }
 }
-
 
 #[test]
 pub fn parse_send_pics() -> SdkResult<()> {
@@ -101,10 +116,12 @@ pub fn parse_send_pics() -> SdkResult<()> {
     let msg = SendPicsEvent::from_xml(&node.root())?;
 
     assert_eq!(msg.count, 1);
-    assert_eq!(msg.pic_md5_sum_list, vec!["1b5f7c23b5bf75682a53e7b6d163e185".to_string()]);
-    Ok(())    
+    assert_eq!(
+        msg.pic_md5_sum_list,
+        vec!["1b5f7c23b5bf75682a53e7b6d163e185".to_string()]
+    );
+    Ok(())
 }
-
 
 #[test]
 pub fn parse_send_locaiton() -> SdkResult<()> {
@@ -129,5 +146,5 @@ pub fn parse_send_locaiton() -> SdkResult<()> {
     assert_eq!(msg.location_x, 23.0);
     assert_eq!(msg.location_y, 113.0);
     assert_eq!(msg.poiname, None);
-    Ok(())   
+    Ok(())
 }

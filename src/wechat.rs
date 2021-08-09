@@ -22,7 +22,12 @@ use roxmltree::Document;
 
 use crate::mp;
 use crate::mp::qrcode::QrCode;
-use crate::{SdkResult, TokenClient, access_token::AccessTokenProvider, error::SdkError, mp::event::{self, ReceivedEvent}};
+use crate::{
+    access_token::AccessTokenProvider,
+    error::SdkError,
+    mp::event::{self, ReceivedEvent},
+    SdkResult, TokenClient,
+};
 
 /// This is the sdk object. We provide a `new` method to construct it.
 pub struct WxSdk<T: AccessTokenProvider> {
@@ -36,7 +41,7 @@ pub struct WxSdk<T: AccessTokenProvider> {
 /// The configuration of your app server.
 pub struct ServerConfig {
     pub token: String,
-    pub encoding_mode: EncodingMode
+    pub encoding_mode: EncodingMode,
 }
 
 type AesKey = String;
@@ -53,13 +58,18 @@ impl ServerConfig {
     pub fn new<S: AsRef<str>>(token: S, encoding_mode: EncodingMode) -> Self {
         ServerConfig {
             token: token.as_ref().to_owned(),
-            encoding_mode
+            encoding_mode,
         }
     }
 }
 
 impl<T: AccessTokenProvider> WxSdk<T> {
-    pub fn new<S: AsRef<str>>(app_id: S, app_secret: S, server_config: ServerConfig, token_client: T) -> Self {
+    pub fn new<S: AsRef<str>>(
+        app_id: S,
+        app_secret: S,
+        server_config: ServerConfig,
+        token_client: T,
+    ) -> Self {
         WxSdk {
             http_client: Client::new(),
             app_id: app_id.as_ref().to_owned(),
@@ -79,7 +89,11 @@ impl<T: AccessTokenProvider> WxSdk<T> {
 }
 
 impl WxSdk<TokenClient> {
-    pub fn new_with_default_token_client<S: AsRef<str>>(app_id: S, app_secret: S, server_config: ServerConfig) -> Self {
+    pub fn new_with_default_token_client<S: AsRef<str>>(
+        app_id: S,
+        app_secret: S,
+        server_config: ServerConfig,
+    ) -> Self {
         let app_id = app_id.as_ref().to_owned();
         let app_secret = app_secret.as_ref().to_owned();
         let token_client = TokenClient::new(app_id.clone(), app_secret.clone());
@@ -94,27 +108,48 @@ impl WxSdk<TokenClient> {
     pub fn parse_received_msg<S: AsRef<str>>(&self, msg: S) -> SdkResult<ReceivedEvent> {
         event::ReceivedEvent::parse(msg.as_ref())
     }
-    
-    pub fn parse_received_decrypt_msg<S:AsRef<str>>(&self, msg: S, url_params: HashMap<String, String>) -> SdkResult<ReceivedEvent> {
+
+    pub fn parse_received_decrypt_msg<S: AsRef<str>>(
+        &self,
+        msg: S,
+        url_params: HashMap<String, String>,
+    ) -> SdkResult<ReceivedEvent> {
         let mut msg = msg.as_ref().to_owned();
         if let EncodingMode::Security(ref aes_key) = self.get_server_config().encoding_mode {
-            let signature = url_params.get("msg_signature").ok_or_else(|| SdkError::InvalidParams("msg_signature".to_owned()))?;
-            let timestamp= url_params.get("timestamp").ok_or_else(|| SdkError::InvalidParams("timestamp".to_owned()))?;
-            let nonce= url_params.get("nonce").ok_or_else(|| SdkError::InvalidParams("nonce".to_owned()))?;
+            let signature = url_params
+                .get("msg_signature")
+                .ok_or_else(|| SdkError::InvalidParams("msg_signature".to_owned()))?;
+            let timestamp = url_params
+                .get("timestamp")
+                .ok_or_else(|| SdkError::InvalidParams("timestamp".to_owned()))?;
+            let nonce = url_params
+                .get("nonce")
+                .ok_or_else(|| SdkError::InvalidParams("nonce".to_owned()))?;
             let token = self.get_server_config().token.clone();
             let root = Document::parse(msg.as_ref())?;
-            let encrypt_msg = root.descendants().find(|n| n.has_tag_name("Encrypt")).map(|n| n.text()).flatten().unwrap();
+            let encrypt_msg = root
+                .descendants()
+                .find(|n| n.has_tag_name("Encrypt"))
+                .map(|n| n.text())
+                .flatten()
+                .unwrap();
 
-            let check_sign = vec![token, timestamp.clone(), nonce.clone(), encrypt_msg.to_owned()];
+            let check_sign = vec![
+                token,
+                timestamp.clone(),
+                nonce.clone(),
+                encrypt_msg.to_owned(),
+            ];
             let sign = mp::event::signature::Signature::new(signature, check_sign);
             if !sign.is_ok() {
-                return Err(SdkError::InvalidSignature)
+                return Err(SdkError::InvalidSignature);
             }
             // decrpyted_text = [random(16) + content_len(4) + content + appid]
-            let mut decrypted_ciphertext = mp::event::crypto::decrypt_message(encrypt_msg, aes_key)?;
-            let(_, text) = decrypted_ciphertext.split_at_mut(16);
+            let mut decrypted_ciphertext =
+                mp::event::crypto::decrypt_message(encrypt_msg, aes_key)?;
+            let (_, text) = decrypted_ciphertext.split_at_mut(16);
             let (xlen, text) = text.split_at_mut(4);
-            let mut len = [0;4];
+            let mut len = [0; 4];
             len.copy_from_slice(&xlen[..]);
             let len = u32::from_be_bytes(len);
             let (text, appid) = text.split_at(len as usize);

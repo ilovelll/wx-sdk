@@ -1,6 +1,12 @@
 use roxmltree::Node;
 
-use crate::{SdkResult, mp::event::{ReceivedMessageParser, xmlutil::{get_node_by_tag, get_number_from_root, get_text_from_root}}};
+use crate::{
+    mp::event::{
+        xmlutil::{get_node_by_tag, get_number_from_root, get_text_from_root},
+        ReceivedMessageParser,
+    },
+    SdkResult,
+};
 
 pub struct MassSendJobFinishEvent {
     pub msg_id: u64,
@@ -50,10 +56,13 @@ impl ReceivedMessageParser for MassSendJobFinishEvent {
         let copyright_count = get_number_from_root::<u16>(&copyright_check, "Count")?;
         let copyright_check_state = get_number_from_root::<u8>(&copyright_check, "CheckState")?;
         let copyright_result_list = get_node_by_tag(&copyright_check, "ResultList")?;
-        let copyright_result_list: Vec<Node> = copyright_result_list.descendants()
+        let copyright_result_list: Vec<Node> = copyright_result_list
+            .descendants()
             .filter(|n| n.has_tag_name("item"))
             .collect();
-        let copyright_result_list: SdkResult<Vec<CopyrightCheckResultItem>> = copyright_result_list.iter().map(|n| {
+        let copyright_result_list: SdkResult<Vec<CopyrightCheckResultItem>> = copyright_result_list
+            .iter()
+            .map(|n| {
                 let article_idx = get_number_from_root::<i8>(&n, "ArticleIdx")?;
                 let user_declare_state = get_number_from_root::<i8>(&n, "UserDeclareState")?;
                 let audit_state = get_number_from_root::<i8>(&n, "AuditState")?;
@@ -72,12 +81,13 @@ impl ReceivedMessageParser for MassSendJobFinishEvent {
                     need_replace_content,
                     need_show_reprint_source,
                 })
-            }).collect();
+            })
+            .collect();
         let copyright_result_list = copyright_result_list?;
         let copyright_check_result = CopyrightCheckResult {
             count: copyright_count,
             check_state: copyright_check_state,
-            result_list: copyright_result_list
+            result_list: copyright_result_list,
         };
         Ok(MassSendJobFinishEvent {
             msg_id: msg_id,
@@ -86,7 +96,7 @@ impl ReceivedMessageParser for MassSendJobFinishEvent {
             filter_count,
             sent_count,
             error_count,
-            copyright_check_result
+            copyright_check_result,
         })
     }
 }
@@ -103,7 +113,7 @@ impl ReceivedMessageParser for TemplateSendJobFinishEvent {
         let status = get_text_from_root(node, "Status")?;
         Ok(TemplateSendJobFinishEvent {
             msg_id,
-            status: status.to_string()
+            status: status.to_string(),
         })
     }
 }

@@ -2,7 +2,10 @@ use roxmltree::Node;
 
 use crate::SdkResult;
 
-use super::{ReceivedMessageParser, xmlutil::{get_number_from_root, get_text_from_root}};
+use super::{
+    xmlutil::{get_number_from_root, get_text_from_root},
+    ReceivedMessageParser,
+};
 
 pub struct LinkMessage {
     pub msg_id: u64,
@@ -15,16 +18,16 @@ impl ReceivedMessageParser for LinkMessage {
     type ReceivedMessage = LinkMessage;
 
     fn from_xml(node: &Node) -> SdkResult<Self::ReceivedMessage> {
-	    let msg_id = get_number_from_root::<u64>(&node, "MsgId")?;
+        let msg_id = get_number_from_root::<u64>(&node, "MsgId")?;
         let title = get_text_from_root(&node, "Title")?;
         let description = get_text_from_root(&node, "Description")?;
         let url = get_text_from_root(&node, "Url")?;
 
         Ok(LinkMessage {
             msg_id,
-	        title: title.to_owned(),
-	        description: description.to_owned(),
-	        url: url.to_owned(),
+            title: title.to_owned(),
+            description: description.to_owned(),
+            url: url.to_owned(),
         })
     }
 }

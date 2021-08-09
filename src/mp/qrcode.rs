@@ -8,7 +8,6 @@ use crate::{
     wechat::{WxApiRequestBuilder, WxSdk},
 };
 
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct QRStruct {
     action_name: String,
@@ -53,9 +52,7 @@ pub struct QRValue {
 pub struct QrCode<'a, T: WxApiRequestBuilder>(pub(crate) &'a T);
 
 impl<'a, T: WxApiRequestBuilder> QrCode<'a, T> {
-    pub async fn create_qrcode(&self,
-        qr: QRStruct,
-    ) -> SdkResult<QRValue> {
+    pub async fn create_qrcode(&self, qr: QRStruct) -> SdkResult<QRValue> {
         let base_url = "https://api.weixin.qq.com/cgi-bin/qrcode/create";
         let sdk = self.0;
         let res = sdk.wx_post(base_url).await?;

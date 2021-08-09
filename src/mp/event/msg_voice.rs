@@ -2,7 +2,10 @@ use roxmltree::Node;
 
 use crate::SdkResult;
 
-use super::{ReceivedMessageParser, xmlutil::{get_number_from_root, get_text_from_root}};
+use super::{
+    xmlutil::{get_number_from_root, get_text_from_root},
+    ReceivedMessageParser,
+};
 
 pub struct VoiceMessage {
     pub msg_id: u64,
@@ -15,23 +18,22 @@ impl ReceivedMessageParser for VoiceMessage {
     type ReceivedMessage = VoiceMessage;
 
     fn from_xml(node: &Node) -> SdkResult<Self::ReceivedMessage> {
-	let msg_id = get_number_from_root::<u64>(&node, "MsgId")?;
+        let msg_id = get_number_from_root::<u64>(&node, "MsgId")?;
         let media_id = get_text_from_root(&node, "MediaId")?;
         let format = get_text_from_root(&node, "Format")?;
         let recognition = node.descendants().find(|n| n.has_tag_name("Recognition"));
         let recognition = recognition
-                            .map(|n| n.text())
-                            .map(|t| t.map(|s| s.to_string()))
-                            .unwrap_or_else(|| None);
+            .map(|n| n.text())
+            .map(|t| t.map(|s| s.to_string()))
+            .unwrap_or_else(|| None);
         Ok(VoiceMessage {
             msg_id,
-	    format: format.to_owned(),
-	    media_id: media_id.to_owned(),
-	    recognition,
+            format: format.to_owned(),
+            media_id: media_id.to_owned(),
+            recognition,
         })
     }
 }
-
 
 #[test]
 pub fn parse() -> SdkResult<()> {
