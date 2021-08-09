@@ -57,7 +57,7 @@ pub mod kfaccount {
     use crate::{
         access_token::AccessTokenProvider,
         error::CommonError,
-        office_account::material::FileStruct,
+        mp::material::FileStruct,
         wechat::{WxApiRequestBuilder, WxSdk},
         SdkResult,
     };

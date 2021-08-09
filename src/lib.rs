@@ -14,7 +14,7 @@
 //! 
 //! // Then, you can use the sdk functions, like get current menu info:
 //! 
-//! use wx_func::office_account::menu;
+//! use wx_func::mp::menu;
 //!
 //! let menu = menu::get_current_selfmenu_info(&sdk);
 //! ```
@@ -33,7 +33,7 @@ pub mod access_token;
 pub use access_token::AccessToken;
 
 pub mod error;
-pub mod office_account;
+pub mod mp;
 pub use error::SdkResult;
 pub mod wechat;
 pub use access_token::TokenClient;

@@ -2,7 +2,7 @@ use roxmltree::Node;
 
 use crate::SdkResult;
 
-use super::{EventMessage, xmlutil::{get_number_from_root, get_text_from_root}};
+use super::{ReceivedMessageParser, xmlutil::{get_number_from_root, get_text_from_root}};
 
 pub struct VideoMessage {
 	pub msg_id: u64,
@@ -10,11 +10,11 @@ pub struct VideoMessage {
 	pub media_id: String,
 }
 
-impl EventMessage for VideoMessage {
+impl ReceivedMessageParser for VideoMessage {
     type ReceivedMessage = VideoMessage;
 
     fn from_xml(node: &Node) -> SdkResult<Self::ReceivedMessage> {
-	let msg_id = get_number_from_root::<u64>(&node, "MsgId")?;
+	    let msg_id = get_number_from_root::<u64>(&node, "MsgId")?;
         let media_id = get_text_from_root(&node, "MediaId")?;
         let thumb_media_id = get_text_from_root(&node, "ThumbMediaId")?;
 

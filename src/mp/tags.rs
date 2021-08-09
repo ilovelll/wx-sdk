@@ -111,7 +111,7 @@ pub mod members {
     use crate::{
         access_token::AccessTokenProvider,
         error::{CommonError, CommonResponse},
-        office_account::user::UserList,
+        mp::user::UserList,
         wechat::{WxApiRequestBuilder, WxSdk},
         SdkResult,
     };

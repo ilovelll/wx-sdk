@@ -20,8 +20,9 @@ use async_trait::async_trait;
 use reqwest::Client;
 use roxmltree::Document;
 
-use crate::office_account;
-use crate::{SdkResult, TokenClient, access_token::AccessTokenProvider, error::SdkError, office_account::event::{self, ReceivedEvent}};
+use crate::mp;
+use crate::mp::qrcode::QrCode;
+use crate::{SdkResult, TokenClient, access_token::AccessTokenProvider, error::SdkError, mp::event::{self, ReceivedEvent}};
 
 /// This is the sdk object. We provide a `new` method to construct it.
 pub struct WxSdk<T: AccessTokenProvider> {
@@ -29,7 +30,7 @@ pub struct WxSdk<T: AccessTokenProvider> {
     app_secret: String,
     server_config: ServerConfig,
     http_client: Client,
-    token_client: T,
+    pub token_client: T,
 }
 
 /// The configuration of your app server.
@@ -71,6 +72,10 @@ impl<T: AccessTokenProvider> WxSdk<T> {
     pub fn get_server_config(&self) -> &ServerConfig {
         &self.server_config
     }
+
+    pub fn qrcode(&self) -> QrCode<Self> {
+        QrCode(self)
+    }
 }
 
 impl WxSdk<TokenClient> {
@@ -101,12 +106,12 @@ impl WxSdk<TokenClient> {
             let encrypt_msg = root.descendants().find(|n| n.has_tag_name("Encrypt")).map(|n| n.text()).flatten().unwrap();
 
             let check_sign = vec![token, timestamp.clone(), nonce.clone(), encrypt_msg.to_owned()];
-            let sign = office_account::events::signature::Signature::new(signature, check_sign);
+            let sign = mp::event::signature::Signature::new(signature, check_sign);
             if !sign.is_ok() {
                 return Err(SdkError::InvalidSignature)
             }
             // decrpyted_text = [random(16) + content_len(4) + content + appid]
-            let mut decrypted_ciphertext = office_account::events::crypto::decrypt_message(encrypt_msg, aes_key)?;
+            let mut decrypted_ciphertext = mp::event::crypto::decrypt_message(encrypt_msg, aes_key)?;
             let(_, text) = decrypted_ciphertext.split_at_mut(16);
             let (xlen, text) = text.split_at_mut(4);
             let mut len = [0;4];

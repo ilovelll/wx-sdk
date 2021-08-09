@@ -2,14 +2,14 @@ use roxmltree::Node;
 
 use crate::{SdkResult, error::SdkError};
 
-use super::EventMessage;
+use super::ReceivedMessageParser;
 
 pub struct TextMessage {
     pub msg_id: u64,
     pub content: String,
 }
 
-impl EventMessage for TextMessage {
+impl ReceivedMessageParser for TextMessage {
     type ReceivedMessage = TextMessage;
 
     fn from_xml(node: &Node) -> SdkResult<Self::ReceivedMessage> {

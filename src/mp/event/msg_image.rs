@@ -2,7 +2,7 @@ use roxmltree::Node;
 
 use crate::{SdkResult, error::SdkError};
 
-use super::{EventMessage, xmlutil::{get_number_from_root, get_text_from_root}};
+use super::{ReceivedMessageParser, xmlutil::{get_number_from_root, get_text_from_root}};
 
 
 pub struct ImageMessage {
@@ -11,7 +11,7 @@ pub struct ImageMessage {
     pub media_id: String,
 }
 
-impl EventMessage for ImageMessage {
+impl ReceivedMessageParser for ImageMessage {
     type ReceivedMessage = Self;
 
     fn from_xml(node: &Node) -> SdkResult<Self::ReceivedMessage> {

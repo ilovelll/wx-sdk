@@ -2,7 +2,7 @@ use roxmltree::Node;
 
 use crate::SdkResult;
 
-use super::{EventMessage, xmlutil::{get_number_from_root, get_text_from_root}};
+use super::{ReceivedMessageParser, xmlutil::{get_number_from_root, get_text_from_root}};
 
 pub struct VoiceMessage {
     pub msg_id: u64,
@@ -11,7 +11,7 @@ pub struct VoiceMessage {
     pub recognition: Option<String>,
 }
 
-impl EventMessage for VoiceMessage {
+impl ReceivedMessageParser for VoiceMessage {
     type ReceivedMessage = VoiceMessage;
 
     fn from_xml(node: &Node) -> SdkResult<Self::ReceivedMessage> {

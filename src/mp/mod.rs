@@ -11,7 +11,6 @@ use crate::{
 };
 pub mod customservice;
 pub mod datacube;
-pub mod event;
 pub mod material;
 pub mod media;
 pub mod menu;
@@ -20,7 +19,7 @@ pub mod qrcode;
 pub mod tags;
 pub mod template;
 pub mod user;
-pub mod events;
+pub mod event;
 
 /// 接口限额清零
 ///

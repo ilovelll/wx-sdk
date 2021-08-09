@@ -1,11 +1,14 @@
 use serde::{Deserialize, Serialize};
 
 use crate::error::SdkResult;
+use crate::wechat::ServerConfig;
 use crate::{
     access_token::AccessTokenProvider,
     error::CommonResponse,
     wechat::{WxApiRequestBuilder, WxSdk},
 };
+
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct QRStruct {
     action_name: String,
@@ -45,6 +48,25 @@ pub struct QRValue {
     pub ticket: String,
     pub expire_seconds: Option<i32>,
     pub url: Option<String>,
+}
+
+pub struct QrCode<'a, T: WxApiRequestBuilder>(pub(crate) &'a T);
+
+impl<'a, T: WxApiRequestBuilder> QrCode<'a, T> {
+    pub async fn create_qrcode(&self,
+        qr: QRStruct,
+    ) -> SdkResult<QRValue> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/qrcode/create";
+        let sdk = self.0;
+        let res = sdk.wx_post(base_url).await?;
+        let res = res
+            .json(&qr)
+            .send()
+            .await?
+            .json::<CommonResponse<QRValue>>()
+            .await?;
+        res.into()
+    }
 }
 
 pub async fn create_qrcode<T: AccessTokenProvider>(

@@ -2,6 +2,17 @@ use roxmltree::Node;
 
 use crate::{SdkResult, error::SdkError};
 
+pub fn get_node_by_tag<'a, 'b>(node: &'a Node, tag_name: &'b str) -> SdkResult<Node<'a, 'a>> {
+    node.descendants()
+        .find(|n| n.has_tag_name(tag_name))
+        .ok_or_else(|| {
+            SdkError::InvalidParams(format!(
+                "Parse XML msg from wechat error: tag `{}` invalid",
+                tag_name
+            ))
+        })
+}
+
 pub fn get_text_from_root<'a>(node: &Node<'a, 'a>, tag_name: &str) -> SdkResult<&'a str> {
     node.descendants()
         .find(|n| n.has_tag_name(tag_name))
