@@ -49,9 +49,9 @@ pub struct QRValue {
     pub url: Option<String>,
 }
 
-pub struct QrCode<'a, T: WxApiRequestBuilder>(pub(crate) &'a T);
+pub struct QrcodeModule<'a, T: WxApiRequestBuilder>(pub(crate) &'a T);
 
-impl<'a, T: WxApiRequestBuilder> QrCode<'a, T> {
+impl<'a, T: WxApiRequestBuilder> QrcodeModule<'a, T> {
     pub async fn create_qrcode(&self, qr: QRStruct) -> SdkResult<QRValue> {
         let base_url = "https://api.weixin.qq.com/cgi-bin/qrcode/create";
         let sdk = self.0;
@@ -64,20 +64,4 @@ impl<'a, T: WxApiRequestBuilder> QrCode<'a, T> {
             .await?;
         res.into()
     }
-}
-
-pub async fn create_qrcode<T: AccessTokenProvider>(
-    qr: QRStruct,
-    sdk: &WxSdk<T>,
-) -> SdkResult<QRValue> {
-    let base_url = "https://api.weixin.qq.com/cgi-bin/qrcode/create";
-
-    let res = sdk.wx_post(base_url).await?;
-    let res = res
-        .json(&qr)
-        .send()
-        .await?
-        .json::<CommonResponse<QRValue>>()
-        .await?;
-    res.into()
 }

@@ -467,7 +467,7 @@ pub async fn get_interface_summary_hour<T: AccessTokenProvider>(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    // use super::*;
 
     // #[tokio::test]
     // async fn test_summary() -> SdkResult<()> {

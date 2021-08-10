@@ -92,3 +92,29 @@ impl ReceivedMessageParser for GuideQrcodeScanEvent {
         })
     }
 }
+
+#[test]
+pub fn parse() -> SdkResult<()> {
+    use roxmltree::Document;
+    let s = "<xml>
+    <ToUserName><![CDATA[toUser]]></ToUserName>
+    <FromUserName><![CDATA[fromUser]]></FromUserName>
+    <CreateTime>1546924844</CreateTime>
+    <MsgType><![CDATA[event]]></MsgType>
+    <Event><![CDATA[guide_qrcode_scan_event]]></Event>
+    <GuideScanEvent>
+      <qrcode_guide_account><![CDATA[xxx]]></qrcode_guide_account>
+      <qrcode_guide_openid><![CDATA[xxx]]></qrcode_guide_openid>
+      <openid><![CDATA[xxx]]></openid>
+      <action>11</action>
+      <qrcode_info><![CDATA[xxx]]></qrcode_info>
+    </GuideScanEvent>
+  </xml>
+  ";
+    let node = Document::parse(&s)?;
+    let msg = GuideQrcodeScanEvent::from_xml(&node.root())?;
+    assert_eq!(msg.qrcode_guide_account, Some("xxx".to_string()));
+    assert_eq!(msg.action, 11);
+    assert_eq!(msg.qrcode_info, "xxx");
+    Ok(())
+}

@@ -21,7 +21,9 @@ use reqwest::Client;
 use roxmltree::Document;
 
 use crate::mp;
-use crate::mp::qrcode::QrCode;
+use crate::mp::qrcode::QrcodeModule;
+use crate::mp::tags::TagsModule;
+use crate::mp::user::UserModule;
 use crate::{
     access_token::AccessTokenProvider,
     error::SdkError,
@@ -83,8 +85,16 @@ impl<T: AccessTokenProvider> WxSdk<T> {
         &self.server_config
     }
 
-    pub fn qrcode(&self) -> QrCode<Self> {
-        QrCode(self)
+    pub fn qrcode(&self) -> QrcodeModule<Self> {
+        QrcodeModule(self)
+    }
+
+    pub fn tags(&self) -> TagsModule<Self> {
+        TagsModule(self)
+    }
+
+    pub fn user(&self) -> UserModule<Self> {
+        UserModule(self)
     }
 }
 

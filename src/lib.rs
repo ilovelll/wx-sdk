@@ -36,3 +36,4 @@ pub mod mp;
 pub use error::SdkResult;
 pub mod wechat;
 pub use access_token::TokenClient;
+pub use wechat::WxSdk;

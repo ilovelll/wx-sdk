@@ -1,6 +1,6 @@
 use roxmltree::Node;
 
-use crate::{error::SdkError, SdkResult};
+use crate::SdkResult;
 
 use self::{
     event_click::ClickEvent,
@@ -13,10 +13,7 @@ use self::{
     event_view::ViewEvent,
 };
 
-use super::{
-    xmlutil::{get_number_from_root, get_text_from_root},
-    ReceivedMessageParser,
-};
+use super::{xmlutil::get_text_from_root, ReceivedMessageParser};
 
 pub mod event_click;
 pub mod event_guide;

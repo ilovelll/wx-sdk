@@ -2,25 +2,80 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     access_token::AccessTokenProvider,
-    error::CommonResponse,
+    error::{CommonError, CommonResponse},
     wechat::{WxApiRequestBuilder, WxSdk},
     SdkResult,
 };
+pub struct UserModule<'a, T: WxApiRequestBuilder>(pub(crate) &'a T);
 
-pub async fn get<T: AccessTokenProvider>(
-    next_openid: Option<String>,
-    sdk: &WxSdk<T>,
-) -> SdkResult<UserList> {
-    let base_url = "https://api.weixin.qq.com/cgi-bin/user/get";
+impl<'a, T: WxApiRequestBuilder> UserModule<'a, T> {
+    pub async fn get(&self, next_openid: Option<String>) -> SdkResult<UserList> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/user/get";
+        let sdk = self.0;
+        let mut builder = sdk.wx_get(base_url).await?;
+        if let Some(next) = next_openid {
+            builder = builder.query(&[("next_openid", next)])
+        }
 
-    let mut builder = sdk.wx_get(base_url).await?;
-    if let Some(next) = next_openid {
-        builder = builder.query(&[("next_openid", next)])
+        let res: CommonResponse<UserList> = builder.send().await?.json().await?;
+
+        res.into()
     }
 
-    let res: CommonResponse<UserList> = builder.send().await?.json().await?;
+    pub async fn info(&self, openid: &str, lang: &str) -> SdkResult<UserInfo> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/user/info";
+        let sdk = self.0;
+        let builder = sdk.wx_get(base_url).await?;
+        let builder = builder.query(&[("openid", openid), ("lang", lang)]);
+        let res: CommonResponse<UserInfo> = builder.send().await?.json().await?;
 
-    res.into()
+        res.into()
+    }
+
+    pub async fn tag_get(&self, tagid: i32, next_openid: &str) -> SdkResult<UserList> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/user/tag/get";
+        let sdk = self.0;
+        let res: CommonResponse<UserList> = sdk
+            .wx_post(base_url)
+            .await?
+            .json(&serde_json::json!({ "tagid": tagid, "next_openid": next_openid }))
+            .send()
+            .await?
+            .json()
+            .await?;
+
+        res.into()
+    }
+
+    pub async fn info_updateremark(&self, openid: &str, remark: &str) -> SdkResult<()> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/user/info/updateremark";
+        let sdk = self.0;
+        let res: CommonError = sdk
+            .wx_post(base_url)
+            .await?
+            .json(&serde_json::json!({ "openid": openid, "remark": remark }))
+            .send()
+            .await?
+            .json()
+            .await?;
+
+        res.into()
+    }
+
+    pub async fn info_batchget(&self, query: &[QueryUserInfo]) -> SdkResult<UserInfoList> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/user/info/batchget";
+        let sdk = self.0;
+        let res: CommonResponse<UserInfoList> = sdk
+            .wx_post(base_url)
+            .await?
+            .json(query)
+            .send()
+            .await?
+            .json()
+            .await?;
+
+        res.into()
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -35,37 +90,12 @@ pub struct UserList {
 pub struct OpenidList {
     pub openid: Vec<String>,
 }
-
-pub mod tag {
-    use crate::{
-        access_token::AccessTokenProvider,
-        error::CommonResponse,
-        wechat::{WxApiRequestBuilder, WxSdk},
-        SdkResult,
-    };
-
-    use super::UserList;
-
-    pub async fn get<T: AccessTokenProvider>(
-        tagid: i32,
-        next_openid: &str,
-        sdk: &WxSdk<T>,
-    ) -> SdkResult<UserList> {
-        let base_url = "https://api.weixin.qq.com/cgi-bin/user/tag/get";
-
-        let res: CommonResponse<UserList> = sdk
-            .wx_post(base_url)
-            .await?
-            .json(&serde_json::json!({ "tagid": tagid, "next_openid": next_openid }))
-            .send()
-            .await?
-            .json()
-            .await?;
-
-        res.into()
-    }
+#[derive(Debug, Serialize, Deserialize)]
+pub struct QueryUserInfo {
+    pub openid: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub lang: Option<String>,
 }
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UserInfo {
     pub subscribe: i8,
@@ -87,19 +117,6 @@ pub struct UserInfo {
     pub qr_scene_str: Option<String>,
 }
 
-pub async fn info<T: AccessTokenProvider>(
-    openid: &str,
-    lang: &str,
-    sdk: &WxSdk<T>,
-) -> SdkResult<UserInfo> {
-    let base_url = "https://api.weixin.qq.com/cgi-bin/user/info";
-
-    let builder = sdk.wx_get(base_url).await?;
-    let builder = builder.query(&[("openid", openid), ("lang", lang)]);
-    let res: CommonResponse<UserInfo> = builder.send().await?.json().await?;
-
-    res.into()
-}
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UserInfoList {
     pub user_info_list: Vec<UserInfoItem>,
@@ -110,62 +127,6 @@ pub struct UserInfoList {
 pub enum UserInfoItem {
     Subscribe(UserInfo),
     Unsubscribe { openid: String },
-}
-
-pub mod info {
-    use serde::{Deserialize, Serialize};
-
-    use crate::{
-        access_token::AccessTokenProvider,
-        error::{CommonError, CommonResponse},
-        wechat::{WxApiRequestBuilder, WxSdk},
-        SdkResult,
-    };
-
-    use super::{UserInfo, UserInfoList};
-
-    pub async fn updateremark<T: AccessTokenProvider>(
-        openid: &str,
-        remark: &str,
-        sdk: &WxSdk<T>,
-    ) -> SdkResult<()> {
-        let base_url = "https://api.weixin.qq.com/cgi-bin/user/info/updateremark";
-
-        let res: CommonError = sdk
-            .wx_post(base_url)
-            .await?
-            .json(&serde_json::json!({ "openid": openid, "remark": remark }))
-            .send()
-            .await?
-            .json()
-            .await?;
-
-        res.into()
-    }
-
-    #[derive(Debug, Serialize, Deserialize)]
-    pub struct QueryUserInfo {
-        pub openid: String,
-        pub lang: String,
-    }
-
-    pub async fn batchget<T: AccessTokenProvider>(
-        query: &[QueryUserInfo],
-        sdk: &WxSdk<T>,
-    ) -> SdkResult<UserInfoList> {
-        let base_url = "https://api.weixin.qq.com/cgi-bin/user/info/batchget";
-
-        let res: CommonResponse<UserInfoList> = sdk
-            .wx_post(base_url)
-            .await?
-            .json(query)
-            .send()
-            .await?
-            .json()
-            .await?;
-
-        res.into()
-    }
 }
 
 #[cfg(test)]
