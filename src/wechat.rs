@@ -21,6 +21,8 @@ use reqwest::Client;
 use roxmltree::Document;
 
 use crate::mp;
+use crate::mp::message::MessageModule;
+use crate::mp::template::TemplateModule;
 use crate::mp::qrcode::QrcodeModule;
 use crate::mp::tags::TagsModule;
 use crate::mp::user::UserModule;
@@ -95,6 +97,14 @@ impl<T: AccessTokenProvider> WxSdk<T> {
 
     pub fn user(&self) -> UserModule<Self> {
         UserModule(self)
+    }
+
+    pub fn message(&self) -> MessageModule<Self> {
+        MessageModule(self)
+    }
+
+    pub fn template(&self) -> TemplateModule<Self> {
+        TemplateModule(self)
     }
 }
 

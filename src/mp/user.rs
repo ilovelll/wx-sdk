@@ -1,11 +1,62 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    access_token::AccessTokenProvider,
     error::{CommonError, CommonResponse},
     wechat::{WxApiRequestBuilder, WxSdk},
     SdkResult,
 };
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct UserList {
+    pub total: Option<i32>,
+    pub data: OpenidList,
+    pub count: i32,
+    pub next_openid: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct OpenidList {
+    pub openid: Vec<String>,
+}
+#[derive(Debug, Serialize, Deserialize)]
+pub struct QueryUserInfo {
+    pub openid: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub lang: Option<String>,
+}
+#[derive(Debug, Serialize, Deserialize)]
+pub struct UserInfo {
+    pub subscribe: i8,
+    pub openid: String,
+    pub nickname: String,
+    pub sex: i8,
+    pub city: String,
+    pub country: String,
+    pub province: String,
+    pub language: String,
+    pub headimgurl: String,
+    pub subscribe_time: i64,
+    pub unionid: Option<String>,
+    pub remark: Option<String>,
+    pub groupid: i32,
+    pub tagid_list: Vec<i32>,
+    pub subscribe_scene: String,
+    pub qr_scene: Option<i32>,
+    pub qr_scene_str: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct UserInfoList {
+    pub user_info_list: Vec<UserInfoItem>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum UserInfoItem {
+    Subscribe(UserInfo),
+    Unsubscribe { openid: String },
+}
+
 pub struct UserModule<'a, T: WxApiRequestBuilder>(pub(crate) &'a T);
 
 impl<'a, T: WxApiRequestBuilder> UserModule<'a, T> {
@@ -77,58 +128,6 @@ impl<'a, T: WxApiRequestBuilder> UserModule<'a, T> {
         res.into()
     }
 }
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct UserList {
-    pub total: Option<i32>,
-    pub data: OpenidList,
-    pub count: i32,
-    pub next_openid: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct OpenidList {
-    pub openid: Vec<String>,
-}
-#[derive(Debug, Serialize, Deserialize)]
-pub struct QueryUserInfo {
-    pub openid: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub lang: Option<String>,
-}
-#[derive(Debug, Serialize, Deserialize)]
-pub struct UserInfo {
-    pub subscribe: i8,
-    pub openid: String,
-    pub nickname: String,
-    pub sex: i8,
-    pub city: String,
-    pub country: String,
-    pub province: String,
-    pub language: String,
-    pub headimgurl: String,
-    pub subscribe_time: i64,
-    pub unionid: Option<String>,
-    pub remark: Option<String>,
-    pub groupid: i32,
-    pub tagid_list: Vec<i32>,
-    pub subscribe_scene: String,
-    pub qr_scene: Option<i32>,
-    pub qr_scene_str: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct UserInfoList {
-    pub user_info_list: Vec<UserInfoItem>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum UserInfoItem {
-    Subscribe(UserInfo),
-    Unsubscribe { openid: String },
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
