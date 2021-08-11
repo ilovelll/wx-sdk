@@ -1,4 +1,5 @@
 # wx_func
+![CI](https://github.com/ilovelll/wx_func/workflows/CI.yml/badge.svg)
 
 ## `wx_func` is a [WeChat SDK](https://mp.weixin.qq.com/) written in [Rust](https://www.rust-lang.org/).
 ## QuickStart
