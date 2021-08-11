@@ -97,8 +97,6 @@ impl From<CommonResponse<CommonError>> for SdkResult<()> {
 
 #[test]
 fn test_error_from() {
-    use super::error::SdkError;
-
     let input = r#"{"errcode": 0,"errmsg":"success"}"#;
     let expected = CommonResponse::Ok(CommonError {
         errcode: 0,

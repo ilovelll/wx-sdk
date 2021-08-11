@@ -42,6 +42,7 @@ impl<'a, T: WxApiRequestBuilder> TagsModule<'a, T> {
     pub fn members(&self) -> MembersModule<T> {
         MembersModule(self.0)
     }
+    /// 创建标签
     pub async fn create(&self, name: &str) -> SdkResult<Tag> {
         let base_url = "https://api.weixin.qq.com/cgi-bin/tags/create";
         let sdk = self.0;

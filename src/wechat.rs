@@ -21,10 +21,11 @@ use reqwest::Client;
 use roxmltree::Document;
 
 use crate::mp;
+use crate::mp::menu::MenuModule;
 use crate::mp::message::MessageModule;
-use crate::mp::template::TemplateModule;
 use crate::mp::qrcode::QrcodeModule;
 use crate::mp::tags::TagsModule;
+use crate::mp::template::TemplateModule;
 use crate::mp::user::UserModule;
 use crate::{
     access_token::AccessTokenProvider,
@@ -90,7 +91,7 @@ impl<T: AccessTokenProvider> WxSdk<T> {
     pub fn qrcode(&self) -> QrcodeModule<Self> {
         QrcodeModule(self)
     }
-
+    /// 标签模块
     pub fn tags(&self) -> TagsModule<Self> {
         TagsModule(self)
     }
@@ -103,10 +104,15 @@ impl<T: AccessTokenProvider> WxSdk<T> {
         MessageModule(self)
     }
 
+    pub fn menu(&self) -> MenuModule<Self> {
+        MenuModule(self)
+    }
+
     pub fn template(&self) -> TemplateModule<Self> {
         TemplateModule(self)
     }
 }
+
 
 impl WxSdk<TokenClient> {
     pub fn new_with_default_token_client<S: AsRef<str>>(

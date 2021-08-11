@@ -1,7 +1,6 @@
 #![allow(non_camel_case_types)]
 
 use crate::{
-    access_token::AccessTokenProvider,
     error::{CommonError, CommonResponse, SdkError},
     wechat::{WxApiRequestBuilder, WxSdk},
 };
@@ -92,38 +91,6 @@ pub enum Btn {
     sub(SubBtn),
 }
 
-pub async fn create<T: AccessTokenProvider>(menu: Vec<Btn>, sdk: &WxSdk<T>) -> SdkResult<()> {
-    let base_url = "https://api.weixin.qq.com/cgi-bin/menu/create";
-
-    let builder = sdk.wx_post(base_url).await?;
-    let res: CommonError = builder
-        .json(&serde_json::json!({ "button": menu }))
-        .send()
-        .await?
-        .json()
-        .await?;
-
-    res.into()
-}
-
-pub async fn create_by_json<U: Serialize + ?Sized, T: AccessTokenProvider>(
-    menu_json: &U,
-    sdk: &WxSdk<T>,
-) -> SdkResult<()> {
-    let base_url = "https://api.weixin.qq.com/cgi-bin/menu/create";
-
-    let res: CommonError = sdk
-        .wx_post(base_url)
-        .await?
-        .json(menu_json)
-        .send()
-        .await?
-        .json()
-        .await?;
-
-    res.into()
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MenuInfo {
     pub is_menu_open: i8,
@@ -173,23 +140,6 @@ pub struct ButtonInfo2 {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SubButtonInfo2 {
     pub list: Vec<ButtonInfo2>,
-}
-
-pub async fn get_current_selfmenu_info<T: AccessTokenProvider>(
-    sdk: &WxSdk<T>,
-) -> SdkResult<MenuInfo> {
-    let base_url = "https://api.weixin.qq.com/cgi-bin/get_current_selfmenu_info";
-
-    let res: CommonResponse<MenuInfo> = sdk.wx_get(base_url).await?.send().await?.json().await?;
-
-    res.into()
-}
-
-pub async fn delete<T: AccessTokenProvider>(sdk: &WxSdk<T>) -> SdkResult<()> {
-    let base_url = "https://api.weixin.qq.com/cgi-bin/menu/delete";
-
-    let res: CommonError = sdk.wx_get(base_url).await?.send().await?.json().await?;
-    res.into()
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -305,43 +255,88 @@ pub struct MenuId {
     pub menuid: String,
 }
 
-pub async fn addconditional<T: AccessTokenProvider>(
-    rules: MatchRule,
-    menu_json: Vec<MenuButton>,
-    sdk: &WxSdk<T>,
-) -> SdkResult<MenuId> {
-    let base_url = "https://api.weixin.qq.com/cgi-bin/menu/addconditional";
+pub struct MenuModule<'a, T: WxApiRequestBuilder>(pub(crate) &'a T);
 
-    if !rules.is_valid() {
-        return Err(SdkError::InvalidParams(
-            "add conditional menu match rules invalid.".to_string(),
-        ));
+impl<'a, T: WxApiRequestBuilder> MenuModule<'a, T> {
+    pub async fn create(&self, menu: Vec<Btn>) -> SdkResult<()> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/menu/create";
+        let sdk = self.0;
+        let builder = sdk.wx_post(base_url).await?;
+        let res: CommonError = builder
+            .json(&serde_json::json!({ "button": menu }))
+            .send()
+            .await?
+            .json()
+            .await?;
+
+        res.into()
     }
 
-    let builder = sdk.wx_post(base_url).await?;
-    let res: CommonResponse<MenuId> = builder
-        .json(&serde_json::json!({
-            "button": &menu_json,
-            "matchrule": rules
-        }))
-        .send()
-        .await?
-        .json()
-        .await?;
+    pub async fn create_by_json<U: Serialize + ?Sized>(&self, menu_json: &U) -> SdkResult<()> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/menu/create";
+        let sdk = self.0;
+        let res: CommonError = sdk
+            .wx_post(base_url)
+            .await?
+            .json(menu_json)
+            .send()
+            .await?
+            .json()
+            .await?;
 
-    res.into()
-}
+        res.into()
+    }
+    pub async fn get_current_selfmenu_info(&self) -> SdkResult<MenuInfo> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/get_current_selfmenu_info";
+        let sdk = self.0;
+        let res: CommonResponse<MenuInfo> =
+            sdk.wx_get(base_url).await?.send().await?.json().await?;
 
-pub async fn delconditional<T: AccessTokenProvider>(
-    menuid: MenuId,
-    sdk: &WxSdk<T>,
-) -> SdkResult<()> {
-    let base_url = "https://api.weixin.qq.com/cgi-bin/menu/delconditional";
+        res.into()
+    }
 
-    let builder = sdk.wx_post(base_url).await?;
-    let msg: CommonError = builder.json(&menuid).send().await?.json().await?;
+    pub async fn delete(&self) -> SdkResult<()> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/menu/delete";
+        let sdk = self.0;
+        let res: CommonError = sdk.wx_get(base_url).await?.send().await?.json().await?;
+        res.into()
+    }
 
-    msg.into()
+    pub async fn addconditional(
+        &self,
+        rules: MatchRule,
+        menu_json: Vec<MenuButton>,
+    ) -> SdkResult<MenuId> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/menu/addconditional";
+
+        if !rules.is_valid() {
+            return Err(SdkError::InvalidParams(
+                "add conditional menu match rules invalid.".to_string(),
+            ));
+        }
+        let sdk = self.0;
+        let builder = sdk.wx_post(base_url).await?;
+        let res: CommonResponse<MenuId> = builder
+            .json(&serde_json::json!({
+                "button": &menu_json,
+                "matchrule": rules
+            }))
+            .send()
+            .await?
+            .json()
+            .await?;
+
+        res.into()
+    }
+
+    pub async fn delconditional(&self, menuid: MenuId) -> SdkResult<()> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/menu/delconditional";
+        let sdk = self.0;
+        let builder = sdk.wx_post(base_url).await?;
+        let msg: CommonError = builder.json(&menuid).send().await?.json().await?;
+
+        msg.into()
+    }
 }
 
 #[cfg(test)]

@@ -13,10 +13,8 @@
 //! let sdk = WxSdk::new_with_default_token_client("app_id", "app_secret", config);
 //!
 //! // Then, you can use the sdk functions, like get current menu info:
-//!
-//! use wx_func::mp::menu;
-//!
-//! let menu = menu::get_current_selfmenu_info(&sdk);
+//! let menu = sdk.menu();
+//! let menu = menu.get_current_selfmenu_info();
 //! ```
 
 //! ## Contributing
@@ -36,4 +34,5 @@ pub mod mp;
 pub use error::SdkResult;
 pub mod wechat;
 pub use access_token::TokenClient;
+
 pub use wechat::WxSdk;
