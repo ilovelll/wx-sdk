@@ -1,13 +1,13 @@
 [package]
-name = "wx_func"
+name = "wx-sdk"
 version = "0.0.1"
 authors = ["johny.li <gradle@qq.com>"]
 edition = "2018"
 description = "A Wechat SDK written in Rust"
 readme = "README.md"
-documentation = "https://docs.rs/wx_func/"
-homepage = "https://github.com/ilovelll/wx_func"
-repository = "https://github.com/ilovelll/wx_func"
+documentation = "https://docs.rs/wx-sdk/"
+homepage = "https://github.com/ilovelll/wx-sdk"
+repository = "https://github.com/ilovelll/wx-sdk"
 license = "MIT"
 keywords = ["wechat", "wexin", "sdk"]
 categories = ["API bindings"]

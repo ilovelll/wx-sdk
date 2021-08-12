@@ -2,7 +2,7 @@
 mod test {
     use std::collections::HashMap;
 
-    use wx_func::wechat::{EncodingMode, ServerConfig, WxSdk};
+    use wx_sdk::wechat::{EncodingMode, ServerConfig, WxSdk};
 
     #[test]
     fn test_parse_event() {

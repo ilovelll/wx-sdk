@@ -1,6 +1,6 @@
 //! This module define the types for error handling.
 //!
-//! Most the function call on `wx_func` return a [SdkResult], it's a type of `std::result::Result<T, SdkError>` wrapper.
+//! Most the function call on `wx-sdk` return a [SdkResult], it's a type of `std::result::Result<T, SdkError>` wrapper.
 
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;

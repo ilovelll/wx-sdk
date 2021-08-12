@@ -1,10 +1,10 @@
-//! This module provides the most important struct [WxSdk], almost every funcition in `wx_func` take it as a parameter.
+//! This module provides the most important struct [WxSdk], almost every funcition in `wx-sdk` take it as a parameter.
 //!
 //! You can construct it with a [ServerConfig].
 //!
 //! Example
 //! ```rust
-//! use wx_func::wechat::{WxSdk, ServerConfig, EncodingMode};
+//! use wx_sdk::wechat::{WxSdk, ServerConfig, EncodingMode};
 //! let config = ServerConfig::new("token", EncodingMode::Plain);
 //! let sdk = WxSdk::new_with_default_token_client("app_id", "app_secret", config);
 //! ```
