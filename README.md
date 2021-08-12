@@ -1,5 +1,7 @@
 # wx-sdk
 ![CI](https://github.com/ilovelll/wx-sdk/workflows/CI.yml/badge.svg)
+![Crates.io](https://img.shields.io/crates/v/wx-sdk)
+![docs](https://docs.rs/wx-sdk/badge.svg)
 
 ## `wx-sdk` is a [WeChat SDK](https://mp.weixin.qq.com/) written in [Rust](https://www.rust-lang.org/).
 ## QuickStart

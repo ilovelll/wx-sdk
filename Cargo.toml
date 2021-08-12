@@ -10,7 +10,7 @@ homepage = "https://github.com/ilovelll/wx-sdk"
 repository = "https://github.com/ilovelll/wx-sdk"
 license = "MIT"
 keywords = ["wechat", "wexin", "sdk"]
-categories = ["API bindings"]
+categories = ["api-bindings"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [features]
