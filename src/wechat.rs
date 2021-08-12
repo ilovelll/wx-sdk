@@ -20,19 +20,10 @@ use async_trait::async_trait;
 use reqwest::Client;
 use roxmltree::Document;
 
-use crate::mp;
-use crate::mp::menu::MenuModule;
-use crate::mp::message::MessageModule;
-use crate::mp::qrcode::QrcodeModule;
-use crate::mp::tags::TagsModule;
-use crate::mp::template::TemplateModule;
-use crate::mp::user::UserModule;
-use crate::{
-    access_token::AccessTokenProvider,
-    error::SdkError,
-    mp::event::{self, ReceivedEvent},
-    SdkResult, TokenClient,
-};
+#[cfg(feature = "mp")]
+use crate::mp::{self, MpSdk};
+
+use crate::{access_token::AccessTokenProvider, error::SdkError, SdkResult, TokenClient};
 
 /// This is the sdk object. We provide a `new` method to construct it.
 pub struct WxSdk<T: AccessTokenProvider> {
@@ -84,35 +75,17 @@ impl<T: AccessTokenProvider> WxSdk<T> {
         }
     }
 
+    /// Get the server config, which you can get token and encoding ase key from it.
     pub fn get_server_config(&self) -> &ServerConfig {
         &self.server_config
     }
 
-    pub fn qrcode(&self) -> QrcodeModule<Self> {
-        QrcodeModule(self)
-    }
-    /// 标签模块
-    pub fn tags(&self) -> TagsModule<Self> {
-        TagsModule(self)
-    }
-
-    pub fn user(&self) -> UserModule<Self> {
-        UserModule(self)
-    }
-
-    pub fn message(&self) -> MessageModule<Self> {
-        MessageModule(self)
-    }
-
-    pub fn menu(&self) -> MenuModule<Self> {
-        MenuModule(self)
-    }
-
-    pub fn template(&self) -> TemplateModule<Self> {
-        TemplateModule(self)
+    /// Official account(Media Press) module
+    #[cfg(feature = "mp")]
+    pub fn mp(&self) -> MpSdk<T> {
+        MpSdk(self)
     }
 }
-
 
 impl WxSdk<TokenClient> {
     pub fn new_with_default_token_client<S: AsRef<str>>(
@@ -131,15 +104,18 @@ impl WxSdk<TokenClient> {
             token_client,
         }
     }
-    pub fn parse_received_msg<S: AsRef<str>>(&self, msg: S) -> SdkResult<ReceivedEvent> {
-        event::ReceivedEvent::parse(msg.as_ref())
+
+    #[cfg(feature = "mp")]
+    pub fn parse_received_msg<S: AsRef<str>>(&self, msg: S) -> SdkResult<mp::event::ReceivedEvent> {
+        mp::event::ReceivedEvent::parse(msg.as_ref())
     }
 
+    #[cfg(feature = "mp")]
     pub fn parse_received_decrypt_msg<S: AsRef<str>>(
         &self,
         msg: S,
         url_params: HashMap<String, String>,
-    ) -> SdkResult<ReceivedEvent> {
+    ) -> SdkResult<mp::event::ReceivedEvent> {
         let mut msg = msg.as_ref().to_owned();
         if let EncodingMode::Security(ref aes_key) = self.get_server_config().encoding_mode {
             let signature = url_params
@@ -186,7 +162,7 @@ impl WxSdk<TokenClient> {
             }
             msg = decrypted_msg;
         }
-        event::ReceivedEvent::parse(msg.as_ref())
+        mp::event::ReceivedEvent::parse(msg.as_ref())
     }
 }
 

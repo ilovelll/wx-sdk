@@ -6,15 +6,15 @@
 //! ## QuickStart
 
 //! First, please refer to this [page](https://developers.weixin.qq.com/doc/offiaccount/Basic_Information/Access_Overview.html) to provide these values: `token`, `EncodingAESKey`,`EncodingMode`.
-//! ```rust
+//! ```ignore
 //! use wx_func::wechat::{WxSdk, ServerConfig, EncodingMode};
 //!
 //! let config = ServerConfig::new("token", EncodingMode::Plain);
 //! let sdk = WxSdk::new_with_default_token_client("app_id", "app_secret", config);
 //!
 //! // Then, you can use the sdk functions, like get current menu info:
-//! let menu = sdk.menu();
-//! let menu = menu.get_current_selfmenu_info();
+//! let mpsdk = WxSdk::mp(&sdk);
+//! let menu = mpsdk.menu().get_current_selfmenu_info().await;
 //! ```
 
 //! ## Contributing
@@ -36,3 +36,14 @@ pub mod wechat;
 pub use access_token::TokenClient;
 
 pub use wechat::WxSdk;
+
+// #[tokio::test]
+// async fn test_sdk() -> SdkResult<()> {
+//     use crate::wechat::{WxSdk, ServerConfig, EncodingMode};
+
+//     let config = ServerConfig::new("token", EncodingMode::Plain);
+//     let sdk = WxSdk::new_with_default_token_client("app_id", "app_secret", config);
+//     let mpsdk = sdk.mp();
+//     let menu = mpsdk.menu().get_current_selfmenu_info().await;
+//     Ok(())
+// }
