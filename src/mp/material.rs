@@ -1,6 +1,6 @@
+//! Material Module （永久）素材文件模块
 use crate::SdkResult;
 use crate::{
-    access_token::AccessTokenProvider,
     error::{CommonError, CommonResponse},
     wechat::{WxApiRequestBuilder, WxSdk},
 };
@@ -86,22 +86,6 @@ pub struct Articles {
     pub only_fans_can_comment: Option<i8>,
 }
 
-pub async fn add_news<T: AccessTokenProvider>(
-    articles: &[Articles],
-    sdk: &WxSdk<T>,
-) -> SdkResult<MediaId> {
-    let base_url = "https://api.weixin.qq.com/cgi-bin/material/add_news";
-
-    let builder = sdk.wx_post(base_url).await?;
-    let res: CommonResponse<MediaId> = builder
-        .json(&serde_json::json!({ "articles": articles }))
-        .send()
-        .await?
-        .json()
-        .await?;
-    res.into()
-}
-
 #[derive(Debug, Serialize)]
 pub struct VideoDesc {
     pub title: String,
@@ -123,79 +107,6 @@ pub struct AddMaterialRes {
     pub url: Option<String>,
 }
 
-/// 新增其他类型永久素材
-pub async fn add_material<T: AccessTokenProvider>(
-    file: FileStruct,
-    sdk: &WxSdk<T>,
-) -> SdkResult<AddMaterialRes> {
-    let base_url = "https://api.weixin.qq.com/cgi-bin/material/add_material";
-    let part = reqwest::multipart::Part::bytes(file.file)
-        .file_name(file.filename)
-        .mime_str(file.conten_type.as_ref());
-
-    let mut form = reqwest::multipart::Form::new().part("media", part.unwrap());
-
-    if file.filetype == "video" {
-        form = form.text(
-            "description",
-            serde_json::to_string(&file.video_desc).unwrap(),
-        );
-    }
-
-    let builder = sdk.wx_post(base_url).await?;
-    let builder = builder.query(&[("type", file.filetype)]);
-    let res: CommonResponse<AddMaterialRes> = builder.multipart(form).send().await?.json().await?;
-    res.into()
-}
-
-pub async fn get_material<T: AccessTokenProvider>(
-    media_id: &str,
-    sdk: &WxSdk<T>,
-) -> SdkResult<Material> {
-    let base_url = "https://api.weixin.qq.com/cgi-bin/material/get_material";
-    let builder = sdk.wx_post(base_url).await?;
-    let res: CommonResponse<Material> = builder
-        .json(&serde_json::json!({ "media_id": media_id }))
-        .send()
-        .await?
-        .json()
-        .await?;
-
-    res.into()
-}
-
-pub async fn get_material_other<T: AccessTokenProvider>(
-    media_id: &str,
-    sdk: &WxSdk<T>,
-) -> SdkResult<Vec<u8>> {
-    let base_url = "https://api.weixin.qq.com/cgi-bin/material/get_material";
-
-    let res = sdk
-        .wx_post(base_url)
-        .await?
-        .json(&serde_json::json!({ "media_id": media_id }))
-        .send()
-        .await?
-        .bytes()
-        .await?;
-
-    Ok(res.to_vec())
-}
-
-pub async fn del_material<T: AccessTokenProvider>(media_id: &str, sdk: &WxSdk<T>) -> SdkResult<()> {
-    let base_url = "https://api.weixin.qq.com/cgi-bin/material/del_material";
-    let builder = sdk.wx_post(base_url).await?;
-
-    let res: CommonError = builder
-        .json(&serde_json::json!({ "media_id": media_id }))
-        .send()
-        .await?
-        .json()
-        .await?;
-
-    res.into()
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UpdateNews {
     pub media_id: String,
@@ -203,19 +114,6 @@ pub struct UpdateNews {
     pub index: i32,
     /// 在开发文档中这两个字段: `need_open_comment`, `only_fans_can_comment` 在更新时是没有提到的
     pub articles: Articles,
-}
-
-/// 修改永久图文素材
-pub async fn update_news<T: AccessTokenProvider>(
-    news: &UpdateNews,
-    sdk: &WxSdk<T>,
-) -> SdkResult<()> {
-    let base_url = "https://api.weixin.qq.com/cgi-bin/material/update_news";
-    let builder = sdk.wx_post(base_url).await?;
-
-    let res: CommonError = builder.json(news).send().await?.json().await?;
-
-    res.into()
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -226,14 +124,6 @@ pub struct MaterialCount {
     pub news_count: i32,
 }
 
-pub async fn get_materialcount<T: AccessTokenProvider>(sdk: &WxSdk<T>) -> SdkResult<MaterialCount> {
-    let base_url = "https://api.weixin.qq.com/cgi-bin/material/get_materialcount";
-
-    let res: CommonResponse<MaterialCount> =
-        sdk.wx_get(base_url).await?.send().await?.json().await?;
-    res.into()
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Batch {
     #[serde(rename = "type")]
@@ -242,17 +132,6 @@ pub struct Batch {
     pub offset: i32,
     /// 返回素材的数量，取值在1到20之间
     pub count: u8,
-}
-
-pub async fn batchget_material<T: AccessTokenProvider>(
-    batch: &Batch,
-    sdk: &WxSdk<T>,
-) -> SdkResult<MaterialList> {
-    let base_url = "https://api.weixin.qq.com/cgi-bin/material/batchget_material";
-    let builder = sdk.wx_post(base_url).await?;
-    let res: CommonResponse<MaterialList> = builder.json(batch).send().await?.json().await?;
-
-    res.into()
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -284,4 +163,120 @@ pub struct MediaInfo {
     pub url: Option<String>,
     pub description: Option<String>,
     pub tags: Option<Vec<String>>,
+}
+/// Material Module （永久）素材文件模块
+pub struct MaterialModule<'a, T: WxApiRequestBuilder>(pub(crate) &'a T);
+impl<'a, T: WxApiRequestBuilder> MaterialModule<'a, T> {
+    /// 新增图文素材
+    pub async fn add_news(&self, articles: &[Articles]) -> SdkResult<MediaId> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/material/add_news";
+        let sdk = self.0;
+        let builder = sdk.wx_post(base_url).await?;
+        let res: CommonResponse<MediaId> = builder
+            .json(&serde_json::json!({ "articles": articles }))
+            .send()
+            .await?
+            .json()
+            .await?;
+        res.into()
+    }
+
+    /// 新增其他类型永久素材
+    pub async fn add_material(&self, file: FileStruct) -> SdkResult<AddMaterialRes> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/material/add_material";
+        let part = reqwest::multipart::Part::bytes(file.file)
+            .file_name(file.filename)
+            .mime_str(file.conten_type.as_ref());
+
+        let mut form = reqwest::multipart::Form::new().part("media", part.unwrap());
+
+        if file.filetype == "video" {
+            form = form.text(
+                "description",
+                serde_json::to_string(&file.video_desc).unwrap(),
+            );
+        }
+        let sdk = self.0;
+        let builder = sdk.wx_post(base_url).await?;
+        let builder = builder.query(&[("type", file.filetype)]);
+        let res: CommonResponse<AddMaterialRes> =
+            builder.multipart(form).send().await?.json().await?;
+        res.into()
+    }
+
+    /// 获取永久素材
+    pub async fn get_material(&self, media_id: &str) -> SdkResult<Material> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/material/get_material";
+        let sdk = self.0;
+        let builder = sdk.wx_post(base_url).await?;
+        let res: CommonResponse<Material> = builder
+            .json(&serde_json::json!({ "media_id": media_id }))
+            .send()
+            .await?
+            .json()
+            .await?;
+
+        res.into()
+    }
+
+    /// 获取除图文、视频外其它类型永久素材
+    pub async fn get_material_other(&self, media_id: &str) -> SdkResult<Vec<u8>> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/material/get_material";
+        let sdk = self.0;
+        let res = sdk
+            .wx_post(base_url)
+            .await?
+            .json(&serde_json::json!({ "media_id": media_id }))
+            .send()
+            .await?
+            .bytes()
+            .await?;
+
+        Ok(res.to_vec())
+    }
+
+    /// 删除永久素材
+    pub async fn del_material(&self, media_id: &str) -> SdkResult<()> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/material/del_material";
+        let sdk = self.0;
+        let builder = sdk.wx_post(base_url).await?;
+        let res: CommonError = builder
+            .json(&serde_json::json!({ "media_id": media_id }))
+            .send()
+            .await?
+            .json()
+            .await?;
+
+        res.into()
+    }
+
+    /// 修改永久图文素材
+    pub async fn update_news(&self, news: &UpdateNews) -> SdkResult<()> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/material/update_news";
+        let sdk = self.0;
+        let builder = sdk.wx_post(base_url).await?;
+
+        let res: CommonError = builder.json(news).send().await?.json().await?;
+
+        res.into()
+    }
+
+    /// 获取各类型素材文件数量
+    pub async fn get_materialcount(&self) -> SdkResult<MaterialCount> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/material/get_materialcount";
+        let sdk = self.0;
+        let res: CommonResponse<MaterialCount> =
+            sdk.wx_get(base_url).await?.send().await?.json().await?;
+        res.into()
+    }
+
+    /// 批量获取素材
+    pub async fn batchget_material(&self, batch: &Batch) -> SdkResult<MaterialList> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/material/batchget_material";
+        let sdk = self.0;
+        let builder = sdk.wx_post(base_url).await?;
+        let res: CommonResponse<MaterialList> = builder.json(batch).send().await?.json().await?;
+
+        res.into()
+    }
 }

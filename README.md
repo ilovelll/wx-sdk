@@ -1,14 +1,14 @@
 # wx-sdk
-![CI](https://github.com/ilovelll/wx-sdk/workflows/CI.yml/badge.svg)
-![Crates.io](https://img.shields.io/crates/v/wx-sdk)
-![docs](https://docs.rs/wx-sdk/badge.svg)
+[![CI](https://github.com/ilovelll/wx-sdk/workflows/CI/badge.svg)](https://github.com/ilovelll/wx-sdk/actions/workflows/CI.yml)
+[![Crates.io](https://img.shields.io/crates/v/wx-sdk)](https://crates.io/crates/wx-sdk)
+[![docs](https://docs.rs/wx-sdk/badge.svg)](https://docs.rs/wx-sdk)
 
 ## `wx-sdk` is a [WeChat SDK](https://mp.weixin.qq.com/) written in [Rust](https://www.rust-lang.org/).
 ## QuickStart
 
 First, please refer to this [page](https://developers.weixin.qq.com/doc/offiaccount/Basic_Information/Access_Overview.html) to provide these values: `token`, `EncodingAESKey`,`EncodingMode`.
 ```rust
-use wx-sdk::wechat::{ServerConfig, EncodingMode};
+use wx_sdk::wechat::{ServerConfig, EncodingMode};
 
 let config = ServerConfig::new(token, Some("aes_key"), EncodingMode::Plain);
 let sdk = WxSdk::new_with_default_token_client("app_id", "app_secret", config);

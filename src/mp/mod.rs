@@ -1,7 +1,6 @@
 //! This module define the api set of wechat office account.
 //!
 //! It seperates those apis to different mods by url path.
-use serde_json::json;
 
 use crate::{
     access_token::AccessTokenProvider,
@@ -13,8 +12,9 @@ use crate::{
 };
 
 use self::{
-    menu::MenuModule, message::MessageModule, qrcode::QrcodeModule, shorten::ShortenModule,
-    tags::TagsModule, template::TemplateModule, user::UserModule,
+    material::MaterialModule, media::MediaModule, menu::MenuModule, message::MessageModule,
+    qrcode::QrcodeModule, shorten::ShortenModule, tags::TagsModule, template::TemplateModule,
+    user::UserModule,
 };
 pub mod customservice;
 pub mod datacube;
@@ -80,5 +80,15 @@ impl<'a, T: AccessTokenProvider> MpSdk<'a, T> {
     /// Template message module 模板消息模块
     pub fn template(&self) -> TemplateModule<WxSdk<T>> {
         TemplateModule(self.0)
+    }
+
+    /// Media module （临时）素材文件模块
+    pub fn media(&self) -> MediaModule<WxSdk<T>> {
+        MediaModule(self.0)
+    }
+
+    /// Material module （永久）素材模块
+    pub fn material(&self) -> MaterialModule<WxSdk<T>> {
+        MaterialModule(self.0)
     }
 }
