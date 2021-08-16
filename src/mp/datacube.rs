@@ -40,42 +40,10 @@ pub struct UserNewCancel {
     pub cancel_user: i32,
 }
 
-pub async fn get_user_summary<T: AccessTokenProvider>(
-    time: &TimeSpan,
-    sdk: &WxSdk<T>,
-) -> SdkResult<ListRes<UserNewCancel>> {
-    let base_url = "https://api.weixin.qq.com/datacube/getusersummary";
-    let res: CommonResponse<ListRes<UserNewCancel>> = sdk
-        .wx_post(base_url)
-        .await?
-        .json(time)
-        .send()
-        .await?
-        .json()
-        .await?;
-    res.into()
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UserCumulate {
     pub ref_date: String,
     pub cumulate_user: i64,
-}
-
-pub async fn get_user_cumulate<T: AccessTokenProvider>(
-    time: &TimeSpan,
-    sdk: &WxSdk<T>,
-) -> SdkResult<ListRes<UserCumulate>> {
-    let base_url = "https://api.weixin.qq.com/datacube/getusercumulate";
-    let res: CommonResponse<ListRes<UserCumulate>> = sdk
-        .wx_post(base_url)
-        .await?
-        .json(time)
-        .send()
-        .await?
-        .json()
-        .await?;
-    res.into()
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -91,22 +59,6 @@ pub struct ArticleSummary {
     pub share_count: i32,
     pub add_to_fav_user: i32,
     pub add_to_fav_count: i32,
-}
-
-pub async fn get_article_summary<T: AccessTokenProvider>(
-    time: &TimeSpan,
-    sdk: &WxSdk<T>,
-) -> SdkResult<ListRes<ArticleSummary>> {
-    let base_url = "https://api.weixin.qq.com/datacube/getarticlesummary";
-    let res: CommonResponse<ListRes<ArticleSummary>> = sdk
-        .wx_post(base_url)
-        .await?
-        .json(time)
-        .send()
-        .await?
-        .json()
-        .await?;
-    res.into()
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -147,22 +99,6 @@ pub struct ArticleTotal {
     pub details: Vec<ArticleDetail>,
 }
 
-pub async fn get_article_total<T: AccessTokenProvider>(
-    time: &TimeSpan,
-    sdk: &WxSdk<T>,
-) -> SdkResult<ListRes<ArticleTotal>> {
-    let base_url = "https://api.weixin.qq.com/datacube/getarticletotal";
-    let res: CommonResponse<ListRes<ArticleTotal>> = sdk
-        .wx_post(base_url)
-        .await?
-        .json(time)
-        .send()
-        .await?
-        .json()
-        .await?;
-    res.into()
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UserRead {
     pub ref_date: String,
@@ -175,22 +111,6 @@ pub struct UserRead {
     pub share_count: i32,
     pub add_to_fav_user: i32,
     pub add_to_fav_count: i32,
-}
-
-pub async fn get_user_read<T: AccessTokenProvider>(
-    time: &TimeSpan,
-    sdk: &WxSdk<T>,
-) -> SdkResult<ListRes<UserRead>> {
-    let base_url = "https://api.weixin.qq.com/datacube/getuserread";
-    let res: CommonResponse<ListRes<UserRead>> = sdk
-        .wx_post(base_url)
-        .await?
-        .json(time)
-        .send()
-        .await?
-        .json()
-        .await?;
-    res.into()
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -208,22 +128,6 @@ pub struct UserReadHour {
     pub add_to_fav_count: i32,
 }
 
-pub async fn get_user_read_hour<T: AccessTokenProvider>(
-    time: &TimeSpan,
-    sdk: &WxSdk<T>,
-) -> SdkResult<ListRes<UserReadHour>> {
-    let base_url = "https://api.weixin.qq.com/datacube/getuserreadhour";
-    let res: CommonResponse<ListRes<UserReadHour>> = sdk
-        .wx_post(base_url)
-        .await?
-        .json(time)
-        .send()
-        .await?
-        .json()
-        .await?;
-    res.into()
-}
-
 // pub async fn get_analyze<T: AccessTokenProvider, U: DeserializeOwned>(time: &TimeSpan, sdk: &WxSdk<T>, url: &'static str) -> SdkResult<ListRes<U>> {
 //      let res: CommonResponse<ListRes<U>> = sdk.wx_post(url).await?.json(time).send().await?.json().await?;
 //     res.into()
@@ -237,22 +141,6 @@ pub struct UserShare {
     pub share_user: i32,
 }
 
-pub async fn get_user_share<T: AccessTokenProvider>(
-    time: &TimeSpan,
-    sdk: &WxSdk<T>,
-) -> SdkResult<ListRes<UserShare>> {
-    let base_url = "https://api.weixin.qq.com/datacube/getusershare";
-    let res: CommonResponse<ListRes<UserShare>> = sdk
-        .wx_post(base_url)
-        .await?
-        .json(time)
-        .send()
-        .await?
-        .json()
-        .await?;
-    res.into()
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UserShareHour {
     pub ref_date: String,
@@ -262,44 +150,12 @@ pub struct UserShareHour {
     pub share_user: i32,
 }
 
-pub async fn get_user_share_hour<T: AccessTokenProvider>(
-    time: &TimeSpan,
-    sdk: &WxSdk<T>,
-) -> SdkResult<ListRes<UserShareHour>> {
-    let base_url = "https://api.weixin.qq.com/datacube/getusersharehour";
-    let res: CommonResponse<ListRes<UserShareHour>> = sdk
-        .wx_post(base_url)
-        .await?
-        .json(time)
-        .send()
-        .await?
-        .json()
-        .await?;
-    res.into()
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UpstreamMsg {
     pub ref_date: String,
     pub msg_type: i32,
     pub msg_user: i32,
     pub msg_count: i32,
-}
-
-pub async fn get_upstream_msg<T: AccessTokenProvider>(
-    time: &TimeSpan,
-    sdk: &WxSdk<T>,
-) -> SdkResult<ListRes<UpstreamMsg>> {
-    let base_url = "https://api.weixin.qq.com/datacube/getupstreammsg";
-    let res: CommonResponse<ListRes<UpstreamMsg>> = sdk
-        .wx_post(base_url)
-        .await?
-        .json(time)
-        .send()
-        .await?
-        .json()
-        .await?;
-    res.into()
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -311,107 +167,11 @@ pub struct UpstreamMsgHour {
     pub msg_count: i32,
 }
 
-pub async fn get_upstream_msg_hour<T: AccessTokenProvider>(
-    time: &TimeSpan,
-    sdk: &WxSdk<T>,
-) -> SdkResult<ListRes<UpstreamMsgHour>> {
-    let base_url = "https://api.weixin.qq.com/datacube/getupstreammsghour";
-    let res: CommonResponse<ListRes<UpstreamMsgHour>> = sdk
-        .wx_post(base_url)
-        .await?
-        .json(time)
-        .send()
-        .await?
-        .json()
-        .await?;
-    res.into()
-}
-
-pub async fn get_upstream_msg_week<T: AccessTokenProvider>(
-    time: &TimeSpan,
-    sdk: &WxSdk<T>,
-) -> SdkResult<ListRes<UpstreamMsg>> {
-    let base_url = "https://api.weixin.qq.com/datacube/getupstreammsgweek";
-    let res: CommonResponse<ListRes<UpstreamMsg>> = sdk
-        .wx_post(base_url)
-        .await?
-        .json(time)
-        .send()
-        .await?
-        .json()
-        .await?;
-    res.into()
-}
-
-pub async fn get_upstream_msg_month<T: AccessTokenProvider>(
-    time: &TimeSpan,
-    sdk: &WxSdk<T>,
-) -> SdkResult<ListRes<UpstreamMsg>> {
-    let base_url = "https://api.weixin.qq.com/datacube/getupstreammsgmonth";
-    let res: CommonResponse<ListRes<UpstreamMsg>> = sdk
-        .wx_post(base_url)
-        .await?
-        .json(time)
-        .send()
-        .await?
-        .json()
-        .await?;
-    res.into()
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UpstreamMsgDist {
     pub ref_date: String,
     pub count_interval: i32,
     pub msg_user: i32,
-}
-
-pub async fn get_upstream_msg_dist<T: AccessTokenProvider>(
-    time: &TimeSpan,
-    sdk: &WxSdk<T>,
-) -> SdkResult<ListRes<UpstreamMsgDist>> {
-    let base_url = "https://api.weixin.qq.com/datacube/getupstreammsgdist";
-    let res: CommonResponse<ListRes<UpstreamMsgDist>> = sdk
-        .wx_post(base_url)
-        .await?
-        .json(time)
-        .send()
-        .await?
-        .json()
-        .await?;
-    res.into()
-}
-
-pub async fn get_upstream_msg_dist_week<T: AccessTokenProvider>(
-    time: &TimeSpan,
-    sdk: &WxSdk<T>,
-) -> SdkResult<ListRes<UpstreamMsgDist>> {
-    let base_url = "https://api.weixin.qq.com/datacube/getupstreammsgdistweek";
-    let res: CommonResponse<ListRes<UpstreamMsgDist>> = sdk
-        .wx_post(base_url)
-        .await?
-        .json(time)
-        .send()
-        .await?
-        .json()
-        .await?;
-    res.into()
-}
-
-pub async fn get_upstream_msg_dist_month<T: AccessTokenProvider>(
-    time: &TimeSpan,
-    sdk: &WxSdk<T>,
-) -> SdkResult<ListRes<UpstreamMsgDist>> {
-    let base_url = "https://api.weixin.qq.com/datacube/getupstreammsgdistmonth";
-    let res: CommonResponse<ListRes<UpstreamMsgDist>> = sdk
-        .wx_post(base_url)
-        .await?
-        .json(time)
-        .send()
-        .await?
-        .json()
-        .await?;
-    res.into()
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -421,22 +181,6 @@ pub struct ApiAnalysis {
     pub fail_count: i32,
     pub total_time_cost: i64,
     pub max_time_cost: i64,
-}
-
-pub async fn get_interface_summary<T: AccessTokenProvider>(
-    time: &TimeSpan,
-    sdk: &WxSdk<T>,
-) -> SdkResult<ListRes<ApiAnalysis>> {
-    let base_url = "https://api.weixin.qq.com/datacube/getinterfacesummary";
-    let res: CommonResponse<ListRes<ApiAnalysis>> = sdk
-        .wx_post(base_url)
-        .await?
-        .json(time)
-        .send()
-        .await?
-        .json()
-        .await?;
-    res.into()
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -449,22 +193,250 @@ pub struct ApiAnalysisHour {
     pub max_time_cost: i64,
 }
 
-pub async fn get_interface_summary_hour<T: AccessTokenProvider>(
-    time: &TimeSpan,
-    sdk: &WxSdk<T>,
-) -> SdkResult<ListRes<ApiAnalysisHour>> {
-    let base_url = "https://api.weixin.qq.com/datacube/getinterfacesummaryhour";
-    let res: CommonResponse<ListRes<ApiAnalysisHour>> = sdk
-        .wx_post(base_url)
-        .await?
-        .json(time)
-        .send()
-        .await?
-        .json()
-        .await?;
-    res.into()
-}
+pub struct DataCubeModule<'a, T: WxApiRequestBuilder>(pub(crate) &'a T);
+impl<'a, T: WxApiRequestBuilder> DataCubeModule<'a, T> {
+    pub async fn get_user_summary(&self, time: &TimeSpan) -> SdkResult<ListRes<UserNewCancel>> {
+        let base_url = "https://api.weixin.qq.com/datacube/getusersummary";
+        let sdk = self.0;
+        let res: CommonResponse<ListRes<UserNewCancel>> = sdk
+            .wx_post(base_url)
+            .await?
+            .json(time)
+            .send()
+            .await?
+            .json()
+            .await?;
+        res.into()
+    }
+    pub async fn get_user_cumulate(&self, time: &TimeSpan) -> SdkResult<ListRes<UserCumulate>> {
+        let base_url = "https://api.weixin.qq.com/datacube/getusercumulate";
+        let sdk = self.0;
+        let res: CommonResponse<ListRes<UserCumulate>> = sdk
+            .wx_post(base_url)
+            .await?
+            .json(time)
+            .send()
+            .await?
+            .json()
+            .await?;
+        res.into()
+    }
+    pub async fn get_article_summary(&self, time: &TimeSpan) -> SdkResult<ListRes<ArticleSummary>> {
+        let base_url = "https://api.weixin.qq.com/datacube/getarticlesummary";
+        let sdk = self.0;
+        let res: CommonResponse<ListRes<ArticleSummary>> = sdk
+            .wx_post(base_url)
+            .await?
+            .json(time)
+            .send()
+            .await?
+            .json()
+            .await?;
+        res.into()
+    }
+    pub async fn get_article_total(&self, time: &TimeSpan) -> SdkResult<ListRes<ArticleTotal>> {
+        let base_url = "https://api.weixin.qq.com/datacube/getarticletotal";
+        let sdk = self.0;
+        let res: CommonResponse<ListRes<ArticleTotal>> = sdk
+            .wx_post(base_url)
+            .await?
+            .json(time)
+            .send()
+            .await?
+            .json()
+            .await?;
+        res.into()
+    }
+    pub async fn get_user_read(&self, time: &TimeSpan) -> SdkResult<ListRes<UserRead>> {
+        let base_url = "https://api.weixin.qq.com/datacube/getuserread";
+        let sdk = self.0;
+        let res: CommonResponse<ListRes<UserRead>> = sdk
+            .wx_post(base_url)
+            .await?
+            .json(time)
+            .send()
+            .await?
+            .json()
+            .await?;
+        res.into()
+    }
+    pub async fn get_user_share(&self, time: &TimeSpan) -> SdkResult<ListRes<UserShare>> {
+        let base_url = "https://api.weixin.qq.com/datacube/getusershare";
+        let sdk = self.0;
+        let res: CommonResponse<ListRes<UserShare>> = sdk
+            .wx_post(base_url)
+            .await?
+            .json(time)
+            .send()
+            .await?
+            .json()
+            .await?;
+        res.into()
+    }
+    pub async fn get_user_read_hour(&self, time: &TimeSpan) -> SdkResult<ListRes<UserReadHour>> {
+        let base_url = "https://api.weixin.qq.com/datacube/getuserreadhour";
+        let sdk = self.0;
+        let res: CommonResponse<ListRes<UserReadHour>> = sdk
+            .wx_post(base_url)
+            .await?
+            .json(time)
+            .send()
+            .await?
+            .json()
+            .await?;
+        res.into()
+    }
+    pub async fn get_user_share_hour(&self, time: &TimeSpan) -> SdkResult<ListRes<UserShareHour>> {
+        let base_url = "https://api.weixin.qq.com/datacube/getusersharehour";
+        let sdk = self.0;
+        let res: CommonResponse<ListRes<UserShareHour>> = sdk
+            .wx_post(base_url)
+            .await?
+            .json(time)
+            .send()
+            .await?
+            .json()
+            .await?;
+        res.into()
+    }
+    pub async fn get_upstream_msg_hour(
+        &self,
+        time: &TimeSpan,
+    ) -> SdkResult<ListRes<UpstreamMsgHour>> {
+        let base_url = "https://api.weixin.qq.com/datacube/getupstreammsghour";
+        let sdk = self.0;
+        let res: CommonResponse<ListRes<UpstreamMsgHour>> = sdk
+            .wx_post(base_url)
+            .await?
+            .json(time)
+            .send()
+            .await?
+            .json()
+            .await?;
+        res.into()
+    }
 
+    pub async fn get_upstream_msg_week(&self, time: &TimeSpan) -> SdkResult<ListRes<UpstreamMsg>> {
+        let base_url = "https://api.weixin.qq.com/datacube/getupstreammsgweek";
+        let sdk = self.0;
+        let res: CommonResponse<ListRes<UpstreamMsg>> = sdk
+            .wx_post(base_url)
+            .await?
+            .json(time)
+            .send()
+            .await?
+            .json()
+            .await?;
+        res.into()
+    }
+
+    pub async fn get_upstream_msg_month(&self, time: &TimeSpan) -> SdkResult<ListRes<UpstreamMsg>> {
+        let base_url = "https://api.weixin.qq.com/datacube/getupstreammsgmonth";
+        let sdk = self.0;
+        let res: CommonResponse<ListRes<UpstreamMsg>> = sdk
+            .wx_post(base_url)
+            .await?
+            .json(time)
+            .send()
+            .await?
+            .json()
+            .await?;
+        res.into()
+    }
+
+    pub async fn get_upstream_msg(&self, time: &TimeSpan) -> SdkResult<ListRes<UpstreamMsg>> {
+        let base_url = "https://api.weixin.qq.com/datacube/getupstreammsg";
+        let sdk = self.0;
+        let res: CommonResponse<ListRes<UpstreamMsg>> = sdk
+            .wx_post(base_url)
+            .await?
+            .json(time)
+            .send()
+            .await?
+            .json()
+            .await?;
+        res.into()
+    }
+    pub async fn get_upstream_msg_dist(
+        &self,
+        time: &TimeSpan,
+    ) -> SdkResult<ListRes<UpstreamMsgDist>> {
+        let base_url = "https://api.weixin.qq.com/datacube/getupstreammsgdist";
+        let sdk = self.0;
+        let res: CommonResponse<ListRes<UpstreamMsgDist>> = sdk
+            .wx_post(base_url)
+            .await?
+            .json(time)
+            .send()
+            .await?
+            .json()
+            .await?;
+        res.into()
+    }
+
+    pub async fn get_upstream_msg_dist_week(
+        &self,
+        time: &TimeSpan,
+    ) -> SdkResult<ListRes<UpstreamMsgDist>> {
+        let base_url = "https://api.weixin.qq.com/datacube/getupstreammsgdistweek";
+        let sdk = self.0;
+        let res: CommonResponse<ListRes<UpstreamMsgDist>> = sdk
+            .wx_post(base_url)
+            .await?
+            .json(time)
+            .send()
+            .await?
+            .json()
+            .await?;
+        res.into()
+    }
+
+    pub async fn get_upstream_msg_dist_month(
+        &self,
+        time: &TimeSpan,
+    ) -> SdkResult<ListRes<UpstreamMsgDist>> {
+        let base_url = "https://api.weixin.qq.com/datacube/getupstreammsgdistmonth";
+        let sdk = self.0;
+        let res: CommonResponse<ListRes<UpstreamMsgDist>> = sdk
+            .wx_post(base_url)
+            .await?
+            .json(time)
+            .send()
+            .await?
+            .json()
+            .await?;
+        res.into()
+    }
+    pub async fn get_interface_summary(&self, time: &TimeSpan) -> SdkResult<ListRes<ApiAnalysis>> {
+        let base_url = "https://api.weixin.qq.com/datacube/getinterfacesummary";
+        let sdk = self.0;
+        let res: CommonResponse<ListRes<ApiAnalysis>> = sdk
+            .wx_post(base_url)
+            .await?
+            .json(time)
+            .send()
+            .await?
+            .json()
+            .await?;
+        res.into()
+    }
+    pub async fn get_interface_summary_hour(
+        &self,
+        time: &TimeSpan,
+    ) -> SdkResult<ListRes<ApiAnalysisHour>> {
+        let base_url = "https://api.weixin.qq.com/datacube/getinterfacesummaryhour";
+        let sdk = self.0;
+        let res: CommonResponse<ListRes<ApiAnalysisHour>> = sdk
+            .wx_post(base_url)
+            .await?
+            .json(time)
+            .send()
+            .await?
+            .json()
+            .await?;
+        res.into()
+    }
+}
 #[cfg(test)]
 mod tests {
     // use super::*;
