@@ -24,4 +24,15 @@ impl Signature {
         let result = hasher.finalize();
         format!("{:x}", result) == self.signature
     }
+
+    pub fn generate_signature(input: Vec<String>) -> String {
+        let mut input = input;
+        input.sort();
+        let str = input.join("");
+
+        let mut hasher = Sha1::new();
+        hasher.update(str);
+        let result = hasher.finalize();
+        format!("{:x}", result)
+    }
 }

@@ -29,24 +29,36 @@ pub enum CommonResponse<T> {
 pub enum SdkError {
     #[error("reqwest Error")]
     ReqwestError(#[from] reqwest::Error),
+
     #[error("wx received event parse error")]
     XmlParseError(#[from] roxmltree::Error),
+
     #[error("get access token error")]
     AccessTokenError(CommonError),
+
     #[error(transparent)]
     WxApiError(#[from] CommonError),
+
     #[error(transparent)]
     UrlParseError(#[from] url::ParseError),
+
     #[error("api request params error: {0}")]
     InvalidParams(String),
+
     #[error("parse received encrypt msg error: wrong signature")]
     InvalidSignature,
+
     #[error("parse received encrypt msg error: invalid appid")]
     InvalidAppid,
+
     #[error("decrypt msg error: {0}")]
     MsgDecryptError(String),
+
     #[error("encrypt msg error: {0}")]
     MsgEncryptError(String),
+
+    #[error("Exile write xml error")]
+    XmlWriteError(#[from] exile::error::Error),
 }
 
 /// A wrap of `std::result::Result<T, SdkError>`.

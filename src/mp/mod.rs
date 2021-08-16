@@ -2,9 +2,15 @@
 //!
 //! It seperates those apis to different mods by url path.
 
+use std::collections::HashMap;
+
+use roxmltree::Document;
+
 use crate::{
     access_token::AccessTokenProvider,
-    error::{CommonError, CommonResponse},
+    error::{CommonError, CommonResponse, SdkError},
+    mp::event::signature::Signature,
+    wechat,
 };
 use crate::{
     wechat::{WxApiRequestBuilder, WxSdk},
@@ -12,9 +18,9 @@ use crate::{
 };
 
 use self::{
-    material::MaterialModule, media::MediaModule, menu::MenuModule, message::MessageModule,
-    qrcode::QrcodeModule, shorten::ShortenModule, tags::TagsModule, template::TemplateModule,
-    user::UserModule,
+    datacube::DataCubeModule, material::MaterialModule, media::MediaModule, menu::MenuModule,
+    message::MessageModule, qrcode::QrcodeModule, reply::Reply, shorten::ShortenModule,
+    tags::TagsModule, template::TemplateModule, user::UserModule,
 };
 pub mod customservice;
 pub mod datacube;
@@ -24,6 +30,7 @@ pub mod media;
 pub mod menu;
 pub mod message;
 pub mod qrcode;
+pub mod reply;
 pub mod shorten;
 pub mod tags;
 pub mod template;
@@ -90,5 +97,105 @@ impl<'a, T: AccessTokenProvider> MpSdk<'a, T> {
     /// Material module （永久）素材模块
     pub fn material(&self) -> MaterialModule<WxSdk<T>> {
         MaterialModule(self.0)
+    }
+
+    /// Datacube module 分析中心模块
+    pub fn datacube(&self) -> DataCubeModule<WxSdk<T>> {
+        DataCubeModule(self.0)
+    }
+
+    /// 解析微信推送消息
+    pub fn parse_received_msg<S: AsRef<str>>(
+        &self,
+        msg: S,
+        url_params: Option<HashMap<String, String>>,
+    ) -> SdkResult<event::ReceivedEvent> {
+        let server_config = self.0.get_server_config();
+        let msg = match server_config.encoding_mode {
+            crate::wechat::EncodingMode::Plain => event::ReceivedEvent::parse(msg.as_ref()),
+            crate::wechat::EncodingMode::Compat(_) => event::ReceivedEvent::parse(msg.as_ref()),
+            crate::wechat::EncodingMode::Security(ref aes_key) => {
+                let url_params = url_params
+                    .ok_or_else(|| SdkError::InvalidParams("needs url_params".to_owned()))?;
+                let signature = url_params
+                    .get("msg_signature")
+                    .ok_or_else(|| SdkError::InvalidParams("msg_signature".to_owned()))?;
+                let timestamp = url_params
+                    .get("timestamp")
+                    .ok_or_else(|| SdkError::InvalidParams("timestamp".to_owned()))?;
+                let nonce = url_params
+                    .get("nonce")
+                    .ok_or_else(|| SdkError::InvalidParams("nonce".to_owned()))?;
+                let token = server_config.token.clone();
+                let root = Document::parse(msg.as_ref())?;
+                let encrypt_msg = root
+                    .descendants()
+                    .find(|n| n.has_tag_name("Encrypt"))
+                    .map(|n| n.text())
+                    .flatten()
+                    .unwrap();
+
+                let check_sign = vec![
+                    token,
+                    timestamp.clone(),
+                    nonce.clone(),
+                    encrypt_msg.to_owned(),
+                ];
+                let sign = event::signature::Signature::new(signature, check_sign);
+                if !sign.is_ok() {
+                    return Err(SdkError::InvalidSignature);
+                }
+                // decrpyted_text = [random(16) + content_len(4) + content + appid]
+                let (msg, app_id) = event::crypto::decrypt_message(encrypt_msg, aes_key)?;
+                if app_id != self.0.app_id {
+                    return Err(SdkError::InvalidAppid);
+                }
+                event::ReceivedEvent::parse(msg.as_ref())
+            }
+        };
+        msg
+    }
+
+    /// 得到回复消息 XML
+    pub fn reply_to_xml<S: Into<String>>(
+        &self,
+        reply: Reply,
+        from: S,
+        to: S,
+        url_params: Option<HashMap<String, String>>,
+    ) -> SdkResult<String> {
+        let server_config = self.0.get_server_config();
+        let mut reply_xml = reply::reply_to_xml(reply, from, to)?;
+        if let wechat::EncodingMode::Security(ref aes_key) = server_config.encoding_mode {
+            let ref app_id = self.0.app_id;
+            let encrypt_msg = event::crypto::encrypt_message(&reply_xml, aes_key, app_id)?;
+            let url_params =
+                url_params.ok_or_else(|| SdkError::InvalidParams("needs url_params".to_owned()))?;
+
+            let timestamp = url_params
+                .get("timestamp")
+                .ok_or_else(|| SdkError::InvalidParams("timestamp".to_owned()))?;
+            let nonce = url_params
+                .get("nonce")
+                .ok_or_else(|| SdkError::InvalidParams("nonce".to_owned()))?;
+            let token = server_config.token.clone();
+            let check_sign = vec![
+                token,
+                timestamp.clone(),
+                nonce.clone(),
+                encrypt_msg.to_owned(),
+            ];
+            let msg_signaturet = Signature::generate_signature(check_sign);
+            reply_xml = format!(
+                "<xml>
+<Encrypt><![CDATA[{}]]></Encrypt>
+<MsgSignature><![CDATA[{}]]></MsgSignature>
+<TimeStamp>{}</TimeStamp>
+<Nonce><![CDATA[{}]]></Nonce>
+</xml>",
+                encrypt_msg, msg_signaturet, timestamp, nonce
+            );
+        }
+        Ok(reply_xml)
     }
 }

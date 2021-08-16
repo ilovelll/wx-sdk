@@ -30,7 +30,8 @@ let menu = mpsdk.menu().get_current_selfmenu_info().await;
   - [x] [delete conditional menu](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Personalized_menu_interface.html#1)
   - [ ] [try match menu](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Personalized_menu_interface.html#2)
   - [ ] [get all menu info](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Getting_Custom_Menu_Configurations.html)
-- [ ] parse received event
+- [x] parse received event
+- [x] reply msg
 - [ ] customer service
 - [x] assert managerment
   - [x] [add temporary material](https://developers.weixin.qq.com/doc/offiaccount/Asset_Management/New_temporary_materials.html)
