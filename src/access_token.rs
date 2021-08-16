@@ -114,48 +114,60 @@ impl AccessTokenProvider for TokenClient {
         }
     }
 }
+#[cfg(test)]
+mod tests {
+    use std::time::SystemTime;
 
-#[test]
-fn test() {
-    let input = r#"{"access_token":"ACCESS_TOKEN","expires_in":7200}"#;
-    let expected = CommonResponse::Ok(AccessToken {
-        access_token: "ACCESS_TOKEN".to_string(),
-        expires_in: 7200,
-    });
-    assert_eq!(expected, serde_json::from_str(input).unwrap());
+    use tokio::sync::RwLock;
 
-    let input = r#"{"errcode":40013,"errmsg":"invalid appid"}"#;
-    let expected = CommonResponse::<AccessToken>::Err(crate::error::CommonError {
-        errcode: 40013,
-        errmsg: "invalid appid".to_string(),
-    });
-    assert_eq!(expected, serde_json::from_str(input).unwrap());
-}
-
-#[tokio::test]
-async fn test_get_from_cache() {
-    use std::thread::sleep;
-    use std::time::Duration;
-
-    let timestamp = SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)
-        .unwrap_or_default();
-    let token_client = TokenClient {
-        app_id: "app_id".to_owned(),
-        app_secret: "app_secret".to_owned(),
-        cache_token: RwLock::new(Some(AccessTokenCache {
-            access_token: "ACCESS_TOKEN".to_owned(),
-            expires_in: 7200,
-            expires_at: timestamp.as_secs() + 7200,
-        })),
+    use crate::{
+        access_token::{AccessTokenCache, AccessTokenProvider},
+        error::CommonResponse,
+        AccessToken, TokenClient,
     };
-    sleep(Duration::new(2, 0));
-    let res = token_client.get_access_token().await.unwrap();
-    assert_eq!(
-        res,
-        AccessToken {
-            access_token: "ACCESS_TOKEN".to_owned(),
+
+    #[test]
+    fn test() {
+        let input = r#"{"access_token":"ACCESS_TOKEN","expires_in":7200}"#;
+        let expected = CommonResponse::Ok(AccessToken {
+            access_token: "ACCESS_TOKEN".to_string(),
             expires_in: 7200,
-        }
-    );
+        });
+        assert_eq!(expected, serde_json::from_str(input).unwrap());
+
+        let input = r#"{"errcode":40013,"errmsg":"invalid appid"}"#;
+        let expected = CommonResponse::<AccessToken>::Err(crate::error::CommonError {
+            errcode: 40013,
+            errmsg: "invalid appid".to_string(),
+        });
+        assert_eq!(expected, serde_json::from_str(input).unwrap());
+    }
+
+    #[tokio::test]
+    async fn test_get_from_cache() {
+        use std::thread::sleep;
+        use std::time::Duration;
+
+        let timestamp = SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .unwrap_or_default();
+        let token_client = TokenClient {
+            app_id: "app_id".to_owned(),
+            app_secret: "app_secret".to_owned(),
+            cache_token: RwLock::new(Some(AccessTokenCache {
+                access_token: "ACCESS_TOKEN".to_owned(),
+                expires_in: 7200,
+                expires_at: timestamp.as_secs() + 7200,
+            })),
+        };
+        sleep(Duration::new(2, 0));
+        let res = token_client.get_access_token().await.unwrap();
+        assert_eq!(
+            res,
+            AccessToken {
+                access_token: "ACCESS_TOKEN".to_owned(),
+                expires_in: 7200,
+            }
+        );
+    }
 }
