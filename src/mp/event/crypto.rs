@@ -1,5 +1,6 @@
 use aes::Aes256;
-use base64ct::{Base64, Encoding};
+// use base64ct::{Base64, Encoding};
+use super::base64;
 use block_modes::block_padding::Pkcs7;
 use block_modes::{BlockMode, Cbc};
 
@@ -16,19 +17,19 @@ pub fn decrypt_message<'a, S: AsRef<str>>(
     ciphertext: &'a str,
     key: S,
 ) -> SdkResult<(String, String)> {
-    let mut key_buf = [0u8; 32];
+    // let mut key_buf = [0u8; 32];
     let mut iv_buf = [0u8; 16];
     // first: base64 decode the key
-    let key = Base64::decode(format!("{}=", key.as_ref()), &mut key_buf)
+    let key = base64::decode(format!("{}=", key.as_ref()))
         .map_err(|e| SdkError::MsgDecryptError(e.to_string()))?;
     iv_buf.copy_from_slice(&key[0..16]);
     // new the cipher
-    let cipher = Aes256Cbc::new_from_slices(key, &iv_buf)
+    let cipher = Aes256Cbc::new_from_slices(&key[0..32], &iv_buf)
         .map_err(|e| SdkError::MsgDecryptError(e.to_string()))?;
 
     // second: base65 decode the raw message
     let mut encrypt_buf =
-        Base64::decode_vec(ciphertext).map_err(|e| SdkError::MsgDecryptError(e.to_string()))?;
+        base64::decode(ciphertext).map_err(|e| SdkError::MsgDecryptError(e.to_string()))?;
 
     // last: decrypt the message
     let decrypted_ciphertext = cipher
@@ -55,14 +56,14 @@ pub fn encrypt_message<'a, S: AsRef<str>>(
     app_id: S,
 ) -> SdkResult<String> {
     let plaintext = plaintext.as_bytes();
-    let mut key_buf = [0u8; 32];
+    // let mut key_buf = [0u8; 32];
     let mut iv_buf = [0u8; 16];
     // first: base64 decode the key
-    let key = Base64::decode(format!("{}=", key.as_ref()), &mut key_buf)
+    let key = base64::decode(format!("{}=", key.as_ref()))
         .map_err(|e| SdkError::MsgEncryptError(e.to_string()))?;
     iv_buf.copy_from_slice(&key[0..16]);
     // new the cipher
-    let cipher = Aes256Cbc::new_from_slices(key, &iv_buf)
+    let cipher = Aes256Cbc::new_from_slices(&key[0..32], &iv_buf)
         .map_err(|e| SdkError::MsgEncryptError(e.to_string()))?;
 
     // encrpyted_text = [random(16) + content_len(4) + content + appid]
@@ -81,7 +82,7 @@ pub fn encrypt_message<'a, S: AsRef<str>>(
     let ciphertext = cipher.encrypt_vec(buf.as_slice());
 
     // last: base65 encode the raw message
-    let ciphertext = Base64::encode_string(ciphertext.as_slice());
+    let ciphertext = base64::encode(ciphertext.as_slice());
     Ok(ciphertext)
 }
 

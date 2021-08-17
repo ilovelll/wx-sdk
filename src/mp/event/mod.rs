@@ -10,6 +10,7 @@ use self::{
     msg_video::VideoMessage, msg_voice::VoiceMessage,
 };
 
+pub mod base64;
 pub mod crypto;
 pub mod msg_event;
 pub mod msg_image;

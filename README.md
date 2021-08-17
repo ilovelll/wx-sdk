@@ -3,6 +3,7 @@
 [![Crates.io](https://img.shields.io/crates/v/wx-sdk)](https://crates.io/crates/wx-sdk)
 [![docs](https://docs.rs/wx-sdk/badge.svg)](https://docs.rs/wx-sdk)
 
+Warning 🚧 (WIP), this crate is undering develop, api may be changes.
 ## `wx-sdk` is a [WeChat SDK](https://mp.weixin.qq.com/) written in [Rust](https://www.rust-lang.org/).
 ## QuickStart
 
