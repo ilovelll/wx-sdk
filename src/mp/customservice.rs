@@ -1,11 +1,12 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    access_token::AccessTokenProvider,
-    error::CommonResponse,
+    error::{CommonError, CommonResponse},
     wechat::{WxApiRequestBuilder, WxSdk},
     SdkResult,
 };
+
+use super::material::FileStruct;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct KFList {
@@ -23,14 +24,6 @@ pub struct KFAccount {
     pub invite_status: Option<String>,
 }
 
-/// 获取客服基本信息
-pub async fn getkflist<T: AccessTokenProvider>(sdk: &WxSdk<T>) -> SdkResult<KFList> {
-    let base_url = "https://api.weixin.qq.com/cgi-bin/customservice/getkflist";
-
-    let res: CommonResponse<KFList> = sdk.wx_get(base_url).await?.send().await?.json().await?;
-    res.into()
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct KFOnlineList {
     kf_online_list: Vec<KFOnlineAccount>,
@@ -44,32 +37,31 @@ pub struct KFOnlineAccount {
     pub accepted_case: i8,
 }
 
-/// 获取在线客服信息
-pub async fn getonlinekflist<T: AccessTokenProvider>(sdk: &WxSdk<T>) -> SdkResult<KFOnlineList> {
-    let base_url = "https://api.weixin.qq.com/cgi-bin/customservice/getonlinekflist";
+/// Custom service module 客服模块
+pub struct CustomServiceModule<'a, T: WxApiRequestBuilder>(pub(crate) &'a T);
+impl<'a, T: WxApiRequestBuilder> CustomServiceModule<'a, T> {
+    /// 获取客服基本信息
+    pub async fn getkflist(&self) -> SdkResult<KFList> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/customservice/getkflist";
+        let sdk = self.0;
+        let res: CommonResponse<KFList> = sdk.wx_get(base_url).await?.send().await?.json().await?;
+        res.into()
+    }
 
-    let res: CommonResponse<KFOnlineList> =
-        sdk.wx_get(base_url).await?.send().await?.json().await?;
-    res.into()
-}
+    /// 获取在线客服信息
+    pub async fn getonlinekflist(&self) -> SdkResult<KFOnlineList> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/customservice/getonlinekflist";
+        let sdk = self.0;
 
-pub mod kfaccount {
-    use crate::{
-        access_token::AccessTokenProvider,
-        error::CommonError,
-        mp::material::FileStruct,
-        wechat::{WxApiRequestBuilder, WxSdk},
-        SdkResult,
-    };
+        let res: CommonResponse<KFOnlineList> =
+            sdk.wx_get(base_url).await?.send().await?.json().await?;
+        res.into()
+    }
 
     /// 添加客服帐号
-    pub async fn add<T: AccessTokenProvider>(
-        kf_account: String,
-        nickname: String,
-        sdk: &WxSdk<T>,
-    ) -> SdkResult<()> {
+    pub async fn kfaccount_add(&self, kf_account: String, nickname: String) -> SdkResult<()> {
         let base_url = "https://api.weixin.qq.com/cgi-bin/customservice/kfaccount/add";
-
+        let sdk = self.0;
         let msg: CommonError = sdk
             .wx_post(base_url)
             .await?
@@ -86,13 +78,13 @@ pub mod kfaccount {
     }
 
     /// 邀请绑定客服帐号
-    pub async fn inviteworker<T: AccessTokenProvider>(
+    pub async fn kfaccount_inviteworker(
+        &self,
         kf_account: String,
         invite_wx: String,
-        sdk: &WxSdk<T>,
     ) -> SdkResult<()> {
         let base_url = "https://api.weixin.qq.com/cgi-bin/customservice/kfaccount/inviteworker";
-
+        let sdk = self.0;
         let msg: CommonError = sdk
             .wx_post(base_url)
             .await?
@@ -109,13 +101,9 @@ pub mod kfaccount {
     }
 
     /// 设置客服信息
-    pub async fn update<T: AccessTokenProvider>(
-        kf_account: String,
-        nickname: String,
-        sdk: &WxSdk<T>,
-    ) -> SdkResult<()> {
+    pub async fn kfaccount_update(&self, kf_account: String, nickname: String) -> SdkResult<()> {
         let base_url = "https://api.weixin.qq.com/cgi-bin/customservice/kfaccount/update";
-
+        let sdk = self.0;
         let msg: CommonError = sdk
             .wx_post(base_url)
             .await?
@@ -132,12 +120,13 @@ pub mod kfaccount {
     }
 
     /// 上传客服头像
-    pub async fn uploadheadimg<T: AccessTokenProvider>(
+    pub async fn kfaccount_uploadheadimg(
+        &self,
         kf_account: String,
         file: FileStruct,
-        sdk: &WxSdk<T>,
     ) -> SdkResult<()> {
         let base_url = "https://api.weixin.qq.com/cgi-bin/customservice/kfaccount/uploadheadimg";
+        let sdk = self.0;
         let builder = sdk.wx_post(base_url).await?;
         let builder = builder.query(&[("kf_account", kf_account)]);
 
@@ -154,9 +143,9 @@ pub mod kfaccount {
     }
 
     /// 删除客服帐号
-    pub async fn del<T: AccessTokenProvider>(kf_account: String, sdk: &WxSdk<T>) -> SdkResult<()> {
+    pub async fn kfaccount_del(&self, kf_account: String) -> SdkResult<()> {
         let base_url = "https://api.weixin.qq.com/cgi-bin/customservice/kfaccount/del";
-
+        let sdk = self.0;
         let builder = sdk.wx_get(base_url).await?;
         let builder = builder.query(&[("kf_account", kf_account)]);
 
@@ -164,23 +153,11 @@ pub mod kfaccount {
 
         res.into()
     }
-}
-pub mod kfsession {
-    use crate::{
-        access_token::AccessTokenProvider,
-        error::CommonError,
-        wechat::{WxApiRequestBuilder, WxSdk},
-        SdkResult,
-    };
 
     /// 创建会话
-    pub async fn create<T: AccessTokenProvider>(
-        kf_account: String,
-        openid: String,
-        sdk: &WxSdk<T>,
-    ) -> SdkResult<()> {
+    pub async fn kfsession_create(&self, kf_account: String, openid: String) -> SdkResult<()> {
         let base_url = "https://api.weixin.qq.com/cgi-bin/customservice/kfsession/create";
-
+        let sdk = self.0;
         let msg: CommonError = sdk
             .wx_post(base_url)
             .await?
@@ -197,13 +174,9 @@ pub mod kfsession {
     }
 
     /// 关闭会话
-    pub async fn close<T: AccessTokenProvider>(
-        kf_account: String,
-        openid: String,
-        sdk: &WxSdk<T>,
-    ) -> SdkResult<()> {
+    pub async fn kfsession_close(&self, kf_account: String, openid: String) -> SdkResult<()> {
         let base_url = "https://api.weixin.qq.com/cgi-bin/customservice/kfsession/close";
-
+        let sdk = self.0;
         let msg: CommonError = sdk
             .wx_post(base_url)
             .await?

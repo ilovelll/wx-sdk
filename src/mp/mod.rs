@@ -18,9 +18,10 @@ use crate::{
 };
 
 use self::{
-    datacube::DataCubeModule, material::MaterialModule, media::MediaModule, menu::MenuModule,
-    message::MessageModule, qrcode::QrcodeModule, reply::Reply, shorten::ShortenModule,
-    tags::TagsModule, template::TemplateModule, user::UserModule,
+    customservice::CustomServiceModule, datacube::DataCubeModule, material::MaterialModule,
+    media::MediaModule, menu::MenuModule, message::MessageModule, qrcode::QrcodeModule,
+    reply::Reply, shorten::ShortenModule, tags::TagsModule, template::TemplateModule,
+    user::UserModule,
 };
 pub mod customservice;
 pub mod datacube;
@@ -102,6 +103,11 @@ impl<'a, T: AccessTokenProvider> MpSdk<'a, T> {
     /// Datacube module 分析中心模块
     pub fn datacube(&self) -> DataCubeModule<WxSdk<T>> {
         DataCubeModule(self.0)
+    }
+
+    /// Custom Service module 客服模块
+    pub fn customservice(&self) -> CustomServiceModule<WxSdk<T>> {
+        CustomServiceModule(self.0)
     }
 
     /// 解析微信推送消息

@@ -64,4 +64,17 @@ mod tests {
 
         Ok(())
     }
+
+    // #[test]
+    // fn test_base_64() -> Result<(), Box<dyn std::error::Error>> {
+    //     use base64ct::{Base64, Encoding};
+    //     let txt = "jWmYm7qr5nMoAUwZRjGtBxmz3KA1tkAj3ykkR6q2B2C=";
+    //     let result = Base64::decode_vec(txt);
+    //     let input = "B2C=";
+    //     let mut buf = [0u8; 1024];
+    //     assert!(Base64::decode(input, &mut buf).is_err());
+    //     assert_eq!(wx_sdk::mp::event::base64::decode(input).unwrap(), vec![1u8]);
+    //     assert!(result.is_err());
+    //     Ok(())
+    // }
 }
