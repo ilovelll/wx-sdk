@@ -90,7 +90,7 @@ impl ReceivedMessageParser for MassSendJobFinishEvent {
             result_list: copyright_result_list,
         };
         Ok(MassSendJobFinishEvent {
-            msg_id: msg_id,
+            msg_id,
             status: status.to_string(),
             total_count,
             filter_count,
