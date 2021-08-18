@@ -3,7 +3,7 @@
 [![Crates.io](https://img.shields.io/crates/v/wx-sdk)](https://crates.io/crates/wx-sdk)
 [![docs](https://docs.rs/wx-sdk/badge.svg)](https://docs.rs/wx-sdk)
 
-Warning 🚧 (WIP), this crate is undering develop, api may be changes.
+Warning 🚧 (WIP), this crate is undering develop, api may be changed.
 ## `wx-sdk` is a [WeChat SDK](https://mp.weixin.qq.com/) written in [Rust](https://www.rust-lang.org/).
 ## QuickStart
 
@@ -20,45 +20,7 @@ let mpsdk = WxSdk::mp(&sdk);
 let menu = mpsdk.menu().get_current_selfmenu_info().await;
 ```
 ## Features
-
-- [x] get access token
-- [x] clear quota
-- [ ] custom menu
-  - [x] [create custom defined menu](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Creating_Custom-Defined_Menu.html)
-  - [x] [get current menu info](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Querying_Custom_Menus.html)
-  - [x] [delete custom defined menu](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Deleting_Custom-Defined_Menu.html)
-  - [x] [add conditional menu ](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Personalized_menu_interface.html#0)
-  - [x] [delete conditional menu](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Personalized_menu_interface.html#1)
-  - [ ] [try match menu](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Personalized_menu_interface.html#2)
-  - [ ] [get all menu info](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Getting_Custom_Menu_Configurations.html)
-- [x] parse received event
-- [x] reply msg
-- [ ] customer service
-- [x] assert managerment
-  - [x] [add temporary material](https://developers.weixin.qq.com/doc/offiaccount/Asset_Management/New_temporary_materials.html)
-  - [x] [get temporary materials](https://developers.weixin.qq.com/doc/offiaccount/Asset_Management/Get_temporary_materials.html)
-  - [x] [add permanent asset](https://developers.weixin.qq.com/doc/offiaccount/Asset_Management/Adding_Permanent_Assets.html)
-  - [x] [get permanent asset](https://developers.weixin.qq.com/doc/offiaccount/Asset_Management/Getting_Permanent_Assets.html)
-  - [x] [delete permanent asset](https://developers.weixin.qq.com/doc/offiaccount/Asset_Management/Deleting_Permanent_Assets.html)
-  - [x] [edit permanent rich media asset](https://developers.weixin.qq.com/doc/offiaccount/Asset_Management/Editing_Permanent_Rich_Media_Assets.html)
-  - [x] [get the total count of all materials](https://developers.weixin.qq.com/doc/offiaccount/Asset_Management/Get_the_total_of_all_materials.html)
-  - [x] [get materials list](https://developers.weixin.qq.com/doc/offiaccount/Asset_Management/Get_materials_list.html)
-- [ ] [comments management](https://developers.weixin.qq.com/doc/offiaccount/Comments_management/Image_Comments_Management_Interface.html)
-- [x] [user management]
-  - [x] [user tag management](https://developers.weixin.qq.com/doc/offiaccount/User_Management/User_Tag_Management.html)
-    - [x] add user tag
-    - [x] get user tags
-    - [x] edit user tag
-    - [x] delete user tag
-    - [x] get user by tag
-    - [x] batch tagging users
-  - [x] [update user remark](https://developers.weixin.qq.com/doc/offiaccount/User_Management/Configuring_user_notes.html)
-  - [x] [get user info](https://developers.weixin.qq.com/doc/offiaccount/User_Management/Get_users_basic_information_UnionID.html#UinonId)
-  - [x] [batch get user info](https://developers.weixin.qq.com/doc/offiaccount/User_Management/Get_users_basic_information_UnionID.html#UinonId)
-  - [x] [get subscribe openid list](https://developers.weixin.qq.com/doc/offiaccount/User_Management/Getting_a_User_List.html)
-  - [x] [get blocklist](https://developers.weixin.qq.com/doc/offiaccount/User_Management/Manage_blacklist.html)
-  - [x] [batch add blocklist](https://developers.weixin.qq.com/doc/offiaccount/User_Management/Manage_blacklist.html)
-  - [x] [batch undo blocklist](https://developers.weixin.qq.com/doc/offiaccount/User_Management/Manage_blacklist.html)
+There're `mp`, `pay`, `wxa` features gates, we have only implemented the `mp` feature now. Please check [`FEATURES.md`](https://github.com/ilovelll/wx-sdk/blob/main/FEATURES.md)
 
 ## Contributing
 
