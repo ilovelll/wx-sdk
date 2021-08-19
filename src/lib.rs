@@ -31,9 +31,9 @@ pub use access_token::AccessToken;
 
 pub mod error;
 pub use error::SdkResult;
+pub(crate) mod cache;
 pub mod wechat;
 pub use access_token::TokenClient;
-
 pub use wechat::WxSdk;
 #[cfg(feature = "mp")]
 pub mod mp;

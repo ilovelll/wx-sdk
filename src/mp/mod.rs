@@ -21,7 +21,7 @@ use self::{
     customservice::CustomServiceModule, datacube::DataCubeModule, material::MaterialModule,
     media::MediaModule, menu::MenuModule, message::MessageModule, qrcode::QrcodeModule,
     reply::Reply, shorten::ShortenModule, tags::TagsModule, template::TemplateModule,
-    user::UserModule,
+    ticket::TicketModule, user::UserModule,
 };
 pub mod customservice;
 pub mod datacube;
@@ -35,6 +35,7 @@ pub mod reply;
 pub mod shorten;
 pub mod tags;
 pub mod template;
+pub mod ticket;
 pub mod user;
 
 /// 公众号接口SDK，由于 Rust Doc 中还无法搜索中文，请直接搜索相关请求 url 中的关键信息，例如 `clear_quota`为接口限额清零接口。
@@ -108,6 +109,11 @@ impl<'a, T: AccessTokenProvider> MpSdk<'a, T> {
     /// Custom Service module 客服模块
     pub fn customservice(&self) -> CustomServiceModule<WxSdk<T>> {
         CustomServiceModule(self.0)
+    }
+
+    /// 获取jsapi ticket 或者 wx_card ticket
+    pub fn ticket(&self) -> TicketModule<T> {
+        TicketModule(self.0)
     }
 
     /// 解析微信推送消息
