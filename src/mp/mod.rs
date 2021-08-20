@@ -17,12 +17,7 @@ use crate::{
     SdkResult,
 };
 
-use self::{
-    customservice::CustomServiceModule, datacube::DataCubeModule, material::MaterialModule,
-    media::MediaModule, menu::MenuModule, message::MessageModule, qrcode::QrcodeModule,
-    reply::Reply, shorten::ShortenModule, tags::TagsModule, template::TemplateModule,
-    ticket::TicketModule, user::UserModule,
-};
+use self::{customservice::CustomServiceModule, datacube::DataCubeModule, material::MaterialModule, media::MediaModule, menu::MenuModule, message::MessageModule, qrcode::QrcodeModule, reply::Reply, shorten::ShortenModule, sns::SnsModule, tags::TagsModule, template::TemplateModule, ticket::TicketModule, user::UserModule};
 pub mod customservice;
 pub mod datacube;
 pub mod event;
@@ -37,6 +32,7 @@ pub mod tags;
 pub mod template;
 pub mod ticket;
 pub mod user;
+pub mod sns;
 
 /// 公众号接口SDK，由于 Rust Doc 中还无法搜索中文，请直接搜索相关请求 url 中的关键信息，例如 `clear_quota`为接口限额清零接口。
 pub struct MpSdk<'a, T: AccessTokenProvider>(pub(crate) &'a WxSdk<T>);
@@ -114,6 +110,11 @@ impl<'a, T: AccessTokenProvider> MpSdk<'a, T> {
     /// 获取jsapi ticket 或者 wx_card ticket
     pub fn ticket(&self) -> TicketModule<T> {
         TicketModule(self.0)
+    }
+
+    /// 网页授权模块
+    pub fn sns(&self) -> SnsModule<T> {
+        SnsModule(self.0)
     }
 
     /// 解析微信推送消息
@@ -210,4 +211,6 @@ impl<'a, T: AccessTokenProvider> MpSdk<'a, T> {
         }
         Ok(reply_xml)
     }
+
+
 }

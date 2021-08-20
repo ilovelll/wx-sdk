@@ -3,17 +3,18 @@
 ### Feature `mp`  公众号
 - [x] get access token  获取 api 调用 access token
 - [x] clear quota  清除 api 调用计数
-- [ ] custom menu  自定义菜单
+- [x] web oauth 网页授权
+- [x] custom menu  自定义菜单
   - [x] [create custom defined menu](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Creating_Custom-Defined_Menu.html)
   - [x] [get current menu info](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Querying_Custom_Menus.html)
   - [x] [delete custom defined menu](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Deleting_Custom-Defined_Menu.html)
   - [x] [add conditional menu ](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Personalized_menu_interface.html#0)
   - [x] [delete conditional menu](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Personalized_menu_interface.html#1)
-  - [ ] [try match menu](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Personalized_menu_interface.html#2)
-  - [ ] [get all menu info](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Getting_Custom_Menu_Configurations.html)
+  - [x] [try match menu](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Personalized_menu_interface.html#2)
+  - [x] [get all menu info](https://developers.weixin.qq.com/doc/offiaccount/Custom_Menus/Getting_Custom_Menu_Configurations.html)
 - [x] parse received event  解析微信推送消息
 - [x] reply msg  回复微信消息
-- [ ] customer service  客服服务
+- [x] customer service  客服服务
 - [x] assert managerment  素材管理
   - [x] [add temporary material](https://developers.weixin.qq.com/doc/offiaccount/Asset_Management/New_temporary_materials.html)
   - [x] [get temporary materials](https://developers.weixin.qq.com/doc/offiaccount/Asset_Management/Get_temporary_materials.html)
