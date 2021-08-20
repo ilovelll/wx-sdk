@@ -255,9 +255,29 @@ pub struct MenuId {
     pub menuid: String,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct MatchButtons {
+    pub button: Vec<MenuButton>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub menuid: Option<u32>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub matchrule: Option<MatchRule>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AllButtons {
+    pub menu: MatchButtons,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub conditionalmenu: Option<Vec<MatchButtons>>,
+}
+
+/// 菜单模块
 pub struct MenuModule<'a, T: WxApiRequestBuilder>(pub(crate) &'a T);
 
 impl<'a, T: WxApiRequestBuilder> MenuModule<'a, T> {
+    /// 创建自定义菜单
     pub async fn create(&self, menu: Vec<Btn>) -> SdkResult<()> {
         let base_url = "https://api.weixin.qq.com/cgi-bin/menu/create";
         let sdk = self.0;
@@ -272,6 +292,7 @@ impl<'a, T: WxApiRequestBuilder> MenuModule<'a, T> {
         res.into()
     }
 
+    /// 创建自定义菜单（通过自定义的json数据）
     pub async fn create_by_json<U: Serialize + ?Sized>(&self, menu_json: &U) -> SdkResult<()> {
         let base_url = "https://api.weixin.qq.com/cgi-bin/menu/create";
         let sdk = self.0;
@@ -286,6 +307,7 @@ impl<'a, T: WxApiRequestBuilder> MenuModule<'a, T> {
 
         res.into()
     }
+    /// 获取当前菜单信息
     pub async fn get_current_selfmenu_info(&self) -> SdkResult<MenuInfo> {
         let base_url = "https://api.weixin.qq.com/cgi-bin/get_current_selfmenu_info";
         let sdk = self.0;
@@ -295,6 +317,8 @@ impl<'a, T: WxApiRequestBuilder> MenuModule<'a, T> {
         res.into()
     }
 
+    /// 删除自定义菜单
+    /// 调用此接口会删除默认菜单及全部个性化菜单
     pub async fn delete(&self) -> SdkResult<()> {
         let base_url = "https://api.weixin.qq.com/cgi-bin/menu/delete";
         let sdk = self.0;
@@ -302,6 +326,7 @@ impl<'a, T: WxApiRequestBuilder> MenuModule<'a, T> {
         res.into()
     }
 
+    /// 添加个性化菜单
     pub async fn addconditional(
         &self,
         rules: MatchRule,
@@ -329,6 +354,7 @@ impl<'a, T: WxApiRequestBuilder> MenuModule<'a, T> {
         res.into()
     }
 
+    /// 删除个性化菜单
     pub async fn delconditional(&self, menuid: MenuId) -> SdkResult<()> {
         let base_url = "https://api.weixin.qq.com/cgi-bin/menu/delconditional";
         let sdk = self.0;
@@ -336,6 +362,32 @@ impl<'a, T: WxApiRequestBuilder> MenuModule<'a, T> {
         let msg: CommonError = builder.json(&menuid).send().await?.json().await?;
 
         msg.into()
+    }
+
+    /// 测试个性化菜单匹配结果
+    /// user_id可以是粉丝的OpenID，也可以是粉丝的微信号。
+    pub async fn trymatch(&self, user_id: String) -> SdkResult<MatchButtons> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/menu/trymatch";
+        let sdk = self.0;
+        let builder = sdk.wx_post(base_url).await?;
+        let msg: CommonResponse<MatchButtons> = builder
+            .json(&serde_json::json!({ "user_id": &user_id }))
+            .send()
+            .await?
+            .json()
+            .await?;
+
+        msg.into()
+    }
+    /// 获取自定义菜单配置
+    /// 在设置了个性化菜单后，使用本自定义菜单查询接口可以获取默认菜单和全部个性化菜单信息
+    pub async fn get(&self) -> SdkResult<AllButtons> {
+        let base_url = "https://api.weixin.qq.com/cgi-bin/menu/get";
+        let sdk = self.0;
+        let res: CommonResponse<AllButtons> =
+            sdk.wx_get(base_url).await?.send().await?.json().await?;
+
+        res.into()
     }
 }
 
@@ -407,6 +459,117 @@ mod tests {
             _ => return Err("match &menu[1]"),
         }
 
+        Ok(())
+    }
+
+    #[test]
+    fn deserialize_allmenu1() -> std::result::Result<(), Box<dyn std::error::Error>> {
+        let input = r#"{
+    "menu": {
+        "button": [
+            {
+                "type": "click", 
+                "name": "今日歌曲", 
+                "key": "V1001_TODAY_MUSIC", 
+                "sub_button": [ ]
+            }, 
+            {
+                "type": "click", 
+                "name": "歌手简介", 
+                "key": "V1001_TODAY_SINGER", 
+                "sub_button": [ ]
+            }, 
+            {
+                "name": "菜单", 
+                "sub_button": [
+                    {
+                        "type": "view", 
+                        "name": "搜索", 
+                        "url": "http://www.soso.com/", 
+                        "sub_button": [ ]
+                    }, 
+                    {
+                        "type": "view", 
+                        "name": "视频", 
+                        "url": "http://v.qq.com/", 
+                        "sub_button": [ ]
+                    }, 
+                    {
+                        "type": "click", 
+                        "name": "赞一下我们", 
+                        "key": "V1001_GOOD", 
+                        "sub_button": [ ]
+                    }
+                ]
+            }
+        ]
+    }
+}"#;
+        let menu: AllButtons = serde_json::from_str(&input).unwrap();
+        // println!("{:#?}", &menu);
+        Ok(())
+    }
+
+    #[test]
+    fn deserialize_allmenu2() -> std::result::Result<(), Box<dyn std::error::Error>> {
+        let input = r#"{"menu": {
+                    "button": [
+                        {
+                            "type": "click", 
+                            "name": "今日歌曲", 
+                            "key": "V1001_TODAY_MUSIC", 
+                            "sub_button": [ ]
+                        }
+                    ], 
+                    "menuid": 208396938
+                }, 
+                "conditionalmenu": [
+                    {
+                        "button": [
+                            {
+                                "type": "click", 
+                                "name": "今日歌曲", 
+                                "key": "V1001_TODAY_MUSIC", 
+                                "sub_button": [ ]
+                            }, 
+                            {
+                                "name": "菜单", 
+                                "sub_button": [
+                                    {
+                                        "type": "view", 
+                                        "name": "搜索", 
+                                        "url": "http://www.soso.com/", 
+                                        "sub_button": [ ]
+                                    }, 
+                                    {
+                                        "type": "view", 
+                                        "name": "视频", 
+                                        "url": "http://v.qq.com/", 
+                                        "sub_button": [ ]
+                                    }, 
+                                    {
+                                        "type": "click", 
+                                        "name": "赞一下我们", 
+                                        "key": "V1001_GOOD", 
+                                        "sub_button": [ ]
+                                    }
+                                ]
+                            }
+                        ], 
+                        "matchrule": {
+                            "group_id": 2, 
+                            "sex": 1, 
+                            "country": "中国", 
+                            "province": "广东", 
+                            "city": "广州", 
+                            "client_platform_type": 2
+                        }, 
+                        "menuid": 208396993
+                    }
+                ]
+}"#;
+        let menu: AllButtons = serde_json::from_str(&input).unwrap();
+        // println!("{:#?}", &menu);
         Ok(())
     }
 }

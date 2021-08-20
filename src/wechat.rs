@@ -20,18 +20,14 @@ use reqwest::Client;
 #[cfg(feature = "mp")]
 use crate::mp::MpSdk;
 
-use crate::{
-    access_token::AccessTokenProvider,
-    cache::Cache,
-    SdkResult, TokenClient,
-};
+use crate::{access_token::AccessTokenProvider, cache::Cache, SdkResult, TokenClient};
 
 /// This is the sdk object. We provide a `new` method to construct it.
 pub struct WxSdk<T: AccessTokenProvider> {
     pub app_id: String,
-    app_secret: String,
+    pub(crate) app_secret: String,
     server_config: ServerConfig,
-    http_client: Client,
+    pub(crate) http_client: Client,
     pub(crate) token_client: T,
     pub(crate) cache: Cache<String, String>,
 }
