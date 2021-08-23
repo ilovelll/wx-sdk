@@ -6,15 +6,19 @@
 //! ## QuickStart
 
 //! First, please refer to this [page](https://developers.weixin.qq.com/doc/offiaccount/Basic_Information/Access_Overview.html) to provide these values: `token`, `EncodingAESKey`,`EncodingMode`.
-//! ```ignore
-//! use wx_sdk::wechat::{WxSdk, ServerConfig, EncodingMode};
+//! ```
+//! use wx_sdk::wechat::{WxSdk};
+//! use wx_sdk::mp::{ServerConfig, EncodingMode};
 //!
-//! let config = ServerConfig::new("token", EncodingMode::Plain);
-//! let sdk = WxSdk::new_with_default_token_client("app_id", "app_secret", config);
+//! let sdk = WxSdk::new_with_default_token_client("app_id", "app_secret");
 //!
 //! // Then, you can use the sdk functions, like get current menu info:
-//! let mpsdk = WxSdk::mp(&sdk);
-//! let menu = mpsdk.menu().get_current_selfmenu_info().await;
+//!
+//! let config = ServerConfig::new("token", EncodingMode::Plain);
+//! let mpsdk = sdk.mp(config);
+//! async {
+//!    let menu = mpsdk.menu().get_current_selfmenu_info().await;
+//! };
 //! ```
 
 //! ## Contributing
@@ -37,14 +41,3 @@ pub use access_token::TokenClient;
 pub use wechat::WxSdk;
 #[cfg(feature = "mp")]
 pub mod mp;
-
-// #[tokio::test]
-// async fn test_sdk() -> SdkResult<()> {
-//     use crate::wechat::{WxSdk, ServerConfig, EncodingMode};
-
-//     let config = ServerConfig::new("token", EncodingMode::Plain);
-//     let sdk = WxSdk::new_with_default_token_client("app_id", "app_secret", config);
-//     let mpsdk = sdk.mp();
-//     let menu = mpsdk.menu().get_current_selfmenu_info().await;
-//     Ok(())
-// }

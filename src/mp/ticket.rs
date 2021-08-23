@@ -66,30 +66,33 @@ mod tests {
 
     use crate::{
         mp::ticket::TicketType,
-        wechat::{EncodingMode, ServerConfig},
+        mp::{EncodingMode, ServerConfig},
         TokenClient, WxSdk,
     };
 
     fn get_sdk() -> WxSdk<TokenClient> {
+        let wsdk = WxSdk::new_with_default_token_client("wx5823bf96d3bd56c7", "app_secret");
+        wsdk
+    }
+    fn get_server_config() -> ServerConfig {
         let server_config = ServerConfig::new(
             "QDG6eK",
             EncodingMode::Security("jWmYm7qr5nMoAUwZRjGtBxmz3KA1tkAj3ykkR6q2B2C".to_owned()),
         );
-        let wsdk =
-            WxSdk::new_with_default_token_client("wx5823bf96d3bd56c7", "app_secret", server_config);
-        wsdk
+        server_config
     }
 
     #[tokio::test]
     async fn test_get_from_cache() {
         use std::time::Duration;
         let sdk = get_sdk();
-        let mp_sdk = sdk.mp();
+        let server_config = get_server_config();
+        let mp_sdk = sdk.mp(server_config);
         assert_eq!(TicketType::JsApi.to_string(), "jsapi");
         assert_eq!(TicketType::WxCard.to_string(), "wx_card");
         let t_type = TicketType::JsApi;
         mp_sdk
-            .0
+            .sdk
             .cache
             .set(
                 t_type.to_string(),

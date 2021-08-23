@@ -10,14 +10,18 @@ use crate::{
     access_token::AccessTokenProvider,
     error::{CommonError, CommonResponse, SdkError},
     mp::event::signature::Signature,
-    wechat,
 };
 use crate::{
     wechat::{WxApiRequestBuilder, WxSdk},
     SdkResult,
 };
 
-use self::{customservice::CustomServiceModule, datacube::DataCubeModule, material::MaterialModule, media::MediaModule, menu::MenuModule, message::MessageModule, qrcode::QrcodeModule, reply::Reply, shorten::ShortenModule, sns::SnsModule, tags::TagsModule, template::TemplateModule, ticket::TicketModule, user::UserModule};
+use self::{
+    customservice::CustomServiceModule, datacube::DataCubeModule, material::MaterialModule,
+    media::MediaModule, menu::MenuModule, message::MessageModule, qrcode::QrcodeModule,
+    reply::Reply, shorten::ShortenModule, sns::SnsModule, tags::TagsModule,
+    template::TemplateModule, ticket::TicketModule, user::UserModule,
+};
 pub mod customservice;
 pub mod datacube;
 pub mod event;
@@ -28,23 +32,51 @@ pub mod message;
 pub mod qrcode;
 pub mod reply;
 pub mod shorten;
+pub mod sns;
 pub mod tags;
 pub mod template;
 pub mod ticket;
 pub mod user;
-pub mod sns;
+
+/// The configuration of your app server.
+pub struct ServerConfig {
+    pub token: String,
+    pub encoding_mode: EncodingMode,
+}
+
+type AesKey = String;
+
+/// Encoding mode of message getting or sending with wechat.
+/// [EncodingMode::Compat] or [EncodingMode::Security] mode has a aes-key.
+pub enum EncodingMode {
+    Plain,
+    Compat(AesKey),
+    Security(AesKey),
+}
+
+impl ServerConfig {
+    pub fn new<S: AsRef<str>>(token: S, encoding_mode: EncodingMode) -> Self {
+        ServerConfig {
+            token: token.as_ref().to_owned(),
+            encoding_mode,
+        }
+    }
+}
 
 /// 公众号接口SDK，由于 Rust Doc 中还无法搜索中文，请直接搜索相关请求 url 中的关键信息，例如 `clear_quota`为接口限额清零接口。
-pub struct MpSdk<'a, T: AccessTokenProvider>(pub(crate) &'a WxSdk<T>);
+pub struct MpSdk<T: AccessTokenProvider> {
+    pub(crate) sdk: WxSdk<T>,
+    pub(crate) server_config: ServerConfig,
+}
 
-impl<'a, T: AccessTokenProvider> MpSdk<'a, T> {
+impl<T: AccessTokenProvider> MpSdk<T> {
     /// 接口限额清零
     ///
     /// 公众号调用接口并不是无限制的。
     /// 每个帐号每月共10次清零操作机会，清零生效一次即用掉一次机会（10次包括了平台上的清零和调用接口API的清零）。
     pub async fn clear_quota(&self) -> SdkResult<()> {
         let base_url = "https://api.weixin.qq.com/cgi-bin/clear_quota";
-        let sdk = self.0;
+        let sdk = &self.sdk;
         let app_id = sdk.app_id.clone();
         let res = sdk
             .wx_post(base_url)
@@ -60,61 +92,61 @@ impl<'a, T: AccessTokenProvider> MpSdk<'a, T> {
 
     /// Qrcode generator module 生成二维码模块
     pub fn qrcode(&self) -> QrcodeModule<WxSdk<T>> {
-        QrcodeModule(self.0)
+        QrcodeModule(&self.sdk)
     }
     /// Short key generator module 短key生成模块
     pub fn shorten(&self) -> ShortenModule<WxSdk<T>> {
-        ShortenModule(self.0)
+        ShortenModule(&self.sdk)
     }
     /// Tag module 标签模块
     pub fn tags(&self) -> TagsModule<WxSdk<T>> {
-        TagsModule(self.0)
+        TagsModule(&self.sdk)
     }
     /// User module 用户模块
     pub fn user(&self) -> UserModule<WxSdk<T>> {
-        UserModule(self.0)
+        UserModule(&self.sdk)
     }
     /// Message send module 消息（发送）相关模块
     pub fn message(&self) -> MessageModule<WxSdk<T>> {
-        MessageModule(self.0)
+        MessageModule(&self.sdk)
     }
     /// Menu module 自定义菜单模块
     pub fn menu(&self) -> MenuModule<WxSdk<T>> {
-        MenuModule(self.0)
+        MenuModule(&self.sdk)
     }
     /// Template message module 模板消息模块
     pub fn template(&self) -> TemplateModule<WxSdk<T>> {
-        TemplateModule(self.0)
+        TemplateModule(&self.sdk)
     }
 
     /// Media module （临时）素材文件模块
     pub fn media(&self) -> MediaModule<WxSdk<T>> {
-        MediaModule(self.0)
+        MediaModule(&self.sdk)
     }
 
     /// Material module （永久）素材模块
     pub fn material(&self) -> MaterialModule<WxSdk<T>> {
-        MaterialModule(self.0)
+        MaterialModule(&self.sdk)
     }
 
     /// Datacube module 分析中心模块
     pub fn datacube(&self) -> DataCubeModule<WxSdk<T>> {
-        DataCubeModule(self.0)
+        DataCubeModule(&self.sdk)
     }
 
     /// Custom Service module 客服模块
     pub fn customservice(&self) -> CustomServiceModule<WxSdk<T>> {
-        CustomServiceModule(self.0)
+        CustomServiceModule(&self.sdk)
     }
 
     /// 获取jsapi ticket 或者 wx_card ticket
     pub fn ticket(&self) -> TicketModule<T> {
-        TicketModule(self.0)
+        TicketModule(&self.sdk)
     }
 
     /// 网页授权模块
     pub fn sns(&self) -> SnsModule<T> {
-        SnsModule(self.0)
+        SnsModule(&self.sdk)
     }
 
     /// 解析微信推送消息
@@ -123,11 +155,11 @@ impl<'a, T: AccessTokenProvider> MpSdk<'a, T> {
         msg: S,
         url_params: Option<HashMap<String, String>>,
     ) -> SdkResult<event::ReceivedEvent> {
-        let server_config = self.0.get_server_config();
+        let server_config = &self.server_config;
         let msg = match server_config.encoding_mode {
-            crate::wechat::EncodingMode::Plain => event::ReceivedEvent::parse(msg.as_ref()),
-            crate::wechat::EncodingMode::Compat(_) => event::ReceivedEvent::parse(msg.as_ref()),
-            crate::wechat::EncodingMode::Security(ref aes_key) => {
+            EncodingMode::Plain => event::ReceivedEvent::parse(msg.as_ref()),
+            EncodingMode::Compat(_) => event::ReceivedEvent::parse(msg.as_ref()),
+            EncodingMode::Security(ref aes_key) => {
                 let url_params = url_params
                     .ok_or_else(|| SdkError::InvalidParams("needs url_params".to_owned()))?;
                 let signature = url_params
@@ -160,7 +192,7 @@ impl<'a, T: AccessTokenProvider> MpSdk<'a, T> {
                 }
                 // decrpyted_text = [random(16) + content_len(4) + content + appid]
                 let (msg, app_id) = event::crypto::decrypt_message(encrypt_msg, aes_key)?;
-                if app_id != self.0.app_id {
+                if app_id != self.sdk.app_id {
                     return Err(SdkError::InvalidAppid);
                 }
                 event::ReceivedEvent::parse(msg.as_ref())
@@ -177,10 +209,10 @@ impl<'a, T: AccessTokenProvider> MpSdk<'a, T> {
         to: S,
         url_params: Option<HashMap<String, String>>,
     ) -> SdkResult<String> {
-        let server_config = self.0.get_server_config();
+        let server_config = &self.server_config;
         let mut reply_xml = reply::reply_to_xml(reply, from, to)?;
-        if let wechat::EncodingMode::Security(ref aes_key) = server_config.encoding_mode {
-            let ref app_id = self.0.app_id;
+        if let EncodingMode::Security(ref aes_key) = server_config.encoding_mode {
+            let ref app_id = self.sdk.app_id;
             let encrypt_msg = event::crypto::encrypt_message(&reply_xml, aes_key, app_id)?;
             let url_params =
                 url_params.ok_or_else(|| SdkError::InvalidParams("needs url_params".to_owned()))?;
@@ -211,6 +243,4 @@ impl<'a, T: AccessTokenProvider> MpSdk<'a, T> {
         }
         Ok(reply_xml)
     }
-
-
 }

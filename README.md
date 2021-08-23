@@ -9,14 +9,14 @@ Warning 🚧 (WIP), this crate is undering develop, api may be changed.
 
 First, please refer to this [page](https://developers.weixin.qq.com/doc/offiaccount/Basic_Information/Access_Overview.html) to provide these values: `token`, `EncodingAESKey`,`EncodingMode`.
 ```rust
-use wx_sdk::wechat::{ServerConfig, EncodingMode};
-
-let config = ServerConfig::new(token, EncodingMode::Plain);
+use wx_sdk::wechat::WxSdk;
 let sdk = WxSdk::new_with_default_token_client("app_id", "app_secret", config);
 ```
 Then, you can use the sdk functions, like get current menu info:
 ```rust
-let mpsdk = WxSdk::mp(&sdk);
+use wx_sdk::mp::{ServerConfig, EncodingMode};
+let config = ServerConfig::new("token", EncodingMode::Plain);
+let mpsdk = WxSdk::mp(sdk, config); // or sdk.mp(config);
 let menu = mpsdk.menu().get_current_selfmenu_info().await;
 ```
 ## Features
