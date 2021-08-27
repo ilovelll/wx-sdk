@@ -17,7 +17,7 @@ categories = ["api-bindings"]
 default = ["mp"]
 mp = []
 pay = []
-mxa = []
+wxa = []
 
 [dependencies]
 anyhow = "1.0"

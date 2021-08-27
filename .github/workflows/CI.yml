@@ -20,3 +20,7 @@ jobs:
       run: cargo build --verbose
     - name: Run tests
       run: cargo test --verbose
+    - name: Build wxa
+      run: cargo build --verbose --features wxa
+    - name: Run tests wxa
+      run: cargo test --verbose --features wxa

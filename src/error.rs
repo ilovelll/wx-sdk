@@ -107,6 +107,12 @@ impl From<CommonResponse<CommonError>> for SdkResult<()> {
     }
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ListRes<T> {
+    pub list: Vec<T>,
+}
+pub type SdkResultList<T> = Result<ListRes<T>, SdkError>;
+
 #[test]
 fn test_error_from() {
     let input = r#"{"errcode": 0,"errmsg":"success"}"#;
@@ -128,4 +134,20 @@ fn test_error_from() {
 
     let into: SdkResult<()> = expected.clone().into();
     assert!(into.is_err());
+}
+
+#[test]
+fn test_data_and_error() {
+    #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+    pub struct Data {
+        pub aid: String,
+        pub session_key: String,
+    }
+    let input = r#"{ "aid": "ssss", "seesion_Key": "dddddd", "errcode": 22,"errmsg":"errrrr"}"#;
+    let expected = &CommonResponse::<Data>::Err(CommonError {
+        errcode: 22,
+        errmsg: "errrrr".to_string(),
+    });
+    
+    assert_eq!(expected, &serde_json::from_str(input).unwrap());
 }
