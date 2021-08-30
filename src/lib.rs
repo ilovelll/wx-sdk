@@ -36,6 +36,7 @@ pub use access_token::AccessToken;
 pub mod error;
 pub use error::SdkResult;
 pub(crate) mod cache;
+pub(crate) mod utils;
 pub mod wechat;
 pub use access_token::TokenClient;
 pub use wechat::WxSdk;

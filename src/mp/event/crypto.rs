@@ -1,13 +1,11 @@
 use aes::Aes256;
 // use base64ct::{Base64, Encoding};
-use super::base64;
+use crate::utils::{base64, get_random_string};
 use block_modes::block_padding::Pkcs7;
 use block_modes::{BlockMode, Cbc};
 
 use crate::error::SdkError;
 use crate::SdkResult;
-use rand::distributions::Alphanumeric;
-use rand::{thread_rng, Rng};
 
 // create an alias for convenience
 type Aes256Cbc = Cbc<Aes256, Pkcs7>;
@@ -84,13 +82,4 @@ pub fn encrypt_message<'a, S: AsRef<str>>(
     // last: base65 encode the raw message
     let ciphertext = base64::encode(ciphertext.as_slice());
     Ok(ciphertext)
-}
-
-pub fn get_random_string(size: usize) -> String {
-    let rand_string: String = thread_rng()
-        .sample_iter(&Alphanumeric)
-        .take(size)
-        .map(char::from)
-        .collect();
-    rand_string
 }
