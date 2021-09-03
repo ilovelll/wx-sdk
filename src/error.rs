@@ -136,11 +136,16 @@ fn test_data_and_error() {
         pub aid: String,
         pub session_key: String,
     }
-    let input = r#"{ "aid": "ssss", "seesion_Key": "dddddd", "errcode": 22,"errmsg":"errrrr"}"#;
-    let expected = &CommonResponse::<Data>::Err(CommonError {
-        errcode: 22,
-        errmsg: "errrrr".to_string(),
-    });
+    let input = r#"{ "aid": "ssss", "session_key": "dddddd", "errcode": 22,"errmsg":"errrrr"}"#;
+    // let expected = &CommonResponse::<Data>::Err(CommonError {
+    //     errcode: 22,
+    //     errmsg: "errrrr".to_string(),
+    // });
     
-    assert_eq!(expected, &serde_json::from_str(input).unwrap());
+    let expected_data = &CommonResponse::<Data>::Ok(Data {
+        aid: "ssss".to_string(),
+        session_key: "dddddd".to_string(),
+    });
+
+    assert_eq!(expected_data, &serde_json::from_str(input).unwrap());
 }

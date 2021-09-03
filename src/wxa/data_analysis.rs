@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 // use serde_json::json;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct QueryDailyRetain {
+pub struct QueryVisitRetain {
     /// 开始日期。格式为 yyyymmdd
     pub begin_date: String,
     /// 结束日期，限定查询1天数据，允许设置的最大值为昨日。格式为 yyyymmdd
@@ -31,8 +31,18 @@ pub struct VisitUv {
 pub struct DataAnalysisModule<'a, T: WxApiRequestBuilder>(pub(crate) &'a T);
 
 impl<'a, T: WxApiRequestBuilder> DataAnalysisModule<'a, T> {
-    pub async fn get_daily_retain(&self, query: &QueryDailyRetain) -> SdkResult<VisitRetain> {
+    pub async fn get_daily_retain(&self, query: &QueryVisitRetain) -> SdkResult<VisitRetain> {
         let url = "https://api.weixin.qq.com/datacube/getweanalysisappiddailyretaininfo";
-        crate::wxa::post_common_send(self.0, url, query).await
+        crate::wxa::post_send(self.0, url, query).await
+    }
+
+    pub async fn get_monthly_retain(&self, query: &QueryVisitRetain) -> SdkResult<VisitRetain> {
+        let url = "https://api.weixin.qq.com/datacube/getweanalysisappidmonthlyretaininfo";
+        crate::wxa::post_send(self.0, url, query).await
+    }
+
+    pub async fn get_weekly_retain(&self, query: &QueryVisitRetain) -> SdkResult<VisitRetain> {
+        let url = "https://api.weixin.qq.com/datacube/getweanalysisappidweeklyretaininfo";
+        crate::wxa::post_send(self.0, url, query).await
     }
 }

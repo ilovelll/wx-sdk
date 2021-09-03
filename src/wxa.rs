@@ -85,16 +85,6 @@ async fn post_send<'a, A: WxApiRequestBuilder, R: DeserializeOwned, D: Serialize
     post_data: &'a D,
 ) -> SdkResult<R> {
     let builder = api_builder.wx_post(url).await?.json(post_data);
-    let res = builder.send().await?.json::<R>().await?;
-    Ok(res)
-}
-
-async fn post_common_send<'a, A: WxApiRequestBuilder, R: DeserializeOwned, D: Serialize>(
-    api_builder: &'a A,
-    url: &'static str,
-    post_data: &'a D,
-) -> SdkResult<R> {
-    let builder = api_builder.wx_post(url).await?.json(post_data);
     let res = builder.send().await?.json::<CommonResponse<R>>().await?;
     res.into()
 }
