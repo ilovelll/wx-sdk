@@ -42,5 +42,10 @@ pub use access_token::TokenClient;
 pub use wechat::WxSdk;
 #[cfg(feature = "mp")]
 pub mod mp;
+
+#[cfg(feature = "wxa")]
+pub mod wxa;
+
 #[cfg(feature = "pay")]
 pub mod pay;
+

@@ -3,7 +3,6 @@
 //! Most the function call on `wx-sdk` return a [SdkResult], it's a type of `std::result::Result<T, SdkError>` wrapper.
 
 use serde::{Deserialize, Serialize};
-use std::fmt::Display;
 use thiserror::Error;
 // use tonic::codegen::http::request;
 
@@ -128,4 +127,25 @@ fn test_error_from() {
 
     let into: SdkResult<()> = expected.clone().into();
     assert!(into.is_err());
+}
+
+#[test]
+fn test_data_and_error() {
+    #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+    pub struct Data {
+        pub aid: String,
+        pub session_key: String,
+    }
+    let input = r#"{ "aid": "ssss", "session_key": "dddddd", "errcode": 22,"errmsg":"errrrr"}"#;
+    // let expected = &CommonResponse::<Data>::Err(CommonError {
+    //     errcode: 22,
+    //     errmsg: "errrrr".to_string(),
+    // });
+    
+    let expected_data = &CommonResponse::<Data>::Ok(Data {
+        aid: "ssss".to_string(),
+        session_key: "dddddd".to_string(),
+    });
+
+    assert_eq!(expected_data, &serde_json::from_str(input).unwrap());
 }

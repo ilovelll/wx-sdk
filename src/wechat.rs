@@ -19,6 +19,9 @@ use reqwest::Client;
 #[cfg(feature = "mp")]
 use crate::mp::{MpSdk, ServerConfig};
 
+#[cfg(feature = "wxa")]
+use crate::wxa::WxaSdk;
+
 use crate::{access_token::AccessTokenProvider, cache::Cache, SdkResult, TokenClient};
 
 /// This is the sdk object. We provide a `new` method to construct it.
@@ -47,6 +50,14 @@ impl<T: AccessTokenProvider> WxSdk<T> {
         MpSdk {
             sdk: self,
             server_config,
+        }
+    }
+
+    /// miniprogram module
+    #[cfg(feature = "wxa")]
+    pub fn wxa(self) -> WxaSdk<T> {
+        WxaSdk {
+            sdk: self,
         }
     }
 }
