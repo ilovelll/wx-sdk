@@ -3,7 +3,6 @@
 //! Most the function call on `wx-sdk` return a [SdkResult], it's a type of `std::result::Result<T, SdkError>` wrapper.
 
 use serde::{Deserialize, Serialize};
-use std::fmt::Display;
 use thiserror::Error;
 // use tonic::codegen::http::request;
 
@@ -106,12 +105,6 @@ impl From<CommonResponse<CommonError>> for SdkResult<()> {
         }
     }
 }
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ListRes<T> {
-    pub list: Vec<T>,
-}
-pub type SdkResultList<T> = Result<ListRes<T>, SdkError>;
 
 #[test]
 fn test_error_from() {

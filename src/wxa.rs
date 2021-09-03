@@ -105,9 +105,14 @@ pub struct WxaSdk<T: AccessTokenProvider> {
 }
 
 impl<T: AccessTokenProvider> WxaSdk<T> {
-    pub async fn code_to_session(&self, param: &QuerySession) -> SdkResult<LoginResult> {
+    pub async fn code_to_session(&self, js_code: String) -> SdkResult<LoginResult> {
         let url = "https://api.weixin.qq.com/sns/jscode2session?grant_type=authorization_code";
-        get_send(&self.sdk, url, &param).await
+        let query = QuerySession {
+            js_code: js_code,
+            appid: self.sdk.app_id.clone(),
+            secret: self.sdk.app_secret.clone(),
+        };
+        get_send(&self.sdk, url, &query).await
     }
 
     pub async fn check_encrypted_data(
@@ -122,6 +127,11 @@ impl<T: AccessTokenProvider> WxaSdk<T> {
     pub async fn get_paid_unionid(&self, param: &QueryPaidUnionId) -> SdkResult<UnionIdResult> {
         let url = "https://api.weixin.qq.com/wxa/getpaidunionid";
         post_send(&self.sdk, url, &param).await
+    }
+
+    /// Data analysis 数据分析模块
+    pub fn data_analysis(&self) -> data_analysis::DataAnalysisModule<WxSdk<T>> {
+        data_analysis::DataAnalysisModule(&self.sdk)
     }
 }
 
