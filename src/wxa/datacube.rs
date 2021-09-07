@@ -231,9 +231,9 @@ pub struct VisitPageItem {
     pub page_share_uv: i64,
 }
 
-pub struct DataAnalysisModule<'a, T: WxApiRequestBuilder>(pub(crate) &'a T);
+pub struct DatacubeModule<'a, T: WxApiRequestBuilder>(pub(crate) &'a T);
 
-impl<'a, T: WxApiRequestBuilder> DataAnalysisModule<'a, T> {
+impl<'a, T: WxApiRequestBuilder> DatacubeModule<'a, T> {
     /// 获取用户访问小程序日留存
     pub async fn get_daily_retain(&self, query: &DateRange) -> SdkResult<VisitRetain> {
         let url = "https://api.weixin.qq.com/datacube/getweanalysisappiddailyretaininfo";

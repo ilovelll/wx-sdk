@@ -3,7 +3,7 @@ use crate::{wechat::WxApiRequestBuilder, SdkResult, WxSdk};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::json;
 
-pub mod data_analysis;
+pub mod datacube;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DateRange {
@@ -142,8 +142,8 @@ impl<T: AccessTokenProvider> WxaSdk<T> {
     }
 
     /// Data analysis 数据分析模块
-    pub fn data_analysis(&self) -> data_analysis::DataAnalysisModule<WxSdk<T>> {
-        data_analysis::DataAnalysisModule(&self.sdk)
+    pub fn datacube(&self) -> datacube::DatacubeModule<WxSdk<T>> {
+        datacube::DatacubeModule(&self.sdk)
     }
 }
 
