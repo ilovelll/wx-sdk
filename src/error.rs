@@ -141,7 +141,7 @@ fn test_data_and_error() {
     //     errcode: 22,
     //     errmsg: "errrrr".to_string(),
     // });
-    
+
     let expected_data = &CommonResponse::<Data>::Ok(Data {
         aid: "ssss".to_string(),
         session_key: "dddddd".to_string(),

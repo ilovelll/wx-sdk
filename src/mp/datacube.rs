@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    access_token::AccessTokenProvider,
+    // access_token::AccessTokenProvider,
     error::CommonResponse,
-    wechat::{WxApiRequestBuilder, WxSdk},
+    wechat::WxApiRequestBuilder,
     SdkResult,
 };
 

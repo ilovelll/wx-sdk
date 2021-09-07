@@ -1,9 +1,6 @@
 //! Media Module （临时）素材文件接口相关
 use crate::SdkResult;
-use crate::{
-    error::CommonResponse,
-    wechat::{WxApiRequestBuilder, WxSdk},
-};
+use crate::{error::CommonResponse, wechat::WxApiRequestBuilder};
 use serde::{Deserialize, Serialize};
 
 use super::material::Articles;

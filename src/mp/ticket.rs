@@ -2,11 +2,11 @@ use std::time::Duration;
 
 use crate::{
     access_token::AccessTokenProvider,
-    error::{CommonResponse, SdkError, SdkResult},
+    error::{CommonResponse, SdkResult},
     wechat::WxApiRequestBuilder,
     WxSdk,
 };
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct Ticket {

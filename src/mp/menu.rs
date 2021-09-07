@@ -2,7 +2,7 @@
 
 use crate::{
     error::{CommonError, CommonResponse, SdkError},
-    wechat::{WxApiRequestBuilder, WxSdk},
+    wechat::WxApiRequestBuilder,
 };
 
 use super::SdkResult;
@@ -505,8 +505,8 @@ mod tests {
         ]
     }
 }"#;
-        let menu: AllButtons = serde_json::from_str(&input).unwrap();
-        // println!("{:#?}", &menu);
+        let _menu: AllButtons = serde_json::from_str(&input).unwrap();
+        // println!("{:#?}", &_menu);
         Ok(())
     }
 
@@ -568,8 +568,8 @@ mod tests {
                     }
                 ]
 }"#;
-        let menu: AllButtons = serde_json::from_str(&input).unwrap();
-        // println!("{:#?}", &menu);
+        let _menu: AllButtons = serde_json::from_str(&input).unwrap();
+        // println!("{:#?}", &_menu);
         Ok(())
     }
 }
