@@ -30,7 +30,7 @@ jobs:
         override: true
 
     - name: Cache Dependencies
-      uses: Swatinem/rust-cache@1
+      uses: Swatinem/rust-cache@v1.3.0
 
     - name: Run tests
       run: cargo test --verbose --all-features
