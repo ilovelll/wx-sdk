@@ -15,12 +15,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Build
-      run: cargo build --verbose
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Rename existing rust toolchain (Windows)
+      if: matrix.os == 'windows-latest'
+      run: Rename-Item C:\Users\runneradmin\.rustup\toolchains\stable-x86_64-pc-windows-msvc C:\Users\runneradmin\.rustup\toolchains\stable-x86_64-pc-windows-msvc.old
+
+    - name: Install Rust toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        profile: minimal
+        override: true
+
+    - name: Cache Dependencies
+      uses: Swatinem/rust-cache@1
+
     - name: Run tests
-      run: cargo test --verbose
-    - name: Build wxa
-      run: cargo build --verbose --features wxa
-    - name: Run tests wxa
-      run: cargo test --verbose --features wxa
+      run: cargo test --verbose --all-features
