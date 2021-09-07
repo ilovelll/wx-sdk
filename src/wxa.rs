@@ -3,7 +3,29 @@ use crate::{wechat::WxApiRequestBuilder, SdkResult, WxSdk};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::json;
 
-pub mod data_analysis;
+pub mod datacube;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct DateRange {
+    /// 开始日期。格式为 yyyymmdd
+    pub begin_date: String,
+    /// 结束日期，限定查询1天数据，允许设置的最大值为昨日。格式为 yyyymmdd
+    pub end_date: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TimestampRange {
+    /// 开始日期时间戳
+    pub begin_timestamp: String,
+    /// 结束日期时间戳
+    pub end_timestamp: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ListRes<T> {
+    /// 数据列表
+    pub list: Vec<T>,
+}
 
 #[derive(Debug, Serialize)]
 pub struct QuerySession {
@@ -41,7 +63,7 @@ pub struct CheckEncryptedResult {
     /// 是否是合法的数据
     pub vaild: bool,
     /// 加密数据生成的时间戳
-    pub create_time: i32,
+    pub create_time: i64,
 }
 
 #[derive(Debug, Serialize)]
@@ -114,14 +136,14 @@ impl<T: AccessTokenProvider> WxaSdk<T> {
         post_send(&self.sdk, url, post_data).await
     }
 
-    pub async fn get_paid_unionid(&self, param: &QueryPaidUnionId) -> SdkResult<UnionIdResult> {
+    pub async fn get_paid_unionid(&self, query: &QueryPaidUnionId) -> SdkResult<UnionIdResult> {
         let url = "https://api.weixin.qq.com/wxa/getpaidunionid";
-        post_send(&self.sdk, url, &param).await
+        post_send(&self.sdk, url, &query).await
     }
 
     /// Data analysis 数据分析模块
-    pub fn data_analysis(&self) -> data_analysis::DataAnalysisModule<WxSdk<T>> {
-        data_analysis::DataAnalysisModule(&self.sdk)
+    pub fn datacube(&self) -> datacube::DataCubeModule<WxSdk<T>> {
+        datacube::DataCubeModule(&self.sdk)
     }
 }
 
