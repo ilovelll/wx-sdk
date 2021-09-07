@@ -142,8 +142,8 @@ impl<T: AccessTokenProvider> WxaSdk<T> {
     }
 
     /// Data analysis 数据分析模块
-    pub fn datacube(&self) -> datacube::DatacubeModule<WxSdk<T>> {
-        datacube::DatacubeModule(&self.sdk)
+    pub fn datacube(&self) -> datacube::DataCubeModule<WxSdk<T>> {
+        datacube::DataCubeModule(&self.sdk)
     }
 }
 
