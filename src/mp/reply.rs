@@ -1,4 +1,4 @@
-use exile::{Document, Element, Node};
+use exile::{Document, Element};
 use serde_derive::{Deserialize, Serialize};
 
 use crate::SdkResult;

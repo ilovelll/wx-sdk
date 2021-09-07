@@ -2,7 +2,7 @@
 use crate::SdkResult;
 use crate::{
     error::{CommonError, CommonResponse},
-    wechat::{WxApiRequestBuilder, WxSdk},
+    wechat::WxApiRequestBuilder,
 };
 use serde::{Deserialize, Serialize};
 

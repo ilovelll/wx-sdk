@@ -1,5 +1,3 @@
-use serde::{Deserialize, Serialize};
-
 use crate::wechat::WxApiRequestBuilder;
 
 use self::{mass::MassModule, template::TemplateModule};
@@ -8,10 +6,7 @@ pub mod template {
     use serde::{Deserialize, Serialize};
     use std::collections::HashMap;
 
-    use crate::{
-        wechat::{WxApiRequestBuilder, WxSdk},
-        SdkResult,
-    };
+    use crate::{wechat::WxApiRequestBuilder, SdkResult};
 
     #[derive(Serialize, Deserialize, Debug)]
     pub struct SendTplMsgResponse {

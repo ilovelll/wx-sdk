@@ -8,8 +8,8 @@ use crate::{
     error::{CommonResponse, SdkError, SdkResult},
 };
 use async_trait::async_trait;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use std::time::{Duration, SystemTime};
+use serde::{Deserialize, Serialize};
+use std::time::Duration;
 use tokio::sync::RwLock;
 
 /// [WxSdk][crate::wechat::WxSdk] take a struct which impl [AccessTokenProvider].

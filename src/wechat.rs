@@ -56,9 +56,7 @@ impl<T: AccessTokenProvider> WxSdk<T> {
     /// miniprogram module
     #[cfg(feature = "wxa")]
     pub fn wxa(self) -> WxaSdk<T> {
-        WxaSdk {
-            sdk: self,
-        }
+        WxaSdk { sdk: self }
     }
 }
 

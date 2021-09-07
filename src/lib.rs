@@ -48,4 +48,3 @@ pub mod wxa;
 
 #[cfg(feature = "pay")]
 pub mod pay;
-

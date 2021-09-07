@@ -8,7 +8,7 @@ use roxmltree::Document;
 
 use crate::{
     access_token::AccessTokenProvider,
-    error::{CommonError, CommonResponse, SdkError},
+    error::{CommonError, SdkError},
     mp::event::signature::Signature,
 };
 use crate::{

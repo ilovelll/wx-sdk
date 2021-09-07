@@ -6,10 +6,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::error::SdkResult;
-use crate::{
-    error::CommonResponse,
-    wechat::{WxApiRequestBuilder, WxSdk},
-};
+use crate::{error::CommonResponse, wechat::WxApiRequestBuilder};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct QRStruct {
