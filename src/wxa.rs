@@ -3,7 +3,9 @@ use crate::{wechat::WxApiRequestBuilder, SdkResult, WxSdk};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::json;
 
+pub mod customer_message;
 pub mod datacube;
+pub mod uniform_message;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DateRange {
@@ -25,6 +27,15 @@ pub struct TimestampRange {
 pub struct ListRes<T> {
     /// 数据列表
     pub list: Vec<T>,
+}
+
+/// A single "part" of a multipart/form-data body. <br/>
+/// Yielded from the `FormData` stream.
+pub struct Part {
+    pub name: String,
+    pub filename: String,
+    pub content_type: String,
+    pub data: Vec<u8>,
 }
 
 #[derive(Debug, Serialize)]
@@ -144,6 +155,16 @@ impl<T: AccessTokenProvider> WxaSdk<T> {
     /// Data analysis 数据分析模块
     pub fn datacube(&self) -> datacube::DataCubeModule<WxSdk<T>> {
         datacube::DataCubeModule(&self.sdk)
+    }
+
+    /// Customer Service message 客服消息
+    pub fn customer_message(&self) -> customer_message::CustomerMessageModule<WxSdk<T>> {
+        customer_message::CustomerMessageModule(&self.sdk)
+    }
+
+    /// Uniform Service Message 统一服务消息
+    pub fn uniform_message(&self) -> uniform_message::UniformMessageModule<WxSdk<T>> {
+        uniform_message::UniformMessageModule(&self.sdk)
     }
 }
 
