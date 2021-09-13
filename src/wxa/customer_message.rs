@@ -23,7 +23,7 @@ pub struct SendMsg {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")] // todo test rename_all
+#[serde(rename_all = "lowercase")]
 pub enum MsgType {
     /// 文本消息
     Text,
@@ -87,10 +87,6 @@ pub enum Command {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MediaResult {
-    /// 错误码
-    pub errcode: i64,
-    /// 错误信息
-    pub errmsg: String,
     /// 文件类型
     #[serde(rename = "type")]
     pub type_: String,
@@ -98,6 +94,10 @@ pub struct MediaResult {
     pub media_id: String,
     /// 媒体文件上传时间戳
     pub created_at: i64,
+    /// 错误码
+    pub errcode: i32,
+    /// 错误信息
+    pub errmsg: String,
 }
 
 pub struct CustomerMessageModule<'a, T: WxApiRequestBuilder>(pub(crate) &'a T);

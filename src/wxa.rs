@@ -6,6 +6,7 @@ use serde_json::json;
 pub mod customer_message;
 pub mod datacube;
 pub mod uniform_message;
+pub mod updatable_message;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DateRange {
@@ -165,6 +166,11 @@ impl<T: AccessTokenProvider> WxaSdk<T> {
     /// Uniform Service Message 统一服务消息
     pub fn uniform_message(&self) -> uniform_message::UniformMessageModule<WxSdk<T>> {
         uniform_message::UniformMessageModule(&self.sdk)
+    }
+
+    /// Uniform Service Message 统一服务消息
+    pub fn updatable_message(&self) -> updatable_message::UpdatableMessageModule<WxSdk<T>> {
+        updatable_message::UpdatableMessageModule(&self.sdk)
     }
 }
 
