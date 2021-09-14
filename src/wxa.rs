@@ -7,6 +7,8 @@ pub mod customer_message;
 pub mod datacube;
 pub mod uniform_message;
 pub mod updatable_message;
+pub mod url_link;
+pub mod url_scheme;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DateRange {
@@ -171,6 +173,16 @@ impl<T: AccessTokenProvider> WxaSdk<T> {
     /// Uniform Service Message 统一服务消息
     pub fn updatable_message(&self) -> updatable_message::UpdatableMessageModule<WxSdk<T>> {
         updatable_message::UpdatableMessageModule(&self.sdk)
+    }
+
+    /// Url Scheme
+    pub fn url_scheme(&self) -> url_scheme::UrlSchemeModule<WxSdk<T>> {
+        url_scheme::UrlSchemeModule(&self.sdk)
+    }
+
+    /// Url Link
+    pub fn url_link(&self) -> url_link::UrlLinkModule<WxSdk<T>> {
+        url_link::UrlLinkModule(&self.sdk)
     }
 }
 
