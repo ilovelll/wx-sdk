@@ -42,3 +42,18 @@
   - [x] [batch undo blocklist](https://developers.weixin.qq.com/doc/offiaccount/User_Management/Manage_blacklist.html)
 
 ### Feature `pay`  微信支付
+
+### Feature `wxa`  微信支付
+- [x] Login  登录
+- [x] User Information  用户信息
+- [x] datacube  数据分析
+- [x] Customer Service Message  客服消息
+- [ ] Message Template  模板消息
+- [x] Customer Service Message  客服消息
+- [x] Uniform Service Message  模板消息
+- [x] Updatable Message  动态消息
+- [x] Plug-In Management  插件管理
+- [ ] Mini Programs Nearby  附近的小程序
+- [ ] Mini Program Code  小程序码
+- [x] Url Scheme
+- [x] Url Link
