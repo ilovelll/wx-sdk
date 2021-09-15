@@ -5,7 +5,13 @@ use serde_json::json;
 
 pub mod customer_message;
 pub mod datacube;
+pub mod nearby_poi;
+pub mod plugin_manage;
+pub mod qrcode;
 pub mod uniform_message;
+pub mod updatable_message;
+pub mod url_link;
+pub mod url_scheme;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DateRange {
@@ -38,18 +44,6 @@ pub struct Part {
     pub data: Vec<u8>,
 }
 
-#[derive(Debug, Serialize)]
-pub struct QuerySession {
-    /// 小程序 appId
-    pub appid: String,
-    /// 小程序 appSecret
-    pub secret: String,
-    /// 登录时获取的 code
-    pub js_code: String,
-    // 授权类型，此处只需填写 authorization_code
-    // pub grant_type: String,
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LoginResult {
     /// 用户唯一标识
@@ -67,14 +61,14 @@ pub struct LoginResult {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CheckEncryptedResult {
-    /// 错误码
-    pub errcode: i32,
-    /// 错误提示信息
-    pub errmsg: String,
     /// 是否是合法的数据
     pub vaild: bool,
     /// 加密数据生成的时间戳
     pub create_time: i64,
+    /// 错误码
+    pub errcode: i32,
+    /// 错误提示信息
+    pub errmsg: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -128,14 +122,14 @@ pub struct WxaSdk<T: AccessTokenProvider> {
 }
 
 impl<T: AccessTokenProvider> WxaSdk<T> {
-    pub async fn code_to_session(&self, js_code: String) -> SdkResult<LoginResult> {
+    pub async fn code_to_session(&self, js_code: &str) -> SdkResult<LoginResult> {
         let url = "https://api.weixin.qq.com/sns/jscode2session?grant_type=authorization_code";
-        let query = QuerySession {
-            js_code: js_code,
-            appid: self.sdk.app_id.clone(),
-            secret: self.sdk.app_secret.clone(),
-        };
-        get_send(&self.sdk, url, &query).await
+        let query = &serde_json::json!({
+            "js_code": js_code,
+            "appid": &self.sdk.app_id,
+            "secret": &self.sdk.app_secret,
+        });
+        get_send(&self.sdk, url, query).await
     }
 
     pub async fn check_encrypted_data(
@@ -165,6 +159,36 @@ impl<T: AccessTokenProvider> WxaSdk<T> {
     /// Uniform Service Message 统一服务消息
     pub fn uniform_message(&self) -> uniform_message::UniformMessageModule<WxSdk<T>> {
         uniform_message::UniformMessageModule(&self.sdk)
+    }
+
+    /// Uniform Service Message 统一服务消息
+    pub fn updatable_message(&self) -> updatable_message::UpdatableMessageModule<WxSdk<T>> {
+        updatable_message::UpdatableMessageModule(&self.sdk)
+    }
+
+    /// Plugin Manager 插件管理
+    pub fn plugin_mangage(&self) -> plugin_manage::PluginManageModule<WxSdk<T>> {
+        plugin_manage::PluginManageModule(&self.sdk)
+    }
+
+    /// Mini Programs Nearby 附近的小程序
+    pub fn nearby_poi(&self) -> nearby_poi::NearbyPoiModule<WxSdk<T>> {
+        nearby_poi::NearbyPoiModule(&self.sdk)
+    }
+
+    /// Mini Program Code 小程序码
+    pub fn qrcode(&self) -> qrcode::QrcodeModule<WxSdk<T>> {
+        qrcode::QrcodeModule(&self.sdk)
+    }
+
+    /// Url Scheme
+    pub fn url_scheme(&self) -> url_scheme::UrlSchemeModule<WxSdk<T>> {
+        url_scheme::UrlSchemeModule(&self.sdk)
+    }
+
+    /// Url Link
+    pub fn url_link(&self) -> url_link::UrlLinkModule<WxSdk<T>> {
+        url_link::UrlLinkModule(&self.sdk)
     }
 }
 
