@@ -53,7 +53,7 @@
 - [x] Uniform Service Message  模板消息
 - [x] Updatable Message  动态消息
 - [x] Plug-In Management  插件管理
-- [ ] Mini Programs Nearby  附近的小程序
-- [ ] Mini Program Code  小程序码
+- [x] Mini Programs Nearby  附近的小程序
+- [x] Mini Program Code  小程序码
 - [x] Url Scheme
 - [x] Url Link

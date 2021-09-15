@@ -5,7 +5,9 @@ use serde_json::json;
 
 pub mod customer_message;
 pub mod datacube;
+pub mod nearby_poi;
 pub mod plugin_manage;
+pub mod qrcode;
 pub mod uniform_message;
 pub mod updatable_message;
 pub mod url_link;
@@ -167,6 +169,16 @@ impl<T: AccessTokenProvider> WxaSdk<T> {
     /// Plugin Manager 插件管理
     pub fn plugin_mangage(&self) -> plugin_manage::PluginManageModule<WxSdk<T>> {
         plugin_manage::PluginManageModule(&self.sdk)
+    }
+
+    /// Mini Programs Nearby 附近的小程序
+    pub fn nearby_poi(&self) -> nearby_poi::NearbyPoiModule<WxSdk<T>> {
+        nearby_poi::NearbyPoiModule(&self.sdk)
+    }
+
+    /// Mini Program Code 小程序码
+    pub fn qrcode(&self) -> qrcode::QrcodeModule<WxSdk<T>> {
+        qrcode::QrcodeModule(&self.sdk)
     }
 
     /// Url Scheme
