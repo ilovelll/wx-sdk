@@ -3,11 +3,13 @@ use crate::{wechat::WxApiRequestBuilder, SdkResult, WxSdk};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::json;
 
+pub mod content_security;
 pub mod customer_message;
 pub mod datacube;
 pub mod nearby_poi;
 pub mod plugin_manage;
 pub mod qrcode;
+pub mod redpacket_cover;
 pub mod uniform_message;
 pub mod updatable_message;
 pub mod url_link;
@@ -189,6 +191,16 @@ impl<T: AccessTokenProvider> WxaSdk<T> {
     /// Url Link
     pub fn url_link(&self) -> url_link::UrlLinkModule<WxSdk<T>> {
         url_link::UrlLinkModule(&self.sdk)
+    }
+
+    /// Content Security 内容安全
+    pub fn content_security(&self) -> content_security::ContentSecurityModule<WxSdk<T>> {
+        content_security::ContentSecurityModule(&self.sdk)
+    }
+
+    /// Redpacket Cover 微信红包封面
+    pub fn redpacket_cover(&self) -> redpacket_cover::RedpacketCoverModule<WxSdk<T>> {
+        redpacket_cover::RedpacketCoverModule(&self.sdk)
     }
 }
 

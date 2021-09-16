@@ -57,3 +57,5 @@
 - [x] Mini Program Code  小程序码
 - [x] Url Scheme
 - [x] Url Link
+- [x] Content Security  内容安全
+- [x] Redpacket Cover  微信红包封面
