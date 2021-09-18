@@ -43,7 +43,7 @@
 
 ### Feature `pay`  微信支付
 
-### Feature `wxa`  微信支付
+### Feature `wxa`  微信小程序
 - [x] Login  登录
 - [x] User Information  用户信息
 - [x] datacube  数据分析

@@ -1,4 +1,4 @@
-use super::{post_send};
+use super::post_send;
 use crate::{wechat::WxApiRequestBuilder, SdkResult};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;

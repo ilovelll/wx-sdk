@@ -5,7 +5,7 @@
 // pub struct AdModule<'a, T: WxApiRequestBuilder>(pub(crate) &'a T);
 
 // impl<'a, T: WxApiRequestBuilder> AdModule<'a, T> {
-    
+
 //     pub async fn AddUserAction(&self, data: Part) -> SdkResult<()> {
 //         let url = "https://api.weixin.qq.com/marketing/user_actions/add";
 //         let part = reqwest::multipart::Part::bytes(data.data)
