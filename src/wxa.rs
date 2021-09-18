@@ -3,6 +3,8 @@ use crate::{wechat::WxApiRequestBuilder, SdkResult, WxSdk};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::json;
 
+pub mod ad;
+pub mod cloudbase;
 pub mod content_security;
 pub mod customer_message;
 pub mod datacube;
@@ -201,6 +203,11 @@ impl<T: AccessTokenProvider> WxaSdk<T> {
     /// Redpacket Cover 微信红包封面
     pub fn redpacket_cover(&self) -> redpacket_cover::RedpacketCoverModule<WxSdk<T>> {
         redpacket_cover::RedpacketCoverModule(&self.sdk)
+    }
+
+    /// Cloudbase 云开发
+    pub fn cloudbase(&self) -> cloudbase::CloudbaseModule<WxSdk<T>> {
+        cloudbase::CloudbaseModule(&self.sdk)
     }
 }
 

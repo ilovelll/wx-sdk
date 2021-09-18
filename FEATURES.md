@@ -59,3 +59,5 @@
 - [x] Url Link
 - [x] Content Security  内容安全
 - [x] Redpacket Cover  微信红包封面
+- [ ] Ad  广告
+- [x] Cloudbase  云开发
