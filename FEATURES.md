@@ -43,7 +43,7 @@
 
 ### Feature `pay`  微信支付
 
-### Feature `wxa`  微信支付
+### Feature `wxa`  微信小程序
 - [x] Login  登录
 - [x] User Information  用户信息
 - [x] datacube  数据分析
@@ -57,3 +57,10 @@
 - [x] Mini Program Code  小程序码
 - [x] Url Scheme
 - [x] Url Link
+- [x] Content Security  内容安全
+- [x] Redpacket Cover  微信红包封面
+- [ ] Ad  广告
+- [x] Cloudbase  云开发
+- [x] Img  图像处理
+- [ ] Immediate Delivery 即时配送
+- [x] Internet  网络

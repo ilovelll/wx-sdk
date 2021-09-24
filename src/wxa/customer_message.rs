@@ -94,10 +94,6 @@ pub struct MediaResult {
     pub media_id: String,
     /// 媒体文件上传时间戳
     pub created_at: i64,
-    /// 错误码
-    pub errcode: i32,
-    /// 错误信息
-    pub errmsg: String,
 }
 
 pub struct CustomerMessageModule<'a, T: WxApiRequestBuilder>(pub(crate) &'a T);
