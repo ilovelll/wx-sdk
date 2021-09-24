@@ -8,6 +8,8 @@ pub mod cloudbase;
 pub mod content_security;
 pub mod customer_message;
 pub mod datacube;
+pub mod img;
+pub mod internet;
 pub mod nearby_poi;
 pub mod plugin_manage;
 pub mod qrcode;
@@ -208,6 +210,16 @@ impl<T: AccessTokenProvider> WxaSdk<T> {
     /// Cloudbase 云开发
     pub fn cloudbase(&self) -> cloudbase::CloudbaseModule<WxSdk<T>> {
         cloudbase::CloudbaseModule(&self.sdk)
+    }
+
+    /// Img 图像处理
+    pub fn img(&self) -> img::ImgModule<WxSdk<T>> {
+        img::ImgModule(&self.sdk)
+    }
+
+    /// Internet 网络
+    pub fn internet(&self) -> internet::InternetModule<WxSdk<T>> {
+        internet::InternetModule(&self.sdk)
     }
 }
 
