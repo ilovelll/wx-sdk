@@ -30,10 +30,6 @@ pub struct PressureTask {
 pub struct PressureId {
     /// 压测ID
     pub pressure_id: i64,
-    /// 错误码
-    pub errcode: i32,
-    /// 错误信息
-    pub errmsg: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -50,10 +46,6 @@ pub struct SmsTask {
 pub struct QueryId {
     /// 查询 ID
     pub query_id: String,
-    /// 错误码
-    pub errcode: i32,
-    /// 错误信息
-    pub errmsg: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -80,10 +72,6 @@ pub struct FilesData {
     /// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
     #[serde(rename = "RequestId")]
     pub request_id: String,
-    /// 错误码
-    pub errcode: i32,
-    /// 错误信息
-    pub errmsg: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -133,10 +121,6 @@ pub struct SmsRecords {
     /// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
     #[serde(rename = "RequestId")]
     pub request_id: String,
-    /// 错误码
-    pub errcode: i32,
-    /// 错误信息
-    pub errmsg: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -172,10 +156,6 @@ pub struct QueryOpenData {
 pub struct OpenDataList {
     /// 开放数据列表
     pub data_list: Vec<OpenData>,
-    /// 错误码
-    pub errcode: i32,
-    /// 错误信息
-    pub errmsg: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -206,10 +186,6 @@ pub struct StepInfo {
 pub struct PressureTestReport {
     /// 压测报告
     pub report: PTestReport,
-    /// 错误码
-    pub errcode: i32,
-    /// 错误信息
-    pub errmsg: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -267,10 +243,6 @@ pub struct PressureTestStatus {
     pub beg_time: i64,
     /// 压测结束时间
     pub end_time: i64,
-    /// 错误码
-    pub errcode: i32,
-    /// 错误信息
-    pub errmsg: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

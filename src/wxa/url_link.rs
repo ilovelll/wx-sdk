@@ -58,8 +58,6 @@ pub struct CloudBase {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UrlLink {
     openlink: String,
-    errcode: i32,
-    errmsg: String,
 }
 
 pub struct UrlLinkModule<'a, T: WxApiRequestBuilder>(pub(crate) &'a T);

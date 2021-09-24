@@ -42,8 +42,6 @@ pub struct JumpWxa {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Openlink {
     openlink: String,
-    errcode: i32,
-    errmsg: String,
 }
 
 pub struct UrlSchemeModule<'a, T: WxApiRequestBuilder>(pub(crate) &'a T);

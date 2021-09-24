@@ -13,8 +13,6 @@ pub struct Auth {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AuthResult {
     pub data: DataUrl,
-    pub errcode: i32,
-    pub errmsg: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

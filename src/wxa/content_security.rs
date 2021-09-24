@@ -21,10 +21,6 @@ pub struct Media {
 pub struct MediaCheckResult {
     /// 唯一请求标识，标记单次请求，用于匹配异步推送结果
     pub trace_id: String,
-    /// 错误码
-    pub errcode: i32,
-    /// 错误信息
-    pub errmsg: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -56,10 +52,6 @@ pub struct MsgCheckRes {
     pub result: MsgCheckResult,
     /// 详细检测结果
     pub detail: Vec<MsgCheckDetail>,
-    /// 错误码
-    pub errcode: i32,
-    /// 错误信息
-    pub errmsg: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -68,7 +60,7 @@ pub struct MsgCheckResult {
     pub suggust: String,
     /// 命中标签枚举值，100 正常；10001 广告；20001 时政；20002 色情；20003 辱骂；<br/>
     /// 20006 违法犯罪；20008 欺诈；20012 低俗；20013  版权；21000 其他
-    pub label: String,
+    pub label: i32,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -81,7 +73,7 @@ pub struct MsgCheckDetail {
     pub suggest: String,
     /// 命中标签枚举值，100 正常；10001 广告；20001 时政；20002 色情；20003 辱骂；20006 违法犯罪；20008 欺诈；20012 低俗；20013  版权；21000 其他
     #[serde(default)]
-    pub label: Option<String>,
+    pub label: Option<i32>,
     /// 0-100，代表置信度，越高代表越有可能属于当前返回的标签（label）
     #[serde(default)]
     pub prob: Option<i32>,

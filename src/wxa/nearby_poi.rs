@@ -51,10 +51,6 @@ pub struct Address {
 pub struct AddResult {
     /// 返回数据
     pub data: AddData,
-    /// 错误信息
-    pub errmsg: String,
-    /// 错误码
-    pub errcode: i32,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -79,10 +75,6 @@ pub struct QueryList {
 pub struct PoiListResult {
     /// 返回数据
     pub data: PoiListData,
-    /// 错误信息
-    pub errmsg: String,
-    /// 错误码
-    pub errcode: i32,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
