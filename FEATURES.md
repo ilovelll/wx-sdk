@@ -62,5 +62,8 @@
 - [ ] Ad  广告
 - [x] Cloudbase  云开发
 - [x] Img  图像处理
-- [ ] Immediate Delivery 即时配送
+- [x] Immediate Delivery  即时配送
 - [x] Internet  网络
+- [ ] Live Broadcast  直播
+- [ ] Logistics  物流助手
+

@@ -11,6 +11,7 @@ pub mod img;
 pub mod internet;
 pub mod nearby_poi;
 pub mod plugin_manage;
+pub mod immediate_delivery;
 pub mod qrcode;
 pub mod redpacket_cover;
 pub mod uniform_message;
@@ -202,6 +203,11 @@ impl<T: AccessTokenProvider> WxaSdk<T> {
     /// Img 图像处理
     pub fn img(&self) -> img::ImgModule<WxSdk<T>> {
         img::ImgModule(&self.sdk)
+    }
+
+    /// Immediate Delivery 即使配送
+    pub fn immediate_delivery(&self) -> immediate_delivery::ImmediateDeliveryModule<WxSdk<T>> {
+        immediate_delivery::ImmediateDeliveryModule(&self.sdk)
     }
 
     /// Internet 网络
