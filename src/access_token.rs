@@ -10,7 +10,7 @@ use crate::{
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
-use tokio::sync::RwLock;
+use std::sync::{Arc, RwLock};
 
 /// [WxSdk][crate::wechat::WxSdk] take a struct which impl [AccessTokenProvider].
 /// You need to use [async_trait](https://crates.io/crates/async-trait) to implement [AccessTokenProvider].
@@ -47,7 +47,7 @@ impl From<AccessToken> for cache::Item<String> {
 pub struct TokenClient {
     app_id: String,
     app_secret: String,
-    cache_token: RwLock<Option<cache::Item<String>>>,
+    cache_token: Arc<RwLock<Option<cache::Item<String>>>>,
 }
 
 impl TokenClient {
@@ -55,8 +55,25 @@ impl TokenClient {
         TokenClient {
             app_id,
             app_secret,
-            cache_token: RwLock::new(None),
+            cache_token: Arc::new(RwLock::new(None)),
         }
+    }
+
+    fn get_cache_token(&self) -> Option<AccessToken> {
+        let locked = self.cache_token.read().unwrap();
+        match &*locked {
+            Some(i) if !i.expired() => {
+                Some(i.clone().into())
+            },
+            _ => {
+                None
+            },
+        }
+    }
+
+    fn set_cache_token(&self, token: AccessToken) {
+        let mut locked = self.cache_token.write().unwrap();
+        *locked = Some(token.into())
     }
 }
 
@@ -68,14 +85,12 @@ impl AccessTokenProvider for TokenClient {
             self.app_id.clone(),
             self.app_secret.clone()
         );
-        // let locked = futures::executor::block_on(self.cache_token.read());
-        let locked = self.cache_token.read().await;
-        match &*locked {
-            Some(i) if !i.expired() => {
-                let cloned = i.clone();
-                Ok(cloned.into())
-            }
-            _ => {
+        let cache_token = self.get_cache_token();
+        match cache_token {
+            Some(token) => {
+                Ok(token)
+            },
+            None => {
                 let msg = reqwest::get(&url)
                     .await?
                     .json::<CommonResponse<AccessToken>>()
@@ -83,14 +98,12 @@ impl AccessTokenProvider for TokenClient {
 
                 match msg {
                     CommonResponse::Ok(at) => {
-                        drop(locked);
-                        let mut locked = self.cache_token.write().await;
-                        *locked = Some(at.clone().into());
+                        self.set_cache_token(at.clone());
                         Ok(at)
                     }
                     CommonResponse::Err(e) => Err(SdkError::AccessTokenError(e)),
                 }
-            }
+            },
         }
     }
 }
@@ -98,9 +111,9 @@ impl AccessTokenProvider for TokenClient {
 mod tests {
     use std::time::SystemTime;
 
-    use tokio::{sync::RwLock, time::sleep};
+    use tokio::{ time::sleep };
 
-    use crate::{cache, error::CommonResponse, AccessToken, TokenClient};
+    use crate::{AccessToken, TokenClient, access_token::AccessTokenProvider, cache, error::CommonResponse};
 
     #[test]
     fn test() {
@@ -119,25 +132,25 @@ mod tests {
         assert_eq!(expected, serde_json::from_str(input).unwrap());
     }
 
-    // #[tokio::test]
-    // async fn test_get_from_cache() {
-    //     use std::time::Duration;
+    #[tokio::test]
+    async fn test_get_from_cache() {
+        use std::time::Duration;
 
-    //     let token_client = TokenClient {
-    //         app_id: "app_id".to_owned(),
-    //         app_secret: "secret".to_owned(),
-    //         cache_token: RwLock::new(Some(cache::Item::new(
-    //             "ACCESS_TOKEN".to_owned(),
-    //             Some(Duration::from_secs(2)),
-    //         ))),
-    //     };
-    //     sleep(Duration::new(2, 0)).await;
-    //     let res = token_client.get_access_token().await.unwrap();
-    //     let token = res.access_token;
-    //     let new_t = token_client.get_access_token().await.unwrap();
-    //     assert_eq!(new_t, AccessToken{
-    //         access_token: token,
-    //         expires_in: 0
-    //     });
-    // }
+        let token_client = TokenClient {
+            app_id: "app_id".to_owned(),
+            app_secret: "secret".to_owned(),
+            cache_token: std::sync::Arc::new(std::sync::RwLock::new(Some(cache::Item::new(
+                "ACCESS_TOKEN".to_owned(),
+                Some(Duration::from_secs(2)),
+            )))),
+        };
+        sleep(Duration::new(1, 0)).await;
+        let res = token_client.get_access_token().await.unwrap();
+        let token = res.access_token;
+        let new_t = token_client.get_access_token().await.unwrap();
+        assert_eq!(new_t, AccessToken{
+            access_token: token,
+            expires_in: 0
+        });
+    }
 }
