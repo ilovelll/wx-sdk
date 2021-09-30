@@ -7,7 +7,7 @@ pub struct Address {
     /// 必填,写死为"1"
     pub is_comm_nearby: String,
     /// 门店图片，最多9张，最少1张，上传门店图片如门店外景、环境设施、商品服务等，图片将展示在微信客户端的门店页。<br/>
-    /// 图片链接通过文档 https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1444738729 
+    /// 图片链接通过文档 https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1444738729
     /// 中的《上传图文消息内的图片获取URL》接口获取。<br/>
     /// 必填，文件格式为bmp、png、jpeg、jpg或gif，大小不超过5M pic_list是字符串，内容是一个json
     pub pic_list: String,
@@ -51,10 +51,6 @@ pub struct Address {
 pub struct AddResult {
     /// 返回数据
     pub data: AddData,
-    /// 错误信息
-    pub errmsg: String,
-    /// 错误码
-    pub errcode: i32,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -79,10 +75,6 @@ pub struct QueryList {
 pub struct PoiListResult {
     /// 返回数据
     pub data: PoiListData,
-    /// 错误信息
-    pub errmsg: String,
-    /// 错误码
-    pub errcode: i32,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -144,7 +136,7 @@ impl<'a, T: WxApiRequestBuilder> NearbyPoiModule<'a, T> {
     /// 删除地点
     pub async fn delete(&self, poi_id: &str) -> SdkResult<()> {
         let url = "https://api.weixin.qq.com/wxa/delnearbypoi";
-        let data = &serde_json::json!({"poi_id": poi_id});
+        let data = &serde_json::json!({ "poi_id": poi_id });
         post_send(self.0, url, data).await
     }
 

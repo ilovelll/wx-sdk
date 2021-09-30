@@ -1,7 +1,6 @@
 use super::{post_send, DateRange, ListRes, TimestampRange};
 use crate::{wechat::WxApiRequestBuilder, SdkResult};
 use serde::{Deserialize, Serialize};
-// use serde_json::json;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct VisitRetain {
@@ -108,10 +107,6 @@ pub mod performance_data {
     pub struct Result {
         /// 返回的性能数据
         pub body: Data,
-        /// 错误码
-        pub errcode: i32,
-        /// 错误信息
-        pub errmsg: String,
     }
 
     #[derive(Debug, Serialize, Deserialize)]

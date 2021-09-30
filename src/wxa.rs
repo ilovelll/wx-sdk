@@ -1,13 +1,18 @@
 use crate::{access_token::AccessTokenProvider, error::CommonResponse};
 use crate::{wechat::WxApiRequestBuilder, SdkResult, WxSdk};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use serde_json::json;
 
+pub mod ad;
+pub mod cloudbase;
+pub mod content_security;
 pub mod customer_message;
 pub mod datacube;
+pub mod img;
+pub mod internet;
 pub mod nearby_poi;
 pub mod plugin_manage;
 pub mod qrcode;
+pub mod redpacket_cover;
 pub mod uniform_message;
 pub mod updatable_message;
 pub mod url_link;
@@ -53,10 +58,6 @@ pub struct LoginResult {
     pub session_key: String,
     /// 用户在开放平台的唯一标识符，若当前小程序已绑定到微信开放平台帐号下会返回，详见 UnionID 机制说明。
     pub unionid: String,
-    /// 错误码
-    pub errcode: i32,
-    /// 错误信息
-    pub errmsg: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -65,10 +66,6 @@ pub struct CheckEncryptedResult {
     pub vaild: bool,
     /// 加密数据生成的时间戳
     pub create_time: i64,
-    /// 错误码
-    pub errcode: i32,
-    /// 错误提示信息
-    pub errmsg: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -87,13 +84,9 @@ pub struct QueryPaidUnionId {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct UnionIdResult {
+pub struct UnionId {
     /// 用户唯一标识，调用成功后返回
     pub unionid: String,
-    /// 错误码
-    pub errcode: i32,
-    /// 错误信息
-    pub errmsg: String,
 }
 
 async fn get_send<'a, A: WxApiRequestBuilder, R: DeserializeOwned, P: Serialize>(
@@ -137,11 +130,11 @@ impl<T: AccessTokenProvider> WxaSdk<T> {
         encrypted_msg_hash: &str,
     ) -> SdkResult<CheckEncryptedResult> {
         let url = "https://api.weixin.qq.com/wxa/business/checkencryptedmsg";
-        let post_data = &json!({ "encrypted_msg_hash": encrypted_msg_hash });
+        let post_data = &serde_json::json!({ "encrypted_msg_hash": encrypted_msg_hash });
         post_send(&self.sdk, url, post_data).await
     }
 
-    pub async fn get_paid_unionid(&self, query: &QueryPaidUnionId) -> SdkResult<UnionIdResult> {
+    pub async fn get_paid_unionid(&self, query: &QueryPaidUnionId) -> SdkResult<UnionId> {
         let url = "https://api.weixin.qq.com/wxa/getpaidunionid";
         post_send(&self.sdk, url, &query).await
     }
@@ -189,6 +182,31 @@ impl<T: AccessTokenProvider> WxaSdk<T> {
     /// Url Link
     pub fn url_link(&self) -> url_link::UrlLinkModule<WxSdk<T>> {
         url_link::UrlLinkModule(&self.sdk)
+    }
+
+    /// Content Security 内容安全
+    pub fn content_security(&self) -> content_security::ContentSecurityModule<WxSdk<T>> {
+        content_security::ContentSecurityModule(&self.sdk)
+    }
+
+    /// Redpacket Cover 微信红包封面
+    pub fn redpacket_cover(&self) -> redpacket_cover::RedpacketCoverModule<WxSdk<T>> {
+        redpacket_cover::RedpacketCoverModule(&self.sdk)
+    }
+
+    /// Cloudbase 云开发
+    pub fn cloudbase(&self) -> cloudbase::CloudbaseModule<WxSdk<T>> {
+        cloudbase::CloudbaseModule(&self.sdk)
+    }
+
+    /// Img 图像处理
+    pub fn img(&self) -> img::ImgModule<WxSdk<T>> {
+        img::ImgModule(&self.sdk)
+    }
+
+    /// Internet 网络
+    pub fn internet(&self) -> internet::InternetModule<WxSdk<T>> {
+        internet::InternetModule(&self.sdk)
     }
 }
 

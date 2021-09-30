@@ -1,4 +1,4 @@
-use super::{post_send};
+use super::post_send;
 use crate::{wechat::WxApiRequestBuilder, SdkResult};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -7,10 +7,6 @@ use std::collections::HashMap;
 pub struct ApplyList {
     /// 插件使用方列表
     pub apply_list: Vec<ApplyItem>,
-    /// 错误码
-    pub errcode: i32,
-    /// 错误信息
-    pub errmsg: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -43,10 +39,6 @@ pub struct ApplyItem {
 pub struct PluginList {
     /// 申请或使用中的插件列表
     pub plugin_list: Vec<PluginItem>,
-    /// 错误码
-    pub errcode: i32,
-    /// 错误信息
-    pub errmsg: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
