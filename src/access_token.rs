@@ -9,8 +9,8 @@ use crate::{
 };
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use std::time::Duration;
 use std::sync::{Arc, RwLock};
+use std::time::Duration;
 
 /// [WxSdk][crate::wechat::WxSdk] take a struct which impl [AccessTokenProvider].
 /// You need to use [async_trait](https://crates.io/crates/async-trait) to implement [AccessTokenProvider].
@@ -62,12 +62,8 @@ impl TokenClient {
     fn get_cache_token(&self) -> Option<AccessToken> {
         let locked = self.cache_token.read().unwrap();
         match &*locked {
-            Some(i) if !i.expired() => {
-                Some(i.clone().into())
-            },
-            _ => {
-                None
-            },
+            Some(i) if !i.expired() => Some(i.clone().into()),
+            _ => None,
         }
     }
 
@@ -87,9 +83,7 @@ impl AccessTokenProvider for TokenClient {
         );
         let cache_token = self.get_cache_token();
         match cache_token {
-            Some(token) => {
-                Ok(token)
-            },
+            Some(token) => Ok(token),
             None => {
                 let msg = reqwest::get(&url)
                     .await?
@@ -103,7 +97,7 @@ impl AccessTokenProvider for TokenClient {
                     }
                     CommonResponse::Err(e) => Err(SdkError::AccessTokenError(e)),
                 }
-            },
+            }
         }
     }
 }
@@ -111,9 +105,11 @@ impl AccessTokenProvider for TokenClient {
 mod tests {
     use std::time::SystemTime;
 
-    use tokio::{ time::sleep };
+    use tokio::time::sleep;
 
-    use crate::{AccessToken, TokenClient, access_token::AccessTokenProvider, cache, error::CommonResponse};
+    use crate::{
+        access_token::AccessTokenProvider, cache, error::CommonResponse, AccessToken, TokenClient,
+    };
 
     #[test]
     fn test() {
@@ -148,9 +144,12 @@ mod tests {
         let res = token_client.get_access_token().await.unwrap();
         let token = res.access_token;
         let new_t = token_client.get_access_token().await.unwrap();
-        assert_eq!(new_t, AccessToken{
-            access_token: token,
-            expires_in: 0
-        });
+        assert_eq!(
+            new_t,
+            AccessToken {
+                access_token: token,
+                expires_in: 0
+            }
+        );
     }
 }
