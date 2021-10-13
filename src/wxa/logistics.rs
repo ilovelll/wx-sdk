@@ -150,11 +150,11 @@ pub struct KeyValue {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct QueryOrderList {
     /// 订单列表, 最多不能超过100个
-    pub order_list: Vec<QueryOrder>,
+    pub order_list: Vec<QueryOrderItem>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct QueryOrder {
+pub struct QueryOrderItem {
     /// 订单ID
     pub order_id: String,
     /// 快递公司ID，参见getAllDelivery
@@ -597,7 +597,7 @@ impl<'a, T: WxApiRequestBuilder> LogisticsModule<'a, T> {
     }
 
     /// 获取电子面单余额。仅在使用加盟类快递公司时，才可以调用。
-    pub async fn get_quota(&self, data: &QueryQuota) -> SdkResult<Quota> {
+    pub async fn get_quota(&self, data: &QueryQuota) -> SdkResult<QuotaNum> {
         let url = "https://api.weixin.qq.com/cgi-bin/express/business/quota/get";
         post_send(self.0, url, data).await
     }

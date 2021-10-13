@@ -218,7 +218,7 @@ impl<T: AccessTokenProvider> WxaSdk<T> {
 
     /// logistics 物流助手
     pub fn logistics(&self) -> logistics::LogisticsModule<WxSdk<T>> {
-        logistics::ImmediateDeliveryModule(&self.sdk)
+        logistics::LogisticsModule(&self.sdk)
     }
 }
 
