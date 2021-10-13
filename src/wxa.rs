@@ -8,10 +8,11 @@ pub mod content_security;
 pub mod customer_message;
 pub mod datacube;
 pub mod img;
+pub mod immediate_delivery;
 pub mod internet;
+pub mod logistics;
 pub mod nearby_poi;
 pub mod plugin_manage;
-pub mod immediate_delivery;
 pub mod qrcode;
 pub mod redpacket_cover;
 pub mod uniform_message;
@@ -214,6 +215,11 @@ impl<T: AccessTokenProvider> WxaSdk<T> {
     pub fn internet(&self) -> internet::InternetModule<WxSdk<T>> {
         internet::InternetModule(&self.sdk)
     }
+
+    /// logistics 物流助手
+    pub fn logistics(&self) -> logistics::LogisticsModule<WxSdk<T>> {
+        logistics::ImmediateDeliveryModule(&self.sdk)
+    }
 }
 
 // #[test]
@@ -241,4 +247,11 @@ impl<T: AccessTokenProvider> WxaSdk<T> {
 //     let data = &Data { keys: vec![1, 2, 3, 4] };
 //     let builder = reqwest::Client::new().get("https://b.com/").query(&data);
 //     println!("{:?}", &builder); //
+// }
+
+// #[test]
+// fn test_query_data_unit() {
+//     let data = &();
+//     let builder = reqwest::Client::new().get("https://b.com/").query(&data);
+//     println!("{:?}", &builder); // query: None
 // }

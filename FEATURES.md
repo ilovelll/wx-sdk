@@ -65,5 +65,5 @@
 - [x] Immediate Delivery  即时配送
 - [x] Internet  网络
 - [ ] Live Broadcast  直播
-- [ ] Logistics  物流助手
+- [x] Logistics  物流助手
 
