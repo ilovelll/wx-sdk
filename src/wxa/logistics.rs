@@ -282,13 +282,17 @@ pub struct DeliveryInfo {
     /// 快递公司名称
     pub delivery_name: String,
     /// 是否支持散单, 1表示支持
-    pub can_use_cash: i32,
+    #[serde(default)]
+    pub can_use_cash: Option<i32>,
     /// 是否支持查询面单余额, 1表示支持
-    pub can_get_quota: i32,
+    #[serde(default)]
+    pub can_get_quota: Option<i32>,
     /// 散单对应的bizid，当can_use_cash=1时有效
-    pub cash_biz_id: String,
+    #[serde(default)]
+    pub cash_biz_id: Option<String>,
     /// 支持的服务类型
-    pub service_type: Vec<ServiceType>,
+    #[serde(default)]
+    pub service_type: Option<Vec<ServiceType>>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
