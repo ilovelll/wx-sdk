@@ -61,48 +61,48 @@ pub struct MediaId {
     pub media_id: String,
 }
 
+pub(crate) async fn post_img_data<'a, A: WxApiRequestBuilder, R: serde::de::DeserializeOwned>(
+    api_builder: &'a A,
+    url: &'static str,
+    data: ImgData,
+) -> SdkResult<R> {
+    match data {
+        ImgData::ImgUrl(img_url) => {
+            let data = &serde_json::json!({ "img_url": img_url });
+            post_send(api_builder, url, data).await
+        }
+        ImgData::Img(data) => {
+            let part = reqwest::multipart::Part::bytes(data.data)
+                .file_name(data.filename)
+                .mime_str(&data.content_type);
+
+            let form = reqwest::multipart::Form::new().part(data.name, part.unwrap());
+            let builder = api_builder.wx_post(url).await?.multipart(form);
+            let res: CommonResponse<R> = builder.send().await?.json().await?;
+
+            res.into()
+        }
+    }
+}
+
 pub struct ImgModule<'a, T: WxApiRequestBuilder>(pub(crate) &'a T);
 
 impl<'a, T: WxApiRequestBuilder> ImgModule<'a, T> {
-    async fn post_img_data<R: serde::de::DeserializeOwned>(
-        &self,
-        url: &'static str,
-        data: ImgData,
-    ) -> SdkResult<R> {
-        match data {
-            ImgData::ImgUrl(img_url) => {
-                let data = &serde_json::json!({ "img_url": img_url });
-                post_send(self.0, url, data).await
-            }
-            ImgData::Img(data) => {
-                let part = reqwest::multipart::Part::bytes(data.data)
-                    .file_name(data.filename)
-                    .mime_str(&data.content_type);
-
-                let form = reqwest::multipart::Form::new().part(data.name, part.unwrap());
-                let builder = self.0.wx_post(url).await?.multipart(form);
-                let res: CommonResponse<R> = builder.send().await?.json().await?;
-
-                res.into()
-            }
-        }
-    }
-
     /// 本接口提供基于小程序的图片智能裁剪能力。
     pub async fn ai_crop(&self, data: ImgData) -> SdkResult<ImgCrop> {
         let url = "https://api.weixin.qq.com/cv/img/aicrop";
-        self.post_img_data(url, data).await
+        post_img_data(self.0, url, data).await
     }
 
     /// 本接口提供基于小程序的条码/二维码识别的API。
     pub async fn scan_qrcode(&self, data: ImgData) -> SdkResult<ScanQRCode> {
         let url = "https://api.weixin.qq.com/cv/img/qrcode";
-        self.post_img_data(url, data).await
+        post_img_data(self.0, url, data).await
     }
 
     /// 本接口提供基于小程序的图片高清化能力。
     pub async fn superresolution(&self, data: ImgData) -> SdkResult<MediaId> {
         let url = "https://api.weixin.qq.com/cv/img/superresolution";
-        self.post_img_data(url, data).await
+        post_img_data(self.0, url, data).await
     }
 }

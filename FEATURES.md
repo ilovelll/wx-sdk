@@ -66,4 +66,7 @@
 - [x] Internet  网络
 - [ ] Live Broadcast  直播
 - [x] Logistics  物流助手
+- [x] OCR
+- [x] operation  运维中心
+- [x] Risk Control  安全风控
 
