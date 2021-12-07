@@ -17,13 +17,14 @@ use crate::{
 };
 
 use self::{
-    customservice::CustomServiceModule, datacube::DataCubeModule, material::MaterialModule,
-    media::MediaModule, menu::MenuModule, message::MessageModule, qrcode::QrcodeModule,
-    reply::Reply, shorten::ShortenModule, sns::SnsModule, tags::TagsModule,
+    customservice::CustomServiceModule, datacube::DataCubeModule, draft::DraftModule,
+    material::MaterialModule, media::MediaModule, menu::MenuModule, message::MessageModule,
+    qrcode::QrcodeModule, reply::Reply, shorten::ShortenModule, sns::SnsModule, tags::TagsModule,
     template::TemplateModule, ticket::TicketModule, user::UserModule,
 };
 pub mod customservice;
 pub mod datacube;
+pub mod draft;
 pub mod event;
 pub mod material;
 pub mod media;
@@ -147,6 +148,11 @@ impl<T: AccessTokenProvider> MpSdk<T> {
     /// 网页授权模块
     pub fn sns(&self) -> SnsModule<T> {
         SnsModule(&self.sdk)
+    }
+
+    /// 草稿箱模块
+    pub fn draft(&self) -> DraftModule<T> {
+        DraftModule(&self.sdk)
     }
 
     /// 解析微信推送消息

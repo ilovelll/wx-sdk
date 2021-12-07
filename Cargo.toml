@@ -2,7 +2,7 @@
 name = "wx-sdk"
 version = "0.0.5"
 authors = ["johny.li <gradle@qq.com>"]
-edition = "2018"
+edition = "2021"
 description = "A Wechat SDK written in Rust"
 readme = "README.md"
 documentation = "https://docs.rs/wx-sdk/"
