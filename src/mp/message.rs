@@ -8,14 +8,14 @@ pub mod template {
 
     use crate::{wechat::WxApiRequestBuilder, SdkResult};
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     pub struct SendTplMsgResponse {
         pub msgid: Option<i64>,
         pub errcode: i32,
         pub errmsg: String,
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     pub struct SendTplMsgParams {
         pub touser: String,
         pub template_id: String,
@@ -26,14 +26,14 @@ pub mod template {
         pub data: HashMap<String, TplMsgData>,
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     pub struct TplMsgData {
         pub value: String,
         #[serde(skip_serializing_if = "Option::is_none")]
         pub color: Option<String>,
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     pub struct MiniProgramData {
         pub appid: String,
         #[serde(skip_serializing_if = "Option::is_none")]
@@ -65,9 +65,9 @@ pub mod mass {
 
     use serde::{Deserialize, Serialize};
 
-    use crate::{error::CommonError, wechat::WxApiRequestBuilder, SdkResult};
+    use crate::{error::CommonError, mp::media::MediaId, wechat::WxApiRequestBuilder, SdkResult};
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     pub struct SendAllFilter {
         pub is_to_all: bool,
 
@@ -75,7 +75,7 @@ pub mod mass {
         pub tag_id: Option<i32>,
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     #[serde(untagged)]
     pub enum SendContent {
         Text(Text),
@@ -86,12 +86,12 @@ pub mod mass {
         MPVideo(MPVideo),
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     pub struct Text {
         pub msgtype: String,
         pub text: TextContent,
     }
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     pub struct TextContent {
         pub content: String,
     }
@@ -107,56 +107,56 @@ pub mod mass {
         }
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     pub struct MPVideo {
         pub msgtype: String,
-        pub mpvideo: MediaID,
+        pub mpvideo: MediaId,
     }
 
     impl MPVideo {
         pub fn new<S: AsRef<str>>(media_id: S) -> Self {
             MPVideo {
                 msgtype: "mpvideo".to_owned(),
-                mpvideo: MediaID {
+                mpvideo: MediaId {
                     media_id: media_id.as_ref().to_owned(),
                 },
             }
         }
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     pub struct Voice {
         pub msgtype: String,
-        pub voice: MediaID,
+        pub voice: MediaId,
     }
 
     impl Voice {
         pub fn new<S: AsRef<str>>(media_id: S) -> Self {
             Voice {
                 msgtype: "voice".to_owned(),
-                voice: MediaID {
+                voice: MediaId {
                     media_id: media_id.as_ref().to_owned(),
                 },
             }
         }
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     pub struct Images {
         pub msgtype: String,
         pub images: ImagesContent,
     }
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     pub struct Image {
         pub msgtype: String,
-        pub image: MediaID,
+        pub image: MediaId,
     }
 
     impl Image {
         pub fn new<S: AsRef<str>>(media_id: S, _recommend: Option<String>) -> Self {
             Image {
                 msgtype: "image".to_owned(),
-                image: MediaID {
+                image: MediaId {
                     media_id: media_id.as_ref().to_owned(),
                 },
             }
@@ -175,7 +175,7 @@ pub mod mass {
         }
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     pub struct ImagesContent {
         pub media_ids: Vec<String>,
 
@@ -183,10 +183,10 @@ pub mod mass {
         pub recommend: Option<String>,
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     pub struct MPNews {
         pub msgtype: String,
-        pub mpnews: MediaID,
+        pub mpnews: MediaId,
         pub send_ignore_reprint: i8,
     }
 
@@ -194,7 +194,7 @@ pub mod mass {
         pub fn new<S: AsRef<str>>(media_id: S, send_ignore_reprint: i8) -> Self {
             MPNews {
                 msgtype: "mpnews".to_owned(),
-                mpnews: MediaID {
+                mpnews: MediaId {
                     media_id: media_id.as_ref().to_owned(),
                 },
                 send_ignore_reprint,
@@ -209,11 +209,7 @@ pub mod mass {
     //     pub description: Option<String>,
     // }
 
-    #[derive(Serialize, Deserialize, Debug)]
-    pub struct MediaID {
-        media_id: String,
-    }
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     pub struct SendAll {
         filter: SendAllFilter,
 
@@ -224,7 +220,7 @@ pub mod mass {
         clientmsgid: Option<String>,
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     pub struct Send {
         touser: Vec<String>,
 
@@ -234,7 +230,7 @@ pub mod mass {
         #[serde(skip_serializing_if = "Option::is_none")]
         clientmsgid: Option<String>,
     }
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     pub struct SendPreview {
         touser: String,
 
@@ -242,7 +238,7 @@ pub mod mass {
         content: SendContent,
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     pub struct SendResponse {
         pub msg_id: Option<i64>,
         pub msg_data_id: Option<i64>,
@@ -250,7 +246,7 @@ pub mod mass {
         pub errmsg: String,
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize)]
     pub struct DeleteSend {
         pub msg_id: String,
         #[serde(skip_serializing_if = "Option::is_none")]

@@ -6,6 +6,8 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 
+use super::media::MediaId;
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MediaRes {
     #[serde(rename = "type")]
@@ -21,11 +23,6 @@ pub struct MediaRes {
 //     video,
 //     thumb,
 // }
-
-#[derive(Serialize, Deserialize)]
-pub struct MediaId {
-    pub media_id: String,
-}
 
 // pub type MediaId = String;
 

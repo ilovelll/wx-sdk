@@ -4,6 +4,10 @@ use crate::{error::CommonResponse, wechat::WxApiRequestBuilder};
 use serde::{Deserialize, Serialize};
 
 use super::material::Articles;
+#[derive(Serialize, Deserialize)]
+pub struct MediaId {
+    pub media_id: String,
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UploadResponse {
