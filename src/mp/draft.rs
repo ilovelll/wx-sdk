@@ -25,6 +25,8 @@ pub struct Articles {
     pub only_fans_can_comment: Option<i8>,
     #[serde(skip_serializing)]
     pub url: Option<String>,
+    #[serde(skip_serializing)]
+    pub is_deleted: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize)]

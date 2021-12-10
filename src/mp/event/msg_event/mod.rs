@@ -6,6 +6,7 @@ use self::{
     event_click::ClickEvent,
     event_guide::{GuideInviteResultEvent, GuideQrcodeScanEvent},
     event_location::LocationEvent,
+    event_publishjob::PublishJobFinishEvent,
     event_scan::{MenuScanEvent, ScanEvent},
     event_send::{SendLocationEvent, SendPicsEvent},
     event_sendjob::{MassSendJobFinishEvent, TemplateSendJobFinishEvent},
@@ -18,6 +19,7 @@ use super::{xmlutil::get_text_from_root, ReceivedMessageParser};
 pub mod event_click;
 pub mod event_guide;
 pub mod event_location;
+pub mod event_publishjob;
 pub mod event_scan;
 pub mod event_send;
 pub mod event_sendjob;
@@ -41,6 +43,7 @@ const EVENT_TEMPLATESENDJOBFINISH: &'static str = "TEMPLATESENDJOBFINISH";
 const EVENT_MASSSENDJOBFINISH: &'static str = "MASSSENDJOBFINISH";
 const EVENT_GUIDE_INVITE_RESULT: &'static str = "guide_invite_result_event";
 const EVENT_GUIDE_QRCODE_SCAN: &'static str = "guide_qrcode_scan_event";
+const EVENT_PUBLISHJOBFINISH: &'static str = "PUBLISHJOBFINISH";
 
 pub enum EventMessage {
     Subscribe,
@@ -61,6 +64,7 @@ pub enum EventMessage {
     MassSendJobFinish(MassSendJobFinishEvent),
     GuideInviteResult(GuideInviteResultEvent),
     GuideQrcodeScan(GuideQrcodeScanEvent),
+    PublishJobFinish(PublishJobFinishEvent),
     UnhandledEvent(String),
 }
 
@@ -99,6 +103,9 @@ impl ReceivedMessageParser for EventMessage {
             EVENT_GUIDE_QRCODE_SCAN => {
                 EventMessage::GuideQrcodeScan(GuideQrcodeScanEvent::from_xml(node)?)
             }
+            EVENT_PUBLISHJOBFINISH => {
+                EventMessage::PublishJobFinish(PublishJobFinishEvent::from_xml(node)?)
+            }
             _ => EventMessage::UnhandledEvent(format!("unhandle this event type: {}", event_type)),
         };
         Ok(event)
@@ -126,6 +133,7 @@ impl EventMessage {
             EventMessage::MassSendJobFinish(_) => EVENT_MASSSENDJOBFINISH,
             EventMessage::GuideInviteResult(_) => EVENT_GUIDE_INVITE_RESULT,
             EventMessage::GuideQrcodeScan(_) => EVENT_GUIDE_QRCODE_SCAN,
+            EventMessage::PublishJobFinish(_) => EVENT_PUBLISHJOBFINISH,
             EventMessage::UnhandledEvent(_) => "UnhandledEvent",
         }
     }
