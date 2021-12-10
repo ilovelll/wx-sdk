@@ -25,11 +25,14 @@ impl ReceivedMessageParser for ViewEvent {
         })
     }
 }
-
-#[test]
-pub fn parse() -> SdkResult<()> {
-    use roxmltree::Document;
-    let s = "<xml>
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::SdkResult;
+    #[test]
+    pub fn parse() -> SdkResult<()> {
+        use roxmltree::Document;
+        let s = "<xml>
     <ToUserName><![CDATA[toUser]]></ToUserName>
     <FromUserName><![CDATA[FromUser]]></FromUserName>
     <CreateTime>123456789</CreateTime>
@@ -39,10 +42,11 @@ pub fn parse() -> SdkResult<()> {
     <MenuId>MENUID</MenuId>
     </xml>
     ";
-    let node = Document::parse(&s)?;
-    let msg = ViewEvent::from_xml(&node.root())?;
+        let node = Document::parse(&s)?;
+        let msg = ViewEvent::from_xml(&node.root())?;
 
-    assert_eq!(msg.event_key, "www.qq.com");
-    assert_eq!(msg.menu_id, Some("MENUID".to_string()));
-    Ok(())
+        assert_eq!(msg.event_key, "www.qq.com");
+        assert_eq!(msg.menu_id, Some("MENUID".to_string()));
+        Ok(())
+    }
 }

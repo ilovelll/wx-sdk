@@ -24,10 +24,14 @@ impl ReceivedMessageParser for LocationEvent {
     }
 }
 
-#[test]
-pub fn parse() -> SdkResult<()> {
-    use roxmltree::Document;
-    let s = "<xml>
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::SdkResult;
+    #[test]
+    pub fn parse() -> SdkResult<()> {
+        use roxmltree::Document;
+        let s = "<xml>
     <ToUserName><![CDATA[toUser]]></ToUserName>
     <FromUserName><![CDATA[fromUser]]></FromUserName>
     <CreateTime>123456789</CreateTime>
@@ -37,11 +41,12 @@ pub fn parse() -> SdkResult<()> {
     <Longitude>113.352425</Longitude>
     <Precision>119.385040</Precision>
   </xml>";
-    let node = Document::parse(&s)?;
-    let msg = LocationEvent::from_xml(&node.root())?;
+        let node = Document::parse(&s)?;
+        let msg = LocationEvent::from_xml(&node.root())?;
 
-    assert_eq!(msg.latitude, 23.137466);
-    assert_eq!(msg.longitude, 113.352425);
-    assert_eq!(msg.precision, 119.385040);
-    Ok(())
+        assert_eq!(msg.latitude, 23.137466);
+        assert_eq!(msg.longitude, 113.352425);
+        assert_eq!(msg.precision, 119.385040);
+        Ok(())
+    }
 }

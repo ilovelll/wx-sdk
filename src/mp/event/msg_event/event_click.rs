@@ -18,10 +18,14 @@ impl ReceivedMessageParser for ClickEvent {
     }
 }
 
-#[test]
-pub fn parse() -> SdkResult<()> {
-    use roxmltree::Document;
-    let s = "<xml>
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::SdkResult;
+    #[test]
+    pub fn parse() -> SdkResult<()> {
+        use roxmltree::Document;
+        let s = "<xml>
     <ToUserName><![CDATA[toUser]]></ToUserName>
     <FromUserName><![CDATA[FromUser]]></FromUserName>
     <CreateTime>123456789</CreateTime>
@@ -29,9 +33,10 @@ pub fn parse() -> SdkResult<()> {
     <Event><![CDATA[CLICK]]></Event>
     <EventKey><![CDATA[EVENTKEY]]></EventKey>
   </xml>";
-    let node = Document::parse(&s)?;
-    let msg = ClickEvent::from_xml(&node.root())?;
+        let node = Document::parse(&s)?;
+        let msg = ClickEvent::from_xml(&node.root())?;
 
-    assert_eq!(msg.event_key, "EVENTKEY");
-    Ok(())
+        assert_eq!(msg.event_key, "EVENTKEY");
+        Ok(())
+    }
 }

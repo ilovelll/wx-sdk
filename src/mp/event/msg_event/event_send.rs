@@ -96,10 +96,14 @@ impl ReceivedMessageParser for SendLocationEvent {
     }
 }
 
-#[test]
-pub fn parse_send_pics() -> SdkResult<()> {
-    use roxmltree::Document;
-    let s = "<xml>
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::SdkResult;
+    #[test]
+    pub fn parse_send_pics() -> SdkResult<()> {
+        use roxmltree::Document;
+        let s = "<xml>
     <ToUserName><![CDATA[gh_e136c6e50636]]></ToUserName>
     <FromUserName><![CDATA[oMgHVjngRipVsoxg6TuX3vz6glDg]]></FromUserName>
     <CreateTime>1408090651</CreateTime>
@@ -112,21 +116,21 @@ pub fn parse_send_pics() -> SdkResult<()> {
     </PicList>
     </SendPicsInfo>
   </xml>";
-    let node = Document::parse(&s)?;
-    let msg = SendPicsEvent::from_xml(&node.root())?;
+        let node = Document::parse(&s)?;
+        let msg = SendPicsEvent::from_xml(&node.root())?;
 
-    assert_eq!(msg.count, 1);
-    assert_eq!(
-        msg.pic_md5_sum_list,
-        vec!["1b5f7c23b5bf75682a53e7b6d163e185".to_string()]
-    );
-    Ok(())
-}
+        assert_eq!(msg.count, 1);
+        assert_eq!(
+            msg.pic_md5_sum_list,
+            vec!["1b5f7c23b5bf75682a53e7b6d163e185".to_string()]
+        );
+        Ok(())
+    }
 
-#[test]
-pub fn parse_send_locaiton() -> SdkResult<()> {
-    use roxmltree::Document;
-    let s = "<xml><ToUserName><![CDATA[gh_e136c6e50636]]></ToUserName>
+    #[test]
+    pub fn parse_send_locaiton() -> SdkResult<()> {
+        use roxmltree::Document;
+        let s = "<xml><ToUserName><![CDATA[gh_e136c6e50636]]></ToUserName>
 <FromUserName><![CDATA[oMgHVjngRipVsoxg6TuX3vz6glDg]]></FromUserName>
 <CreateTime>1408091189</CreateTime>
 <MsgType><![CDATA[event]]></MsgType>
@@ -139,12 +143,13 @@ pub fn parse_send_locaiton() -> SdkResult<()> {
 <Poiname><![CDATA[]]></Poiname>
 </SendLocationInfo>
 </xml>";
-    let node = Document::parse(&s)?;
-    let msg = SendLocationEvent::from_xml(&node.root())?;
+        let node = Document::parse(&s)?;
+        let msg = SendLocationEvent::from_xml(&node.root())?;
 
-    assert_eq!(msg.event_key, "6");
-    assert_eq!(msg.location_x, 23.0);
-    assert_eq!(msg.location_y, 113.0);
-    assert_eq!(msg.poiname, None);
-    Ok(())
+        assert_eq!(msg.event_key, "6");
+        assert_eq!(msg.location_x, 23.0);
+        assert_eq!(msg.location_y, 113.0);
+        assert_eq!(msg.poiname, None);
+        Ok(())
+    }
 }

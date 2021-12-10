@@ -53,10 +53,15 @@ impl ReceivedMessageParser for MenuScanEvent {
     }
 }
 
-#[test]
-pub fn parse() -> SdkResult<()> {
-    use roxmltree::Document;
-    let s = "<xml>
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::SdkResult;
+
+    #[test]
+    pub fn parse() -> SdkResult<()> {
+        use roxmltree::Document;
+        let s = "<xml>
     <ToUserName><![CDATA[toUser]]></ToUserName>
     <FromUserName><![CDATA[FromUser]]></FromUserName>
     <CreateTime>123456789</CreateTime>
@@ -65,17 +70,17 @@ pub fn parse() -> SdkResult<()> {
     <EventKey><![CDATA[SCENE_VALUE]]></EventKey>
     <Ticket><![CDATA[TICKET]]></Ticket>
   </xml>";
-    let node = Document::parse(&s)?;
-    let msg = ScanEvent::from_xml(&node.root())?;
+        let node = Document::parse(&s)?;
+        let msg = ScanEvent::from_xml(&node.root())?;
 
-    assert_eq!(msg.event_key, "SCENE_VALUE");
-    Ok(())
-}
+        assert_eq!(msg.event_key, "SCENE_VALUE");
+        Ok(())
+    }
 
-#[test]
-pub fn parse_menuscan() -> SdkResult<()> {
-    use roxmltree::Document;
-    let s = "<xml>
+    #[test]
+    pub fn parse_menuscan() -> SdkResult<()> {
+        use roxmltree::Document;
+        let s = "<xml>
     <FromUserName><![CDATA[oMgHVjngRipVsoxg6TuX3vz6glDg]]></FromUserName>
     <CreateTime>1408090502</CreateTime>
     <MsgType><![CDATA[event]]></MsgType>
@@ -85,11 +90,12 @@ pub fn parse_menuscan() -> SdkResult<()> {
     <ScanResult><![CDATA[1]]></ScanResult>
     </ScanCodeInfo>
   </xml>";
-    let node = Document::parse(&s)?;
-    let msg = MenuScanEvent::from_xml(&node.root())?;
+        let node = Document::parse(&s)?;
+        let msg = MenuScanEvent::from_xml(&node.root())?;
 
-    assert_eq!(msg.event_key, "6");
-    assert_eq!(msg.scan_type, "qrcode");
-    assert_eq!(msg.scan_result, "1");
-    Ok(())
+        assert_eq!(msg.event_key, "6");
+        assert_eq!(msg.scan_type, "qrcode");
+        assert_eq!(msg.scan_result, "1");
+        Ok(())
+    }
 }

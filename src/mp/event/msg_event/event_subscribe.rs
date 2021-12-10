@@ -33,10 +33,15 @@ impl ReceivedMessageParser for SubScribeEvent {
     }
 }
 
-#[test]
-pub fn parse() -> SdkResult<()> {
-    use roxmltree::Document;
-    let s = "<xml>
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::mp::event::EventMessage;
+    use crate::SdkResult;
+    #[test]
+    pub fn parse() -> SdkResult<()> {
+        use roxmltree::Document;
+        let s = "<xml>
     <ToUserName><![CDATA[toUser]]></ToUserName>
     <FromUserName><![CDATA[FromUser]]></FromUserName>
     <CreateTime>123456789</CreateTime>
@@ -45,9 +50,10 @@ pub fn parse() -> SdkResult<()> {
     <EventKey><![CDATA[qrscene_123123]]></EventKey>
     <Ticket><![CDATA[TICKET]]></Ticket>
 </xml>";
-    let node = Document::parse(&s)?;
-    let msg = SubScribeEvent::from_xml(&node.root())?;
+        let node = Document::parse(&s)?;
+        let msg = SubScribeEvent::from_xml(&node.root())?;
 
-    matches!(msg, EventMessage::SubscribeScan(_));
-    Ok(())
+        matches!(msg, EventMessage::SubscribeScan(_));
+        Ok(())
+    }
 }
