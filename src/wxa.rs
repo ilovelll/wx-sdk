@@ -112,6 +112,7 @@ async fn post_send<'a, A: WxApiRequestBuilder, R: DeserializeOwned, D: Serialize
 }
 
 /// 小程序接口SDK，由于 Rust Doc 中还无法搜索中文，请直接搜索相关请求 url 中的关键信息。
+#[derive(Clone)]
 pub struct WxaSdk<T: AccessTokenProvider> {
     pub(crate) sdk: crate::WxSdk<T>,
 }

@@ -13,6 +13,8 @@
 //! let sdk = WxSdk::new("app_id", "app_sercret", config, token_client);
 //! ```
 
+use std::sync::Arc;
+
 use async_trait::async_trait;
 use reqwest::Client;
 
@@ -25,12 +27,13 @@ use crate::wxa::WxaSdk;
 use crate::{access_token::AccessTokenProvider, cache::Cache, SdkResult, TokenClient};
 
 /// This is the sdk object. We provide a `new` method to construct it.
+#[derive(Clone)]
 pub struct WxSdk<T: AccessTokenProvider> {
     pub app_id: String,
     pub(crate) app_secret: String,
     pub(crate) http_client: Client,
     pub(crate) token_client: T,
-    pub(crate) cache: Cache<String, String>,
+    pub(crate) cache: Arc<Cache<String, String>>,
 }
 
 impl<T: AccessTokenProvider> WxSdk<T> {
@@ -40,7 +43,7 @@ impl<T: AccessTokenProvider> WxSdk<T> {
             app_id: app_id.as_ref().to_owned(),
             app_secret: app_secret.as_ref().to_owned(),
             token_client,
-            cache: Cache::new(),
+            cache: Arc::new(Cache::new()),
         }
     }
 
@@ -70,7 +73,7 @@ impl WxSdk<TokenClient> {
             app_id,
             app_secret,
             token_client,
-            cache: Cache::new(),
+            cache: Arc::new(Cache::new()),
         }
     }
 }

@@ -1,6 +1,6 @@
 [package]
 name = "wx-sdk"
-version = "0.0.7"
+version = "0.0.8"
 authors = ["johny.li <gradle@qq.com>"]
 edition = "2021"
 description = "A Wechat SDK written in Rust"

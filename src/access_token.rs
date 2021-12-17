@@ -15,7 +15,7 @@ use std::time::Duration;
 /// [WxSdk][crate::wechat::WxSdk] take a struct which impl [AccessTokenProvider].
 /// You need to use [async_trait](https://crates.io/crates/async-trait) to implement [AccessTokenProvider].
 #[async_trait]
-pub trait AccessTokenProvider: Sync + Send + Sized {
+pub trait AccessTokenProvider: Sync + Send + Sized + Clone {
     /// This trait derive [async_trait](https://crates.io/crates/async-trait), it return a [std::future] of [AccessToken].
     async fn get_access_token(&self) -> SdkResult<AccessToken>;
 }
@@ -44,6 +44,7 @@ impl From<AccessToken> for cache::Item<String> {
 }
 
 /// That's a default token client implement [AccessTokenProvider].
+#[derive(Clone)]
 pub struct TokenClient {
     app_id: String,
     app_secret: String,

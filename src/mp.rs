@@ -42,6 +42,7 @@ pub mod ticket;
 pub mod user;
 
 /// The configuration of your app server.
+#[derive(Clone)]
 pub struct ServerConfig {
     pub token: String,
     pub encoding_mode: EncodingMode,
@@ -51,6 +52,7 @@ type AesKey = String;
 
 /// Encoding mode of message getting or sending with wechat.
 /// [EncodingMode::Compat] or [EncodingMode::Security] mode has a aes-key.
+#[derive(Clone)]
 pub enum EncodingMode {
     Plain,
     Compat(AesKey),
@@ -67,6 +69,7 @@ impl ServerConfig {
 }
 
 /// 公众号接口SDK，由于 Rust Doc 中还无法搜索中文，请直接搜索相关请求 url 中的关键信息，例如 `clear_quota`为接口限额清零接口。
+#[derive(Clone)]
 pub struct MpSdk<T: AccessTokenProvider> {
     pub(crate) sdk: WxSdk<T>,
     pub(crate) server_config: ServerConfig,
