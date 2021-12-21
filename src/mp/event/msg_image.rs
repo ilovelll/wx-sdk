@@ -29,11 +29,15 @@ impl ReceivedMessageParser for ImageMessage {
     }
 }
 
-#[test]
-pub fn parse() -> SdkResult<()> {
-    use roxmltree::Document;
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::SdkResult;
+    #[test]
+    pub fn parse() -> SdkResult<()> {
+        use roxmltree::Document;
 
-    let s = "<xml>
+        let s = "<xml>
     <ToUserName><![CDATA[toUser]]></ToUserName>
     <FromUserName><![CDATA[fromUser]]></FromUserName>
     <CreateTime>1348831860</CreateTime>
@@ -42,10 +46,11 @@ pub fn parse() -> SdkResult<()> {
     <MediaId><![CDATA[media_id]]></MediaId>
     <MsgId>1234567890123456</MsgId>
   </xml>";
-    let node = Document::parse(&s)?;
-    let msg = ImageMessage::from_xml(&node.root())?;
-    assert_eq!(msg.pic_url, "this is a url");
-    assert_eq!(msg.media_id, "media_id");
-    assert_eq!(msg.msg_id, 1234567890123456);
-    Ok(())
+        let node = Document::parse(&s)?;
+        let msg = ImageMessage::from_xml(&node.root())?;
+        assert_eq!(msg.pic_url, "this is a url");
+        assert_eq!(msg.media_id, "media_id");
+        assert_eq!(msg.msg_id, 1234567890123456);
+        Ok(())
+    }
 }

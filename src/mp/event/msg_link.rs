@@ -31,10 +31,15 @@ impl ReceivedMessageParser for LinkMessage {
         })
     }
 }
-#[test]
-pub fn parse() -> SdkResult<()> {
-    use roxmltree::Document;
-    let s = "<xml>
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::SdkResult;
+    #[test]
+    pub fn parse() -> SdkResult<()> {
+        use roxmltree::Document;
+        let s = "<xml>
     <ToUserName><![CDATA[toUser]]></ToUserName>
     <FromUserName><![CDATA[fromUser]]></FromUserName>
     <CreateTime>1351776360</CreateTime>
@@ -44,10 +49,11 @@ pub fn parse() -> SdkResult<()> {
     <Url><![CDATA[url]]></Url>
     <MsgId>1234567890123456</MsgId>
 </xml>";
-    let node = Document::parse(&s)?;
-    let msg = LinkMessage::from_xml(&node.root())?;
-    assert_eq!(msg.title, "公众平台官网链接");
-    assert_eq!(msg.url, "url");
-    assert_eq!(msg.msg_id, 1234567890123456);
-    Ok(())
+        let node = Document::parse(&s)?;
+        let msg = LinkMessage::from_xml(&node.root())?;
+        assert_eq!(msg.title, "公众平台官网链接");
+        assert_eq!(msg.url, "url");
+        assert_eq!(msg.msg_id, 1234567890123456);
+        Ok(())
+    }
 }
