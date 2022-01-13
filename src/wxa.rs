@@ -11,10 +11,14 @@ pub mod img;
 pub mod immediate_delivery;
 pub mod internet;
 pub mod logistics;
+pub mod live_broadcast;
 pub mod nearby_poi;
+pub mod ocr;
+pub mod operation;
 pub mod plugin_manage;
 pub mod qrcode;
 pub mod redpacket_cover;
+pub mod risk_control;
 pub mod uniform_message;
 pub mod updatable_message;
 pub mod url_link;
@@ -217,9 +221,29 @@ impl<T: AccessTokenProvider> WxaSdk<T> {
         internet::InternetModule(&self.sdk)
     }
 
+    /// Live Broadcast 直播
+    pub fn live_broadcast(&self) -> live_broadcast::LiveBroadcastModule<WxSdk<T>> {
+        live_broadcast::LiveBroadcastModule(&self.sdk)
+    }
+
     /// logistics 物流助手
     pub fn logistics(&self) -> logistics::LogisticsModule<WxSdk<T>> {
         logistics::LogisticsModule(&self.sdk)
+    }
+
+    /// OCR
+    pub fn ocr(&self) -> ocr::OcrModule<WxSdk<T>> {
+        ocr::OcrModule(&self.sdk)
+    }
+
+    /// Operation 运维中心
+    pub fn operation(&self) -> operation::OperationModule<WxSdk<T>> {
+        operation::OperationModule(&self.sdk)
+    }
+
+    /// Risk Control 安全风控
+    pub fn risk_control(&self) -> risk_control::RiskControlModule<WxSdk<T>> {
+        risk_control::RiskControlModule(&self.sdk)
     }
 }
 
