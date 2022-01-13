@@ -64,7 +64,7 @@
 - [x] Img  图像处理
 - [x] Immediate Delivery  即时配送
 - [x] Internet  网络
-- [ ] Live Broadcast  直播
+- [x] Live Broadcast  直播
 - [x] Logistics  物流助手
 - [x] OCR
 - [x] operation  运维中心

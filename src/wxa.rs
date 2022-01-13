@@ -11,6 +11,7 @@ pub mod img;
 pub mod immediate_delivery;
 pub mod internet;
 pub mod logistics;
+pub mod live_broadcast;
 pub mod nearby_poi;
 pub mod ocr;
 pub mod operation;
@@ -217,6 +218,11 @@ impl<T: AccessTokenProvider> WxaSdk<T> {
     /// Internet 网络
     pub fn internet(&self) -> internet::InternetModule<WxSdk<T>> {
         internet::InternetModule(&self.sdk)
+    }
+
+    /// Live Broadcast 直播
+    pub fn live_broadcast(&self) -> live_broadcast::LiveBroadcastModule<WxSdk<T>> {
+        live_broadcast::LiveBroadcastModule(&self.sdk)
     }
 
     /// logistics 物流助手
