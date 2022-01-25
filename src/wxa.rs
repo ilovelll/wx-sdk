@@ -10,15 +10,21 @@ pub mod datacube;
 pub mod img;
 pub mod immediate_delivery;
 pub mod internet;
-pub mod logistics;
 pub mod live_broadcast;
+pub mod logistics;
 pub mod nearby_poi;
 pub mod ocr;
 pub mod operation;
+pub mod phone_number;
 pub mod plugin_manage;
 pub mod qrcode;
 pub mod redpacket_cover;
 pub mod risk_control;
+pub mod search;
+pub mod service_market;
+pub mod short_link;
+pub mod soter;
+pub mod subscribe_message;
 pub mod uniform_message;
 pub mod updatable_message;
 pub mod url_link;
@@ -240,9 +246,39 @@ impl<T: AccessTokenProvider> WxaSdk<T> {
         operation::OperationModule(&self.sdk)
     }
 
+    /// Phone Number 手机号
+    pub fn phone_number(&self) -> phone_number::PhoneNumberModule<WxSdk<T>> {
+        phone_number::PhoneNumberModule(&self.sdk)
+    }
+
     /// Risk Control 安全风控
     pub fn risk_control(&self) -> risk_control::RiskControlModule<WxSdk<T>> {
         risk_control::RiskControlModule(&self.sdk)
+    }
+
+    /// Search 搜索
+    pub fn search(&self) -> search::SearchModule<WxSdk<T>> {
+        search::SearchModule(&self.sdk)
+    }
+
+    /// Service Market 服务市场
+    pub fn service_market(&self) -> service_market::ServiceMarketModule<WxSdk<T>> {
+        service_market::ServiceMarketModule(&self.sdk)
+    }
+
+    /// Short Link
+    pub fn short_link(&self) -> short_link::ShortLinkModule<WxSdk<T>> {
+        short_link::ShortLinkModule(&self.sdk)
+    }
+
+    /// soter 生物认证
+    pub fn soter(&self) -> soter::SoterModule<WxSdk<T>> {
+        soter::SoterModule(&self.sdk)
+    }
+
+    /// Subscribe Message 订阅消息
+    pub fn subscribe_message(&self) -> subscribe_message::SubscribeMessageModule<WxSdk<T>> {
+        subscribe_message::SubscribeMessageModule(&self.sdk)
     }
 }
 

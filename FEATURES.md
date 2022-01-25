@@ -68,5 +68,11 @@
 - [x] Logistics  物流助手
 - [x] OCR
 - [x] operation  运维中心
+- [x] Phone Number  手机号
 - [x] Risk Control  安全风控
+- [x] Search 小程序搜索
+- [x] Service Market 服务市场
+- [x] Short Link
+- [x] soter 生物认证
+- [x] Subscribe Message 订阅消息
 
