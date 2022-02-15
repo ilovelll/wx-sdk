@@ -1,3 +1,5 @@
+// This file was copied from https://github.com/shadowsocks/crypto2/blob/dev/src/encoding/base64.rs
+
 // The Base16, Base32, and Base64 Data Encodings
 // https://tools.ietf.org/html/rfc3548
 
