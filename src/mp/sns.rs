@@ -8,6 +8,7 @@ pub struct GrantAccessToken {
     refresh_token: String,
     openid: String,
     scope: String,
+    unionid: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
