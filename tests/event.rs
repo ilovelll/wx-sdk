@@ -1,8 +1,7 @@
-#[cfg(test)]
+#[cfg(all(test, feature = "mp"))]
 mod tests {
     use std::collections::HashMap;
 
-    use reqwest::blocking::get;
     use wx_sdk::{
         access_token::AccessTokenProvider,
         mp::reply::{Reply, Text},

@@ -29,6 +29,7 @@ pub enum SdkError {
     #[error("reqwest Error")]
     ReqwestError(#[from] reqwest::Error),
 
+    #[cfg(feature = "mp")]
     #[error("wx received event parse error")]
     XmlParseError(#[from] roxmltree::Error),
 
@@ -56,6 +57,7 @@ pub enum SdkError {
     #[error("encrypt msg error: {0}")]
     MsgEncryptError(String),
 
+    #[cfg(feature = "mp")]
     #[error("Exile write xml error")]
     XmlWriteError(#[from] exile::error::Error),
 }
