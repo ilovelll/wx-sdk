@@ -51,7 +51,6 @@ pub struct SiteSearchResItem {
     pub path: String,
 }
 
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SubmitPages {
     /// 小程序页面信息列表

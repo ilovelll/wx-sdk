@@ -1,4 +1,4 @@
-#[cfg(test)]
+#[cfg(all(test, feature = "mp"))]
 mod tests {
     use wx_sdk::{
         mp::reply::{reply_to_xml, Reply, Text},
