@@ -1,57 +1,16 @@
-use roxmltree::Node;
+// Removed roxmltree, SdkError, SdkResult, ReceivedMessageParser imports as they are no longer used here.
+// The SdkError and SdkResult might be needed if this module had other functions returning results,
+// but for a simple struct definition, they are not.
 
-use crate::{error::SdkError, SdkResult};
-
-use super::ReceivedMessageParser;
-
+#[derive(Debug, Clone)] // Added derive for consistency and usability
 pub struct TextMessage {
-    pub msg_id: u64,
+    // pub msg_id: u64, // Removed: MsgId is now part of ReceivedEvent
     pub content: String,
 }
 
-impl ReceivedMessageParser for TextMessage {
-    type ReceivedMessage = TextMessage;
+// Removed ReceivedMessageParser impl block.
+// Removed from_xml method.
 
-    fn from_xml(node: &Node) -> SdkResult<Self::ReceivedMessage> {
-        let content = node
-            .descendants()
-            .find(|n| n.has_tag_name("Content"))
-            .map(|n| n.text())
-            .flatten()
-            .ok_or_else(|| SdkError::InvalidParams("parse xml need Content params".to_owned()))?;
-        let msg_id = node
-            .descendants()
-            .find(|n| n.has_tag_name("MsgId"))
-            .map(|n| n.text())
-            .flatten()
-            .ok_or_else(|| SdkError::InvalidParams("parse xml need MsgId params".to_owned()))?;
-        let msg_id = msg_id.parse::<u64>().map_err(|_e| {
-            SdkError::InvalidParams(
-                "Parse XML msg from wechat error: tag `MsgId` should be number".to_string(),
-            )
-        })?;
-        Ok(TextMessage {
-            content: content.to_owned(),
-            msg_id,
-        })
-    }
-}
-
-#[test]
-pub fn parse() -> SdkResult<()> {
-    use roxmltree::Document;
-
-    let s = "<xml>
-    <ToUserName><![CDATA[toUser]]></ToUserName>
-    <FromUserName><![CDATA[fromUser]]></FromUserName>
-    <CreateTime>1348831860</CreateTime>
-    <MsgType><![CDATA[text]]></MsgType>
-    <Content><![CDATA[this is a test]]></Content>
-    <MsgId>1234567890123456</MsgId>
-  </xml>";
-    let node = Document::parse(&s)?;
-    let msg = TextMessage::from_xml(&node.root())?;
-    assert_eq!(msg.content, "this is a test");
-    assert_eq!(msg.msg_id, 1234567890123456);
-    Ok(())
-}
+// Removed old test function `parse()` that relied on from_xml.
+// Testing for text message parsing is handled by wx-message crate
+// and integration is tested via ReceivedEvent::parse.

@@ -1,14 +1,14 @@
-use roxmltree::{Document, Node};
-
 use crate::{error::SdkError, SdkResult};
+use wx_message; // Using the local wx-message crate
 
-use msg_image::ImageMessage;
-use msg_text::TextMessage;
-
-use self::{
-    msg_event::EventMessage, msg_link::LinkMessage, msg_location::LocationMessage,
-    msg_video::VideoMessage, msg_voice::VoiceMessage,
-};
+// Keep existing imports for the message structs themselves, they will be adapted
+use self::msg_event::EventMessage; // Already adapted to be a struct
+use self::msg_image::ImageMessage;
+use self::msg_link::LinkMessage;
+use self::msg_location::LocationMessage;
+use self::msg_text::TextMessage;
+use self::msg_video::VideoMessage; // Used for both Video and ShortVideo
+use self::msg_voice::VoiceMessage;
 
 pub mod crypto;
 pub mod msg_event;
@@ -19,111 +19,113 @@ pub mod msg_text;
 pub mod msg_video;
 pub mod msg_voice;
 pub mod signature;
-pub mod xmlutil;
 
+// Constants for message types are not strictly needed for parsing anymore,
+// but might be used by other logic. For now, keep them.
 const MSG_TEXT: &'static str = "text";
 const MSG_IMAGE: &'static str = "image";
 const MSG_VOICE: &'static str = "voice";
 const MSG_VIDEO: &'static str = "video";
 const MSG_SHORTVIDEO: &'static str = "shortvideo";
-const MSG_LOCATION: &'static str = "location"; // 地理位置消息
+const MSG_LOCATION: &'static str = "location";
 const MSG_LINK: &'static str = "link";
 const MSG_EVENT: &'static str = "event";
 
-pub trait ReceivedMessageParser {
-    type ReceivedMessage;
-    fn from_xml(node: &Node) -> SdkResult<Self::ReceivedMessage>;
-}
-
+#[derive(Debug, Clone)]
 pub struct ReceivedEvent {
     pub from: String,
-
     pub to: String,
-
     pub create_time: u64,
-
-    pub msg_type: String,
-
+    pub msg_type: String, // The original MsgType string e.g. "text", "image", "event"
+    pub msg_id: Option<i64>,
     pub body: ReceivedMessage,
 }
 
+#[derive(Debug, Clone)]
 pub enum ReceivedMessage {
-    UnhandledMessage(String),
+    UnhandledMessage(String), // Stores the raw_content from wx_message::Unhandled or error string
     Text(TextMessage),
     Image(ImageMessage),
     Voice(VoiceMessage),
-    Video(VideoMessage),
-    ShortVideo(VideoMessage),
+    Video(VideoMessage), // Represents general video type
+    ShortVideo(VideoMessage), // Represents short video, uses the same VideoMessage struct
     Location(LocationMessage),
     Link(LinkMessage),
-    Event(EventMessage),
+    Event(EventMessage), // Uses the adapted msg_event::EventMessage struct
 }
 
 impl ReceivedEvent {
     pub fn parse(input: &str) -> SdkResult<Self> {
-        let xml = Document::parse(input)?;
-        let root = xml.root();
-        let msg_type = root
-            .descendants()
-            .find(|n| n.has_tag_name("MsgType"))
-            .map(|n| n.text())
-            .flatten()
-            .ok_or_else(|| SdkError::InvalidParams("parse xml need `MsgType` params".to_owned()))?;
-        let from = root
-            .descendants()
-            .find(|n| n.has_tag_name("FromUserName"))
-            .map(|n| n.text())
-            .flatten()
-            .ok_or_else(|| {
-                SdkError::InvalidParams("parse xml need `FromUserName` params".to_owned())
-            })?;
-        let to = root
-            .descendants()
-            .find(|n| n.has_tag_name("ToUserName"))
-            .map(|n| n.text())
-            .flatten()
-            .ok_or_else(|| {
-                SdkError::InvalidParams("parse xml need `ToUserName` params".to_owned())
-            })?;
-        let create_time = root
-            .descendants()
-            .find(|n| n.has_tag_name("CreateTime"))
-            .map(|n| n.text())
-            .flatten()
-            .ok_or_else(|| {
-                SdkError::InvalidParams("parse xml need CreateTime params".to_owned())
-            })?;
-        let create_time = create_time.parse::<u64>().map_err(|_e| {
-            SdkError::InvalidParams(
-                "Parse XML msg from wechat error: tag `CreateTime` should be number".to_string(),
-            )
-        })?;
+        let wx_msg = wx_message::parse(input)
+            .map_err(|e| SdkError::InvalidParams(format!("XML parsing error by wx-message: {}", e)))?;
 
-        let body = match msg_type {
-            MSG_TEXT => ReceivedMessage::Text(TextMessage::from_xml(&root)?),
-            MSG_IMAGE => ReceivedMessage::Image(ImageMessage::from_xml(&root)?),
-            MSG_VOICE => ReceivedMessage::Voice(VoiceMessage::from_xml(&root)?),
-            MSG_VIDEO | MSG_SHORTVIDEO => {
-                if msg_type == MSG_VIDEO {
-                    ReceivedMessage::Video(VideoMessage::from_xml(&root)?)
+        let mapped_body = match wx_msg.message {
+            wx_message::MessageBody::Text { content } => {
+                ReceivedMessage::Text(TextMessage { content })
+            }
+            wx_message::MessageBody::Image { pic_url, media_id } => {
+                ReceivedMessage::Image(ImageMessage { pic_url, media_id })
+            }
+            wx_message::MessageBody::Voice { media_id, format, recognition } => {
+                ReceivedMessage::Voice(VoiceMessage { media_id, format, recognition })
+            }
+            wx_message::MessageBody::Video { media_id, thumb_media_id } => {
+                // wx_msg.msg_type will determine if it's Video or ShortVideo
+                let app_video_msg = VideoMessage { media_id, thumb_media_id };
+                if wx_msg.msg_type == MSG_SHORTVIDEO {
+                    ReceivedMessage::ShortVideo(app_video_msg)
                 } else {
-                    ReceivedMessage::ShortVideo(VideoMessage::from_xml(&root)?)
+                    ReceivedMessage::Video(app_video_msg)
                 }
             }
-            MSG_LOCATION => ReceivedMessage::Location(LocationMessage::from_xml(&root)?),
-            MSG_LINK => ReceivedMessage::Link(LinkMessage::from_xml(&root)?),
-            MSG_EVENT => ReceivedMessage::Event(EventMessage::from_xml(&root)?),
-            _ => ReceivedMessage::UnhandledMessage(format!(
-                "Havent' handle for this message type `{}`",
-                msg_type
-            )),
+            wx_message::MessageBody::ShortVideo { media_id, thumb_media_id } => {
+                 // This case should ideally be handled by the above Video block if wx-message unifies them.
+                 // However, if wx_message::MessageBody explicitly has ShortVideo, we map it.
+                 // Current wx-message has distinct Video and ShortVideo, so this mapping is correct.
+                let app_video_msg = VideoMessage { media_id, thumb_media_id };
+                ReceivedMessage::ShortVideo(app_video_msg)
+            }
+            wx_message::MessageBody::Location { location_x, location_y, scale, label } => {
+                ReceivedMessage::Location(LocationMessage { location_x, location_y, scale, label })
+            }
+            wx_message::MessageBody::Link { title, description, url } => {
+                ReceivedMessage::Link(LinkMessage { title, description, url })
+            }
+            wx_message::MessageBody::Event {
+                event,
+                event_key,
+                ticket,
+                latitude,
+                longitude,
+                precision,
+                menu_id,
+                .. // Ignore all other fields from wx_message::MessageBody::Event
+            } => {
+                let app_event_msg = EventMessage {
+                    event,
+                    event_key,
+                    ticket,
+                    latitude,
+                    longitude,
+                    precision,
+                    menu_id,
+                    // All other fields removed, matching the reverted EventMessage struct
+                };
+                ReceivedMessage::Event(app_event_msg)
+            }
+            wx_message::MessageBody::Unhandled { raw_content } => {
+                // Pass through the raw content that couldn't be parsed by wx-message
+                ReceivedMessage::UnhandledMessage(raw_content)
+            }
         };
+
         Ok(ReceivedEvent {
-            from: from.to_owned(),
-            to: to.to_owned(),
-            msg_type: msg_type.to_owned(),
-            create_time,
-            body,
+            from: wx_msg.from_user_name,
+            to: wx_msg.to_user_name,
+            create_time: wx_msg.create_time,
+            msg_type: wx_msg.msg_type,
+            msg_id: wx_msg.msg_id,
+            body: mapped_body,
         })
     }
 }

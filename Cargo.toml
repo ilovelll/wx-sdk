@@ -1,3 +1,4 @@
+workspace = { members = ["crates/wx-message"] }
 [package]
 name = "wx-sdk"
 version = "0.0.9"
@@ -20,6 +21,7 @@ pay = []
 wxa = []
 
 [dependencies]
+wx-message = { path = "crates/wx-message", version = "0.1.0" }
 anyhow = "1.0"
 bytes = { version = "1.0", features = ["serde"] }
 url = "2.2"
