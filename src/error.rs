@@ -26,13 +26,14 @@ pub enum CommonResponse<T> {
 /// The SDK self-defined error enum.
 #[derive(Error, Debug)]
 pub enum SdkError {
-    #[error("reqwest Error")]
+    #[error("reqwest Error: {0}")]
     ReqwestError(#[from] reqwest::Error),
 
-    #[error("wx received event parse error")]
+    #[cfg(feature = "mp")]
+    #[error("wx received event parse error: {0}")]
     XmlParseError(#[from] roxmltree::Error),
 
-    #[error("get access token error")]
+    #[error("get access token error: {0}")]
     AccessTokenError(CommonError),
 
     #[error(transparent)]
@@ -56,7 +57,8 @@ pub enum SdkError {
     #[error("encrypt msg error: {0}")]
     MsgEncryptError(String),
 
-    #[error("Exile write xml error")]
+    #[cfg(feature = "mp")]
+    #[error("Exile write xml error: {0}")]
     XmlWriteError(#[from] exile::error::Error),
 }
 

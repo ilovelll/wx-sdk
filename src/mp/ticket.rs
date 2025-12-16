@@ -87,7 +87,7 @@ mod tests {
         use std::time::Duration;
         let sdk = get_sdk();
         let server_config = get_server_config();
-        let mp_sdk = sdk.mp(server_config);
+        let mp_sdk = sdk.mp(Some(server_config));
         assert_eq!(TicketType::JsApi.to_string(), "jsapi");
         assert_eq!(TicketType::WxCard.to_string(), "wx_card");
         let t_type = TicketType::JsApi;

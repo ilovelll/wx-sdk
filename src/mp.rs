@@ -72,7 +72,7 @@ impl ServerConfig {
 #[derive(Clone)]
 pub struct MpSdk<T: AccessTokenProvider> {
     pub(crate) sdk: WxSdk<T>,
-    pub(crate) server_config: ServerConfig,
+    pub(crate) server_config: Option<ServerConfig>,
 }
 
 impl<T: AccessTokenProvider> MpSdk<T> {
@@ -171,7 +171,10 @@ impl<T: AccessTokenProvider> MpSdk<T> {
         msg: S,
         url_params: Option<HashMap<String, String>>,
     ) -> SdkResult<event::ReceivedEvent> {
-        let server_config = &self.server_config;
+        let server_config = self
+            .server_config
+            .as_ref()
+            .ok_or(SdkError::InvalidParams("needs server_config".to_owned()))?;
         let msg = match server_config.encoding_mode {
             EncodingMode::Plain => event::ReceivedEvent::parse(msg.as_ref()),
             EncodingMode::Compat(_) => event::ReceivedEvent::parse(msg.as_ref()),
@@ -225,7 +228,10 @@ impl<T: AccessTokenProvider> MpSdk<T> {
         to: S,
         url_params: Option<HashMap<String, String>>,
     ) -> SdkResult<String> {
-        let server_config = &self.server_config;
+        let server_config = self
+            .server_config
+            .as_ref()
+            .ok_or(SdkError::InvalidParams("needs server_config".to_owned()))?;
         let mut reply_xml = reply::reply_to_xml(reply, from, to)?;
         if let EncodingMode::Security(ref aes_key) = server_config.encoding_mode {
             let ref app_id = self.sdk.app_id;

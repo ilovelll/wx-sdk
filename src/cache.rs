@@ -1,5 +1,5 @@
+use async_lock::RwLock;
 use std::collections::HashMap;
-use tokio::sync::RwLock;
 
 use std::hash::Hash;
 use std::time::{Duration, Instant};

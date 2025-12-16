@@ -49,7 +49,7 @@ impl<T: AccessTokenProvider> WxSdk<T> {
 
     /// Official account(Media Press) module
     #[cfg(feature = "mp")]
-    pub fn mp(self, server_config: ServerConfig) -> MpSdk<T> {
+    pub fn mp(self, server_config: Option<ServerConfig>) -> MpSdk<T> {
         MpSdk {
             sdk: self,
             server_config,

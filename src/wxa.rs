@@ -1,4 +1,5 @@
-use crate::{access_token::AccessTokenProvider, error::CommonResponse};
+use crate::access_token::AccessTokenProvider;
+use crate::error::{CommonResponse, SdkError};
 use crate::{wechat::WxApiRequestBuilder, SdkResult, WxSdk};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
@@ -69,7 +70,7 @@ pub struct LoginResult {
     #[serde(skip_serializing)]
     pub session_key: String,
     /// 用户在开放平台的唯一标识符，若当前小程序已绑定到微信开放平台帐号下会返回，详见 UnionID 机制说明。
-    pub unionid: String,
+    pub unionid: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -107,8 +108,12 @@ async fn get_send<'a, A: WxApiRequestBuilder, R: DeserializeOwned, P: Serialize>
     param: &'a P,
 ) -> SdkResult<R> {
     let builder = api_builder.wx_get(url).await?.query(param);
-    let res = builder.send().await?.json::<R>().await?;
-    Ok(res)
+    let res = builder.send().await?.text().await?;
+    if let Ok(data) = serde_json::from_str(&res) {
+        Ok(data)
+    } else {
+        Err(SdkError::MsgDecryptError(res))
+    }
 }
 
 async fn post_send<'a, A: WxApiRequestBuilder, R: DeserializeOwned, D: Serialize>(
@@ -117,8 +122,12 @@ async fn post_send<'a, A: WxApiRequestBuilder, R: DeserializeOwned, D: Serialize
     post_data: &'a D,
 ) -> SdkResult<R> {
     let builder = api_builder.wx_post(url).await?.json(post_data);
-    let res = builder.send().await?.json::<CommonResponse<R>>().await?;
-    res.into()
+    let res = builder.send().await?.text().await?;
+    if let Ok(data) = serde_json::from_str::<CommonResponse<R>>(&res) {
+        data.into()
+    } else {
+        Err(SdkError::MsgDecryptError(res))
+    }
 }
 
 /// 小程序接口SDK，由于 Rust Doc 中还无法搜索中文，请直接搜索相关请求 url 中的关键信息。
